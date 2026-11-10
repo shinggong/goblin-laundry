@@ -321,10 +321,10 @@ function initGL(room){
   renderer.setPixelRatio(Math.min(devicePixelRatio,2));
   const maxW=renderer.capabilities.maxTextureSize,pw=Math.min(room.width,maxW),asp=room.height/room.width;
   const mat=new THREE.ShaderMaterial({
-    uniforms:{pano:{value:texOf(pw<room.width?canvasOf(room,pw,Math.round(pw*asp)):room)},hot:{value:null},all:{value:null},hotOn:{value:0},allOn:{value:0},
+    uniforms:{pano:{value:texOf(pw<room.width?canvasOf(room,pw,Math.round(pw*asp)):room)},hot:{value:null},hotGlow:{value:null},all:{value:null},hotOn:{value:0},allOn:{value:0},
       rot:{value:new THREE.Matrix3()},res:{value:new THREE.Vector2(1,1)},sc:{value:1},dist:{value:FISHEYE},time:{value:0},vspan:{value:Math.PI},hspan:{value:2*Math.PI},topCol:{value:new THREE.Color()},botCol:{value:new THREE.Color()}},
     vertexShader:'varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position.xy,0.,1.);}',
-    fragmentShader:`precision highp float;uniform sampler2D pano,hot,all;uniform mat3 rot;uniform vec2 res;uniform float sc,dist,hotOn,allOn,time,vspan,hspan;uniform vec3 topCol,botCol;varying vec2 vUv;
+    fragmentShader:`precision highp float;uniform sampler2D pano,hot,hotGlow,all;uniform mat3 rot;uniform vec2 res;uniform float sc,dist,hotOn,allOn,time,vspan,hspan;uniform vec3 topCol,botCol;varying vec2 vUv;
       float ring(sampler2D t,vec2 uv,vec2 st){float a=texture2D(t,uv).a,g=0.;
         for(int i=0;i<16;i++){float an=float(i)*.3927;vec2 o=vec2(cos(an),sin(an));g=max(g,texture2D(t,uv+o*st).a);g=max(g,texture2D(t,uv+o*st*.5).a);}
         return smoothstep(.35,.65,g)*(1.-smoothstep(.35,.65,a));}
@@ -341,7 +341,7 @@ function initGL(room){
         vec3 c=texture2D(pano,uv).rgb;
         c=mix(c,topCol,smoothstep(1.,1.12,uv.y));c=mix(c,botCol,1.-smoothstep(-.12,0.,uv.y)); // 그림 위아래 밖은 천장·바닥 색으로 채움
         vec2 st=vec2(.0016/max(cos(lat),.25),.0032*3.14159265/vspan),gs=st*6.;vec3 Y=vec3(1.,.404,.624); // 선택 테두리 색 #FF679F
-        if(hotOn>.01){float g=glow(hot,uv,gs);c=mix(c,Y,min(.95,pow(g,.7)*2.2)*hotOn);}
+        if(hotOn>.01){float g=texture2D(hotGlow,uv).a*(1.-smoothstep(.2,.8,texture2D(hot,uv).a));c=mix(c,Y,min(.95,g*1.8)*hotOn);} // 미리 흐리게 만든 빛 그림을 읽어 매끈하게
         if(allOn>.01)c=mix(c,Y,ring(all,uv,st)*allOn);
         c*=1.-.25*smoothstep(1.,1.5,th);gl_FragColor=vec4(c,1.);}`,
     depthTest:false,depthWrite:false});
@@ -361,7 +361,10 @@ function addHots(imgs){
     let sx=0,sy=0,sl=0,n=0;
     for(let p=0;p<MW*MH;p++){a[p]=small[p*4+3];if(a[p]>128){const lon=(((p%MW)+.5)/MW-.5)*R.hspan;sx+=Math.sin(lon);sy+=Math.cos(lon);sl+=(.5-(Math.floor(p/MW)+.5)/MH)*R.vspan/DEG;n++}}
     const big=canvasOf(img,4096,2048);ug.drawImage(big,0,0);
-    R.hots.push({...h,key:i,a,big,tex:null,yaw:n?Math.atan2(sx,sy)/DEG:0,pitch:n?realLat(sl/n*DEG)/DEG:0});
+    // 글로우용: 마스크를 미리 부드럽게 흐린 그림(여러 번 겹쳐 진하게). 셰이더는 이걸 한 번 읽기만 해서 점이 보이지 않음
+    const gc=document.createElement('canvas');gc.width=2048;gc.height=1024;const gg=gc.getContext('2d');
+    gg.filter='blur(14px)';for(let k=0;k<3;k++)gg.drawImage(img,0,0,2048,1024);gg.filter='blur(5px)';gg.drawImage(img,0,0,2048,1024);
+    R.hots.push({...h,key:i,a,big,glow:gc,tex:null,gtex:null,yaw:n?Math.atan2(sx,sy)/DEG:0,pitch:n?realLat(sl/n*DEG)/DEG:0});
   });
   R.mat.uniforms.all.value=texOf(uc);
 }
@@ -379,7 +382,7 @@ function pick(x,y){
 function setHover(u,x,y){
   const lb=$('#hotlabel');if(u&&x!==undefined){lb.style.left=x+'px';lb.style.top=y+'px'}
   const key=u?u.key:null;if(key===hov)return;hov=key;view.style.cursor=key!==null?'pointer':'';
-  if(u){if(!u.tex)u.tex=texOf(u.big);R.mat.uniforms.hot.value=u.tex;lb.textContent=u.label;lb.classList.add('on')}else lb.classList.remove('on');
+  if(u){if(!u.tex){u.tex=texOf(u.big);u.gtex=texOf(u.glow)}R.mat.uniforms.hot.value=u.tex;R.mat.uniforms.hotGlow.value=u.gtex;lb.textContent=u.label;lb.classList.add('on')}else lb.classList.remove('on');
 }
 function resize(){if(!R)return;R.renderer.setSize(innerWidth,innerHeight,false);R.mat.uniforms.res.value.set(innerWidth,innerHeight);R.mat.uniforms.sc.value=lensScale()}
 addEventListener('resize',resize);
