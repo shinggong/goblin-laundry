@@ -24,42 +24,17 @@ button{font:inherit;color:inherit;cursor:inherit}
 /* ---------- 로더 ---------- */
 #loader{position:fixed;inset:0;z-index:50;background:#f9a8d0;display:grid;place-items:center;align-content:center;gap:18px;text-align:center;transition:opacity .9s ease,visibility .9s;padding-inline:max(16px,env(safe-area-inset-left,0px)) max(16px,env(safe-area-inset-right,0px))}
 #loader.gone{opacity:0;visibility:hidden}
-#emblem{width:min(360px,78vw);height:auto;overflow:visible}
-#emblem .wob{transform-origin:200px 250px;animation:wob 2.4s ease-in-out infinite}
-@keyframes wob{0%,100%{transform:rotate(-3deg)}50%{transform:rotate(3deg)}}
-.ld-msg{font-family:var(--f-led);font-size:15px;letter-spacing:.06em;min-height:3.6em;display:grid;gap:10px;justify-items:center}
-#pct{font-size:22px}
-#enter{font-family:var(--f-display);font-size:18px;background:var(--paper);border:3px solid var(--ink);border-radius:10px;padding:8px 18px;box-shadow:4px 4px 0 var(--ink);transition:transform .12s,box-shadow .12s}
-#enter:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 var(--ink)}
-#enter:active{transform:translate(3px,3px);box-shadow:1px 1px 0 var(--ink)}
 
 /* ---------- 3D 방 (WebGL 캔버스) ---------- */
-#view,#nav,#loader,#hint{-webkit-user-select:none;user-select:none}
+#view,#loader,#hint{-webkit-user-select:none;user-select:none}
 #view{position:fixed;inset:0;touch-action:none;background:#2a2622}
 #gl{display:block;width:100%;height:100%}
 #hotlabel{position:fixed;z-index:25;left:0;top:0;pointer-events:none;font-family:var(--f-display);font-size:18px;color:var(--paper);background:var(--tomato);border:3px solid var(--ink);border-radius:999px;padding:3px 14px 5px;box-shadow:3px 3px 0 var(--ink);transform:translate(16px,-130%);opacity:0;transition:opacity .15s;white-space:nowrap}
 #hotlabel.on{opacity:1}
-/* 입장용 유리 자동문 */
-#doors{position:fixed;inset:0;z-index:45;display:flex;pointer-events:none;transition:transform 1.6s cubic-bezier(.5,0,.2,1)}
-#doors.open{transform:scale(1.35)}
-#doors .d{flex:1;position:relative;overflow:hidden;border:clamp(12px,2.4vw,22px) solid #bdb9ad;box-shadow:inset 0 0 0 4px var(--ink),0 0 0 4px var(--ink);
   background:linear-gradient(115deg,rgba(170,215,230,.5),rgba(120,180,205,.32) 38%,rgba(255,255,255,.55) 44%,rgba(120,180,205,.32) 50%,rgba(150,200,220,.45));
   transition:transform 1.3s cubic-bezier(.7,0,.25,1)}
-#doors.open .l{transform:translateX(-104%)}
-#doors.open .r{transform:translateX(104%)}
-#doors .t{position:absolute;top:30%;font-family:var(--f-display);font-size:clamp(30px,7vw,84px);color:var(--tomato);-webkit-text-stroke:2px var(--ink);white-space:nowrap}
-#doors .s{position:absolute;top:calc(30% + clamp(44px,9vw,104px));font-family:var(--f-led);font-size:clamp(13px,1.8vw,20px);color:var(--paper);background:var(--ink);padding:4px 10px;white-space:nowrap}
-#doors .l .t,#doors .l .s{right:clamp(10px,2vw,24px)}
-#doors .r .t,#doors .r .s{left:clamp(10px,2vw,24px)}
-#doors .h{position:absolute;top:44%;width:14px;height:22%;background:#d9d6cc;border:3px solid var(--ink);border-radius:8px}
-#doors .l .h{right:8px}#doors .r .h{left:8px}
 
 /* ---------- UI 레이어 ---------- */
-#nav{position:fixed;top:0;left:0;right:0;z-index:20;display:flex;gap:clamp(8px,2vw,24px);padding:calc(14px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px));pointer-events:none}
-#nav button{pointer-events:auto;flex:1;min-width:0;text-align:left;background:none;border:0;border-bottom:2px solid var(--paper);color:var(--paper);padding:2px 0 8px;font-family:var(--f-display);font-size:clamp(12px,1.6vw,18px);letter-spacing:.04em;text-shadow:0 2px 0 var(--ink);transition:color .15s,border-color .15s}
-#nav button:hover{color:var(--butter);border-color:var(--butter)}
-#nav .home{flex:none;width:44px;height:44px;margin-top:-6px;border:0;border-radius:50%;background:var(--mint);box-shadow:0 0 0 3px var(--ink);padding:0}
-#nav .home svg{width:100%;height:100%}
 #mute{position:fixed;z-index:20;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));width:48px;height:48px;border-radius:50%;background:var(--paper);border:3px solid var(--ink);box-shadow:3px 3px 0 var(--ink);display:grid;place-items:center}
 #mute svg{width:24px;height:24px}
 #zoom{position:fixed;z-index:20;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(78px + env(safe-area-inset-bottom,0px));display:grid;border:3px solid var(--ink);border-radius:24px;overflow:hidden;box-shadow:3px 3px 0 var(--ink);background:var(--paper)}
@@ -171,7 +146,6 @@ button{font:inherit;color:inherit;cursor:inherit}
   .trow .ven{grid-column:1;font-weight:600;font-size:15px}
   .trow .st{grid-row:2/4;grid-column:2;align-self:center}
   #vthumb{display:none}
-  #nav button{font-size:10.5px;letter-spacing:0}
   #hint{left:max(16px,env(safe-area-inset-left,0px));transform:none;font-size:12px}
 }
 @media (prefers-reduced-motion:reduce){
@@ -360,7 +334,7 @@ function initGL(room){
         vec2 uv=vec2(atan(w.x,-w.z)/hspan+.5,.5+L/vspan);
         vec3 c=texture2D(pano,uv).rgb;
         c=mix(c,topCol,smoothstep(1.,1.12,uv.y));c=mix(c,botCol,1.-smoothstep(-.12,0.,uv.y)); // 그림 위아래 밖은 천장·바닥 색으로 채움
-        vec2 st=vec2(.0009/max(cos(lat),.25),.0018*3.14159265/vspan);vec3 Y=vec3(.141,.129,.165); // 선택 테두리 색 #24212A
+        vec2 st=vec2(.0009/max(cos(lat),.25),.0018*3.14159265/vspan);vec3 Y=vec3(1.,.255,.6); // 선택 테두리 색 #FF4199
         if(hotOn>.01){float g=ring(hot,uv,st);c=mix(c,Y,g*hotOn);}
         if(allOn>.01)c=mix(c,Y,ring(all,uv,st)*allOn);
         c*=1.-.25*smoothstep(1.,1.5,th);gl_FragColor=vec4(c,1.);}`,
