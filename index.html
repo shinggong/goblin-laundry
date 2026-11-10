@@ -327,7 +327,12 @@ function initGL(room){
     fragmentShader:`precision highp float;uniform sampler2D pano,hot,all;uniform mat3 rot;uniform vec2 res;uniform float sc,dist,hotOn,allOn,time,vspan,hspan;uniform vec3 topCol,botCol;varying vec2 vUv;
       float ring(sampler2D t,vec2 uv,vec2 st){float a=texture2D(t,uv).a,g=0.;
         for(int i=0;i<16;i++){float an=float(i)*.3927;vec2 o=vec2(cos(an),sin(an));g=max(g,texture2D(t,uv+o*st).a);g=max(g,texture2D(t,uv+o*st*.5).a);}
-        return smoothstep(.35,.65,g)*(1.-smoothstep(.35,.65,a));} // 물건 바깥쪽에만 얇고 또렷한 선
+        return smoothstep(.35,.65,g)*(1.-smoothstep(.35,.65,a));}
+      // 바깥으로 부드럽게 번지는 빛(아웃글로우): 여러 거리를 고르게 샘플해 가까울수록 진하게
+      float glow(sampler2D t,vec2 uv,vec2 st){float a=texture2D(t,uv).a,g=0.;
+        for(int r=1;r<=5;r++){float d=float(r)/5.,w=1.-d*.75;
+          for(int i=0;i<12;i++){float an=float(i)*.5236+float(r)*.3;g+=texture2D(t,uv+vec2(cos(an),sin(an))*st*d).a*w;}}
+        return clamp(g/24.,0.,1.)*(1.-smoothstep(.2,.8,a));}
       void main(){vec2 q=(vUv-.5)*res/sc;float r=length(q);float th=atan(r)+asin(r*dist/sqrt(1.+r*r));
         vec3 d=r>1e-5?vec3(sin(th)*q/r,-cos(th)):vec3(0.,0.,-1.);vec3 w=normalize(rot*d);
         float lat=asin(clamp(w.y,-1.,1.)),h=vspan*.5,a=h*.7,s=abs(lat);
@@ -335,8 +340,8 @@ function initGL(room){
         vec2 uv=vec2(atan(w.x,-w.z)/hspan+.5,.5+L/vspan);
         vec3 c=texture2D(pano,uv).rgb;
         c=mix(c,topCol,smoothstep(1.,1.12,uv.y));c=mix(c,botCol,1.-smoothstep(-.12,0.,uv.y)); // 그림 위아래 밖은 천장·바닥 색으로 채움
-        vec2 st=vec2(.0016/max(cos(lat),.25),.0032*3.14159265/vspan);vec3 Y=vec3(1.,.404,.624); // 선택 테두리 색 #FF679F
-        if(hotOn>.01){float g=ring(hot,uv,st);c=mix(c,Y,g*hotOn);}
+        vec2 st=vec2(.0016/max(cos(lat),.25),.0032*3.14159265/vspan),gs=st*6.;vec3 Y=vec3(1.,.404,.624); // 선택 테두리 색 #FF679F
+        if(hotOn>.01){float g=glow(hot,uv,gs);c=mix(c,Y,min(.95,pow(g,.7)*2.2)*hotOn);}
         if(allOn>.01)c=mix(c,Y,ring(all,uv,st)*allOn);
         c*=1.-.25*smoothstep(1.,1.5,th);gl_FragColor=vec4(c,1.);}`,
     depthTest:false,depthWrite:false});
