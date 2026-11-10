@@ -368,11 +368,26 @@ function addHots(imgs){
     for(let p=0;p<MW*MH;p++){a[p]=small[p*4+3];if(a[p]>128){const lon=(((p%MW)+.5)/MW-.5)*R.hspan;sx+=Math.sin(lon);sy+=Math.cos(lon);sl+=(.5-(Math.floor(p/MW)+.5)/MH)*R.vspan/DEG;n++}}
     const big=canvasOf(img,4096,2048);ug.drawImage(big,0,0);
     // 글로우용: 마스크를 미리 부드럽게 흐린 그림(여러 번 겹쳐 진하게). 셰이더는 이걸 한 번 읽기만 해서 점이 보이지 않음
-    const gc=document.createElement('canvas');gc.width=2048;gc.height=1024;const gg=gc.getContext('2d');
-    gg.filter='blur(18px)';for(let k=0;k<3;k++)gg.drawImage(img,0,0,2048,1024);gg.filter='blur(10px)';for(let k=0;k<2;k++)gg.drawImage(img,0,0,2048,1024);
+    const gc=makeGlow(img);
     R.hots.push({...h,key:i,a,big,glow:gc,tex:null,gtex:null,yaw:n?Math.atan2(sx,sy)/DEG:0,pitch:n?realLat(sl/n*DEG)/DEG:0});
   });
   R.mat.uniforms.all.value=texOf(uc);
+}
+// 글로우용 흐린 마스크를 직접 계산(사파리는 캔버스 blur 필터를 지원하지 않아서 필터를 쓰지 않음)
+function makeGlow(img){
+  const W=1024,H=512,c=canvasOf(img,W,H),g=c.getContext('2d'),id=g.getImageData(0,0,W,H),d=id.data,n=W*H;
+  const src=new Float32Array(n);for(let i=0;i<n;i++)src[i]=d[i*4+3]/255;
+  const tmp=new Float32Array(n);
+  const box=(a,r)=>{ // 가로·세로 상자 흐림 한 번
+    for(let y=0;y<H;y++){let s=0,o=y*W;for(let x=-r;x<=r;x++)s+=a[o+Math.min(W-1,Math.max(0,x))];
+      for(let x=0;x<W;x++){tmp[o+x]=s/(2*r+1);s+=a[o+Math.min(W-1,x+r+1)]-a[o+Math.max(0,x-r)]}}
+    for(let x=0;x<W;x++){let s=0;for(let y=-r;y<=r;y++)s+=tmp[Math.min(H-1,Math.max(0,y))*W+x];
+      for(let y=0;y<H;y++){a[y*W+x]=s/(2*r+1);s+=tmp[Math.min(H-1,y+r+1)*W+x]-tmp[Math.max(0,y-r)*W+x]}}
+  };
+  const wide=src.slice(),near=src.slice();
+  for(let k=0;k<3;k++)box(wide,9);for(let k=0;k<3;k++)box(near,3); // 세 번 겹치면 가우시안 흐림과 비슷
+  for(let i=0;i<n;i++){const v=Math.min(1,wide[i]*1.8+near[i]*1.2);d[i*4]=d[i*4+1]=d[i*4+2]=255;d[i*4+3]=v*255}
+  g.putImageData(id,0,0);return c;
 }
 function camRot(){R._e.set(pitch*DEG,-yaw*DEG,0,'YXZ');R._m4.makeRotationFromEuler(R._e);return R._m3.setFromMatrix4(R._m4)}
 // 셰이더와 같은 식으로 화면 점 → 그림 속 위치를 구해 그 자리에 물건 마스크가 있는지 봄
