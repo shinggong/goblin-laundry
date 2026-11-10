@@ -31,12 +31,11 @@ button{font:inherit;color:inherit;cursor:inherit}
 #gl{display:block;width:100%;height:100%}
 #hotlabel{position:fixed;z-index:25;left:0;top:0;pointer-events:none;font-family:var(--f-display);font-size:18px;color:var(--paper);background:var(--tomato);border:3px solid var(--ink);border-radius:999px;padding:3px 14px 5px;box-shadow:3px 3px 0 var(--ink);transform:translate(16px,-130%);opacity:0;transition:opacity .15s;white-space:nowrap}
 #hotlabel.on{opacity:1}
-  background:linear-gradient(115deg,rgba(170,215,230,.5),rgba(120,180,205,.32) 38%,rgba(255,255,255,.55) 44%,rgba(120,180,205,.32) 50%,rgba(150,200,220,.45));
-  transition:transform 1.3s cubic-bezier(.7,0,.25,1)}
 
 /* ---------- UI 레이어 ---------- */
 #mute{position:fixed;z-index:20;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));width:48px;height:48px;border-radius:50%;background:var(--paper);border:3px solid var(--ink);box-shadow:3px 3px 0 var(--ink);display:grid;place-items:center}
 #mute svg{width:24px;height:24px}
+#mute.off{background:var(--ink);color:var(--paper)}
 #zoom{position:fixed;z-index:20;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(78px + env(safe-area-inset-bottom,0px));display:grid;border:3px solid var(--ink);border-radius:24px;overflow:hidden;box-shadow:3px 3px 0 var(--ink);background:var(--paper)}
 #zoom button{width:42px;height:42px;border:0;background:none;font-family:var(--f-display);font-size:24px;line-height:1}
 #zoom button+button{border-top:3px solid var(--ink)}
@@ -267,10 +266,17 @@ function stopPreview(){
   if(!Au.pv) return; const g=Au.pv.g, c=Au.ctx; g.gain.setTargetAtTime(0,c.currentTime,.04); setTimeout(()=>g.disconnect(),500);
   Au.pv=null; Au.bgm.gain.setTargetAtTime(.55,c.currentTime,.4);
 }
-$('#mute').onclick=()=>{
-  Au.muted=!Au.muted; $('#mwave').hidden=Au.muted; $('#mx').hidden=!Au.muted;
-  $('#mute').setAttribute('aria-label',Au.muted?'소리 켜기':'소리 끄기');
-  audioInit(); if(Au.master) Au.master.gain.setTargetAtTime(Au.muted?0:.7,Au.ctx.currentTime,.05);
+// 음소거: 버튼이나 M 키로 켜고 끔. 다음에 와도 기억함
+function setMuted(m){
+  Au.muted=m; $('#mwave').hidden=m; $('#mx').hidden=!m;
+  $('#mute').setAttribute('aria-label',m?'소리 켜기':'소리 끄기');$('#mute').classList.toggle('off',m);
+  try{localStorage.setItem('gl-muted',m?'1':'0')}catch(e){}
+  if(Au.master) Au.master.gain.setTargetAtTime(m?0:.7,Au.ctx.currentTime,.05);
+}
+try{if(localStorage.getItem('gl-muted')==='1')setMuted(true)}catch(e){}
+addEventListener('keydown',e=>{if((e.key==='m'||e.key==='M')&&!e.target.closest('input,textarea'))setMuted(!Au.muted)});
+$('#mute').onclick=e=>{e.stopPropagation();
+  setMuted(!Au.muted); audioInit();
 };
 
 /* ===== 3D 방 (360° 파노라마) — 그림 한 장을 어안 렌즈 셰이더로 펼쳐 보여줌 =====
@@ -341,7 +347,7 @@ function initGL(room){
         vec3 c=texture2D(pano,uv).rgb;
         c=mix(c,topCol,smoothstep(1.,1.12,uv.y));c=mix(c,botCol,1.-smoothstep(-.12,0.,uv.y)); // 그림 위아래 밖은 천장·바닥 색으로 채움
         vec2 st=vec2(.0016/max(cos(lat),.25),.0032*3.14159265/vspan),gs=st*6.;vec3 Y=vec3(1.,.404,.624); // 선택 테두리 색 #FF679F
-        if(hotOn>.01){float g=texture2D(hotGlow,uv).a*(1.-smoothstep(.2,.8,texture2D(hot,uv).a));c=mix(c,Y,min(.95,g*1.8)*hotOn);} // 미리 흐리게 만든 빛 그림을 읽어 매끈하게
+        if(hotOn>.01){float g=texture2D(hotGlow,uv).a*(1.-smoothstep(.55,.95,texture2D(hot,uv).a));c=mix(c,Y,min(.9,pow(g,.9)*1.3)*hotOn);} // 미리 흐리게 만든 빛 그림을 읽어 매끈하게
         if(allOn>.01)c=mix(c,Y,ring(all,uv,st)*allOn);
         c*=1.-.25*smoothstep(1.,1.5,th);gl_FragColor=vec4(c,1.);}`,
     depthTest:false,depthWrite:false});
@@ -363,7 +369,7 @@ function addHots(imgs){
     const big=canvasOf(img,4096,2048);ug.drawImage(big,0,0);
     // 글로우용: 마스크를 미리 부드럽게 흐린 그림(여러 번 겹쳐 진하게). 셰이더는 이걸 한 번 읽기만 해서 점이 보이지 않음
     const gc=document.createElement('canvas');gc.width=2048;gc.height=1024;const gg=gc.getContext('2d');
-    gg.filter='blur(14px)';for(let k=0;k<3;k++)gg.drawImage(img,0,0,2048,1024);gg.filter='blur(5px)';gg.drawImage(img,0,0,2048,1024);
+    gg.filter='blur(18px)';for(let k=0;k<3;k++)gg.drawImage(img,0,0,2048,1024);gg.filter='blur(10px)';for(let k=0;k<2;k++)gg.drawImage(img,0,0,2048,1024);
     R.hots.push({...h,key:i,a,big,glow:gc,tex:null,gtex:null,yaw:n?Math.atan2(sx,sy)/DEG:0,pitch:n?realLat(sl/n*DEG)/DEG:0});
   });
   R.mat.uniforms.all.value=texOf(uc);
