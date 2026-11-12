@@ -139,8 +139,11 @@ button{font:inherit;color:inherit;cursor:inherit}
 #toast.on{transform:translate(-50%,0)}
 
 #panel[data-sec="gallery"]{--pbg:#222;--pfg:var(--paper);padding:0;overflow:hidden}
-#gal{position:absolute;inset:0;background:#222;touch-action:none}
-#galc{width:100%;height:100%;display:block}
+#gal{position:absolute;inset:0;background:#f9a8d0;touch-action:none}
+/* 세탁기 문을 위에 얹고, 유리 원 안으로만 돌아가는 사진이 보이게 */
+#gal .gdoor{position:absolute;z-index:1;pointer-events:none;user-select:none;filter:drop-shadow(0 12px 24px rgba(36,33,42,.3))}
+#galc{width:100%;height:100%;display:block;background:#1d1a22}
+#gzoom{position:absolute;inset:0;z-index:2} /* 크게 보기는 세탁기 문 위로 */
 #gal .back{background:var(--paper);color:var(--ink);position:absolute;left:max(16px,env(safe-area-inset-left,0px));top:calc(14px + env(safe-area-inset-top,0px));z-index:2}
 #panel[data-sec="receipt"]{--pbg:var(--tomato);padding:0;overflow:hidden}
 #rc{position:absolute;inset:0;overflow:hidden;touch-action:none;--rw:min(78vw,340px,calc(80vh*.607))}
@@ -672,13 +675,22 @@ function photoArt(img,k,W=768,H=1024){
   const sx=(img.width-sw)*((k*.173)%1), sy=(img.height-sh)*((k*.411)%1);
   g.drawImage(img,sx,sy,sw,sh,0,0,W,H);return c;
 }
+// 세탁기 문 그림 위치: 화면 가운데 크게. 그림 속 유리 원(1200×1175 기준 중심 576,574.5 / 반지름 404)에 맞춰 사진 캔버스를 둥글게 자름
+function placeDoor(){
+  const d=$('#gal .gdoor'),c=$('#galc');if(!d||!c)return;
+  const w=Math.min(innerWidth*.92,innerHeight*.9*1200/1175),h=w*1175/1200,l=innerWidth/2-576/1200*w,t=innerHeight/2-574.5/1175*h+10; // 유리 원이 화면 정가운데 오게
+  Object.assign(d.style,{width:w+'px',height:h+'px',left:l+'px',top:t+'px'});
+  c.style.clipPath=`circle(${404/1200*w}px at ${l+576/1200*w}px ${t+574.5/1175*h}px)`;
+}
+addEventListener('resize',placeDoor);
 function stopGallery(){
   if(!gal) return; cancelAnimationFrame(gal.raf); removeEventListener('resize',gal.onResize);
   gal.cards.forEach(c=>c.mats.forEach(m=>m.dispose())); gal.tex.forEach(t=>t.dispose()); gal.renderer.dispose(); gal=null;
 }
 async function renderGallery(){
   stopGallery();
-  panel.innerHTML='<div id="gal"><canvas id="galc"></canvas><button class="back" data-back>← BACK</button><div id="gzoom" hidden></div></div>';
+  panel.innerHTML='<div id="gal"><canvas id="galc"></canvas><img class="gdoor" src="img/washer_door_glass.webp" alt=""><button class="back" data-back>← BACK</button><div id="gzoom" hidden></div></div>';
+  placeDoor();
   if(!window.THREE) return;
   const NC=15, arts=[];
   if(GALLERY_PHOTOS.length){
