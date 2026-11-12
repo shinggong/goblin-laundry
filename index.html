@@ -139,10 +139,10 @@ button{font:inherit;color:inherit;cursor:inherit}
 #toast.on{transform:translate(-50%,0)}
 
 #panel[data-sec="gallery"]{--pbg:#222;--pfg:var(--paper);padding:0;overflow:hidden}
-#gal{position:absolute;inset:0;background:#fde7d3 url(img/cream_paper.webp) repeat;touch-action:none} /* 세탁기 몸체와 같은 크림색: 그림이 화면보다 작아도 이어져 보임 */
+#gal{position:absolute;inset:0;background:#000;touch-action:none} /* 세탁기 몸체와 같은 크림색: 그림이 화면보다 작아도 이어져 보임 */
 /* 세탁기 문을 위에 얹고, 유리 원 안으로만 돌아가는 사진이 보이게 */
 #gal .gdoor{position:absolute;z-index:1;pointer-events:none;user-select:none} /* 그림자 없음: 세탁기 몸체가 배경 질감과 이어지게 */
-#galc{width:100%;height:100%;display:block;background:#1d1a22}
+#galc{width:100%;height:100%;display:block;background:#000}
 #gzoom{position:absolute;inset:0;z-index:2} /* 크게 보기는 세탁기 문 위로 */
 #gal .back{background:var(--paper);color:var(--ink);position:absolute;left:max(16px,env(safe-area-inset-left,0px));top:calc(14px + env(safe-area-inset-top,0px));z-index:2}
 #panel[data-sec="receipt"]{--pbg:var(--tomato);padding:0;overflow:hidden}
@@ -676,11 +676,12 @@ function photoArt(img,k,W=768,H=1024){
   g.drawImage(img,sx,sy,sw,sh,0,0,W,H);return c;
 }
 // 세탁기 앞면 그림 위치: 그림 속 유리 원(1880×2000 기준 중심 941,1074 / 반지름 391)을 화면 가운데에 두고 사진 캔버스를 그 원으로 자름
+const SHOW_FRAME=false; // true로 바꾸면 세탁기 앞면 그림을 다시 덮음
 function placeDoor(){
   const d=$('#gal .gdoor'),c=$('#galc');if(!d||!c)return;
   const w=Math.min(innerWidth,innerHeight)*.6*1880/782,h=w*2000/1880,l=innerWidth/2-941/1880*w,t=innerHeight/2-1074/2000*h; // 유리 지름 = 화면 짧은 쪽 95%, 세탁기 몸체는 화면 밖으로 넘침
   Object.assign(d.style,{width:w+'px',height:h+'px',left:l+'px',top:t+'px'});
-  const g=$('#gal');if(g){const k=w/1880;g.style.backgroundSize=640*k+'px '+320*k+'px';g.style.backgroundPosition=l+'px '+t+'px'} // 종이 질감을 세탁기 그림과 같은 크기로
+  if(!SHOW_FRAME){d.hidden=true;c.style.clipPath='none';if(gal)gal.glassR=Math.hypot(innerWidth,innerHeight)/2;return} // 프레임 없이 검은 화면 전체에 사진
   c.style.clipPath=`circle(${391/1880*w}px at ${l+941/1880*w}px ${t+1074/2000*h}px)`;
   if(gal)gal.glassR=391/1880*w;
 }
@@ -730,7 +731,7 @@ async function renderGallery(){
   const onResize=()=>{renderer.setSize(innerWidth,innerHeight,false);cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();
     const pr=renderer.getPixelRatio();rt.setSize(innerWidth*pr,innerHeight*pr);pmat.uniforms.res.value.set(innerWidth,innerHeight);pmat.uniforms.rad.value=gal&&gal.glassR||Math.min(innerWidth,innerHeight)*.3};
   addEventListener('resize',onResize);onResize();
-  gal={renderer,rt,cards,tex,onResize,raf:0,zoomed:null,zrect:null,glassR:Math.min(innerWidth,innerHeight)*.3};onResize();
+  gal={renderer,rt,cards,tex,onResize,raf:0,zoomed:null,zrect:null,glassR:Math.hypot(innerWidth,innerHeight)/2};onResize();
   // 사진 클릭 → 그 자리에서 화면 가득 커지며 크게 보기 (다시 클릭하거나 Esc로 원래 자리로 돌아감)
   const EASE='cubic-bezier(.65,0,.2,1)';
   const ray=new THREE.Raycaster(), v2=new THREE.Vector2();
