@@ -647,7 +647,7 @@ let tt; function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('o
 
 /* ===== 갤러리: 세탁기 드럼 속에서 사진 카드가 떠다니며 도는 공간 =====
    사진 바꾸기: GALLERY_PHOTOS에 이미지 경로를 넣으면 그 사진들이 돌아감 (비워 두면 앨범 커버 + 방 사진 조각) */
-const GALLERY_PHOTOS=['img/clothes/01_tee.webp','img/clothes/02_hoodie.webp','img/clothes/03_jeans.webp','img/clothes/04_cap.webp','img/clothes/05_socks.webp','img/clothes/06_longsleeve.webp','img/clothes/07_tote.webp','img/clothes/08_zip.webp','img/clothes/09_beanie.webp','img/clothes/10_shorts.webp','img/clothes/11_crew.webp','img/clothes/12_skirt.webp','img/clothes/13_tank.webp','img/clothes/14_bucket.webp','img/clothes/15_tee2.webp']; // 굿즈 의류 이미지(img/clothes). 실제 상품 사진으로 바꾸려면 이 목록만 교체
+const GALLERY_PHOTOS=['img/clothes2/01.webp','img/clothes2/02.webp','img/clothes2/03.webp','img/clothes2/04.webp','img/clothes2/05.webp','img/clothes2/06.webp','img/clothes2/07.webp','img/clothes2/08.webp','img/clothes2/09.webp','img/clothes2/10.webp','img/clothes2/11.webp','img/clothes2/12.webp','img/clothes2/13.webp','img/clothes2/14.webp','img/clothes2/15.webp','img/clothes2/16.webp','img/clothes2/17.webp','img/clothes2/18.webp','img/clothes2/19.webp','img/clothes2/20.webp']; // 굿즈 의류 이미지(img/clothes). 실제 상품 사진으로 바꾸려면 이 목록만 교체
 let gal=null;
 function roundClip(g,S,r){g.beginPath();if(g.roundRect)g.roundRect(0,0,S,S,r);else g.rect(0,0,S,S);g.clip()}
 function cardArt(a,S=768){
@@ -696,7 +696,7 @@ async function renderGallery(){
   panel.innerHTML='<div id="gal"><canvas id="galc"></canvas><img class="gdoor" src="img/washer_front.webp" alt=""><button class="back" data-back>← BACK</button><div id="gzoom" hidden></div></div>';
   placeDoor();
   if(!window.THREE) return;
-  const NC=15, arts=[];
+  const NC=Math.max(15,GALLERY_PHOTOS.length), arts=[]; // 사진 수만큼 카드
   if(GALLERY_PHOTOS.length){
     const ims=await Promise.all(GALLERY_PHOTOS.map(s=>loadImg(s).catch(()=>null)));
     ims.filter(Boolean).slice(0,NC).forEach((im,i)=>arts.push(photoArt(im,i)));
