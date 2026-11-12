@@ -139,7 +139,7 @@ button{font:inherit;color:inherit;cursor:inherit}
 #toast.on{transform:translate(-50%,0)}
 
 #panel[data-sec="gallery"]{--pbg:#222;--pfg:var(--paper);padding:0;overflow:hidden}
-#gal{position:absolute;inset:0;background:#f9a8d0;touch-action:none}
+#gal{position:absolute;inset:0;background:#fde7d3;touch-action:none} /* 세탁기 몸체와 같은 크림색: 그림이 화면보다 작아도 이어져 보임 */
 /* 세탁기 문을 위에 얹고, 유리 원 안으로만 돌아가는 사진이 보이게 */
 #gal .gdoor{position:absolute;z-index:1;pointer-events:none;user-select:none;filter:drop-shadow(0 12px 24px rgba(36,33,42,.3))}
 #galc{width:100%;height:100%;display:block;background:#1d1a22}
@@ -678,7 +678,7 @@ function photoArt(img,k,W=768,H=1024){
 // 세탁기 앞면 그림 위치: 그림 속 유리 원(1880×2000 기준 중심 941,1074 / 반지름 391)을 화면 가운데에 두고 사진 캔버스를 그 원으로 자름
 function placeDoor(){
   const d=$('#gal .gdoor'),c=$('#galc');if(!d||!c)return;
-  const w=Math.min(innerWidth,innerHeight)*.72*1880/782,h=w*2000/1880,l=innerWidth/2-941/1880*w,t=innerHeight/2-1074/2000*h; // 유리 지름 = 화면 짧은 쪽 95%, 세탁기 몸체는 화면 밖으로 넘침
+  const w=Math.min(innerWidth,innerHeight)*.6*1880/782,h=w*2000/1880,l=innerWidth/2-941/1880*w,t=innerHeight/2-1074/2000*h; // 유리 지름 = 화면 짧은 쪽 95%, 세탁기 몸체는 화면 밖으로 넘침
   Object.assign(d.style,{width:w+'px',height:h+'px',left:l+'px',top:t+'px'});
   c.style.clipPath=`circle(${391/1880*w}px at ${l+941/1880*w}px ${t+1074/2000*h}px)`;
   if(gal)gal.glassR=391/1880*w;
@@ -710,7 +710,7 @@ async function renderGallery(){
   // 정면에서 본 드럼: 카메라는 정면. 사진은 3D 링처럼 기울지 않고 항상 정면을 본 채로,
   // 위치만 Y-Z 평면을 따라 위→앞→아래→뒤로 돈다. 가로축(X)은 열마다 따로 있고(여러 개) 절대 움직이지 않음.
   // 모든 사진이 같은 방향의 평행한 면이라 서로 통과하지 않고, 같은 열은 등간격 위상으로 어긋나게 배치.
-  const NCOL=innerWidth/innerHeight<1?3:5, SP=3.4, CW=2.4, RAD=[7.5,6.4,8.4,6.9,8], cards=[];
+  const NCOL=innerWidth/innerHeight<1?3:5, SP=4.4, CW=3.4, RAD=[7.5,6.4,8.4,6.9,8], cards=[];
   for(let i=0;i<NC;i++){
     const k=i%arts.length, col=i%NCOL, row=Math.floor(i/NCOL), perCol=Math.ceil(NC/NCOL);
     const asp=arts[k].width/arts[k].height, h=CW/asp;
@@ -718,7 +718,7 @@ async function renderGallery(){
     const mesh=new THREE.Mesh(new THREE.PlaneGeometry(CW,h),mat); scene.add(mesh);
     cards.push({mesh,meshes:[mesh],mats:[mat],x:(col-(NCOL-1)/2)*SP,R:RAD[col%RAD.length],a0:row/perCol*Math.PI*2+col*.9,idx:k,cw:CW,ch:h});
   }
-  const mot=reduce?.25:1, DIST=25; let pan=0,panT=0,spin=0,spinV=.28*mot,dist=DIST,distT=DIST,drag=null,last=performance.now();
+  const mot=reduce?.25:1, DIST=25; let pan=0,panT=0,spin=0,spinV=.6*mot,dist=DIST,distT=DIST,drag=null,last=performance.now();
   // 살짝 피시아이: 유리 가운데는 크게, 가장자리는 그대로 (FISH가 클수록 많이 휨)
   const FISH=.28, rt=new THREE.WebGLRenderTarget(4,4), post=new THREE.Scene(), pcam=new THREE.OrthographicCamera(-1,1,1,-1,0,1);
   const pmat=new THREE.ShaderMaterial({uniforms:{t:{value:rt.texture},res:{value:new THREE.Vector2(1,1)},rad:{value:300},k:{value:FISH}},
@@ -727,9 +727,9 @@ async function renderGallery(){
   post.add(new THREE.Mesh(new THREE.PlaneGeometry(2,2),pmat));
   const unfish=(x,y)=>{const R=gal&&gal.glassR||300,dx=(x-innerWidth/2)/R,dy=(y-innerHeight/2)/R,f=1-FISH+FISH*Math.min(dx*dx+dy*dy,1);return{clientX:innerWidth/2+dx*f*R,clientY:innerHeight/2+dy*f*R}};
   const onResize=()=>{renderer.setSize(innerWidth,innerHeight,false);cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();
-    const pr=renderer.getPixelRatio();rt.setSize(innerWidth*pr,innerHeight*pr);pmat.uniforms.res.value.set(innerWidth,innerHeight);pmat.uniforms.rad.value=gal&&gal.glassR||Math.min(innerWidth,innerHeight)*.36};
+    const pr=renderer.getPixelRatio();rt.setSize(innerWidth*pr,innerHeight*pr);pmat.uniforms.res.value.set(innerWidth,innerHeight);pmat.uniforms.rad.value=gal&&gal.glassR||Math.min(innerWidth,innerHeight)*.3};
   addEventListener('resize',onResize);onResize();
-  gal={renderer,rt,cards,tex,onResize,raf:0,zoomed:null,zrect:null,glassR:Math.min(innerWidth,innerHeight)*.36};onResize();
+  gal={renderer,rt,cards,tex,onResize,raf:0,zoomed:null,zrect:null,glassR:Math.min(innerWidth,innerHeight)*.3};onResize();
   // 사진 클릭 → 그 자리에서 화면 가득 커지며 크게 보기 (다시 클릭하거나 Esc로 원래 자리로 돌아감)
   const EASE='cubic-bezier(.65,0,.2,1)';
   const ray=new THREE.Raycaster(), v2=new THREE.Vector2();
@@ -770,7 +770,7 @@ async function renderGallery(){
   cv.addEventListener('wheel',e=>{e.preventDefault();distT=Math.max(DIST*.6,Math.min(DIST*1.5,distT+e.deltaY*.03))},{passive:false});
   const tick=now=>{
     const dt=Math.min(.05,(now-last)/1000);last=now;
-    if(!drag){spinV+=(.28*mot*Math.sign(spinV||1)-spinV)*(1-Math.exp(-dt*.7));if(!gal.zoomed)spin+=spinV*dt}
+    if(!drag){spinV+=(.6*mot*Math.sign(spinV||1)-spinV)*(1-Math.exp(-dt*.7));if(!gal.zoomed)spin+=spinV*dt}
     dist+=(distT-dist)*.1; pan+=(panT-pan)*.18;
     cam.position.set(0,0,dist); cam.lookAt(0,0,0);      // 정면에서 바라봄
     cards.forEach(c=>{
