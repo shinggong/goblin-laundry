@@ -678,14 +678,15 @@ function photoArt(img,k,W=768,H=1024){
 // 세탁기 문 그림 위치: 화면 가운데 크게. 그림 속 유리 원(1200×1175 기준 중심 576,574.5 / 반지름 404)에 맞춰 사진 캔버스를 둥글게 자름
 function placeDoor(){
   const d=$('#gal .gdoor'),c=$('#galc');if(!d||!c)return;
-  const w=Math.min(innerWidth*.92,innerHeight*.9*1200/1175),h=w*1175/1200,l=innerWidth/2-576/1200*w,t=innerHeight/2-574.5/1175*h+10; // 유리 원이 화면 정가운데 오게
+  const w=Math.min(innerWidth,innerHeight)*.95*1200/808,h=w*1175/1200,l=innerWidth/2-576/1200*w,t=innerHeight/2-574.5/1175*h; // 유리 원을 화면 짧은 쪽 95%로 크게, 문틀은 화면 밖으로 넘쳐도 됨
   Object.assign(d.style,{width:w+'px',height:h+'px',left:l+'px',top:t+'px'});
   c.style.clipPath=`circle(${404/1200*w}px at ${l+576/1200*w}px ${t+574.5/1175*h}px)`;
+  if(gal)gal.glassR=404/1200*w;
 }
 addEventListener('resize',placeDoor);
 function stopGallery(){
   if(!gal) return; cancelAnimationFrame(gal.raf); removeEventListener('resize',gal.onResize);
-  gal.cards.forEach(c=>c.mats.forEach(m=>m.dispose())); gal.tex.forEach(t=>t.dispose()); gal.renderer.dispose(); gal=null;
+  gal.cards.forEach(c=>c.mats.forEach(m=>m.dispose())); gal.tex.forEach(t=>t.dispose()); gal.rt&&gal.rt.dispose(); gal.renderer.dispose(); gal=null;
 }
 async function renderGallery(){
   stopGallery();
@@ -718,13 +719,21 @@ async function renderGallery(){
     cards.push({mesh,meshes:[mesh],mats:[mat],x:(col-(NCOL-1)/2)*SP,R:RAD[col%RAD.length],a0:row/perCol*Math.PI*2+col*.9,idx:k,cw:CW,ch:h});
   }
   const mot=reduce?.25:1, DIST=25; let spin=0,spinV=.28*mot,dist=DIST,distT=DIST,drag=null,last=performance.now();
-  const onResize=()=>{renderer.setSize(innerWidth,innerHeight,false);cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix()};
+  // 살짝 피시아이: 유리 가운데는 크게, 가장자리는 그대로 (FISH가 클수록 많이 휨)
+  const FISH=.28, rt=new THREE.WebGLRenderTarget(4,4), post=new THREE.Scene(), pcam=new THREE.OrthographicCamera(-1,1,1,-1,0,1);
+  const pmat=new THREE.ShaderMaterial({uniforms:{t:{value:rt.texture},res:{value:new THREE.Vector2(1,1)},rad:{value:300},k:{value:FISH}},
+    vertexShader:'varying vec2 u;void main(){u=uv;gl_Position=vec4(position.xy,0.,1.);}',
+    fragmentShader:'uniform sampler2D t;uniform vec2 res;uniform float rad,k;varying vec2 u;void main(){vec2 d=(u-.5)*res/rad;float r2=dot(d,d);vec2 s=.5+d*(1.-k+k*min(r2,1.))*rad/res;gl_FragColor=texture2D(t,s);}'});
+  post.add(new THREE.Mesh(new THREE.PlaneGeometry(2,2),pmat));
+  const unfish=(x,y)=>{const R=gal&&gal.glassR||300,dx=(x-innerWidth/2)/R,dy=(y-innerHeight/2)/R,f=1-FISH+FISH*Math.min(dx*dx+dy*dy,1);return{clientX:innerWidth/2+dx*f*R,clientY:innerHeight/2+dy*f*R}};
+  const onResize=()=>{renderer.setSize(innerWidth,innerHeight,false);cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();
+    const pr=renderer.getPixelRatio();rt.setSize(innerWidth*pr,innerHeight*pr);pmat.uniforms.res.value.set(innerWidth,innerHeight);pmat.uniforms.rad.value=gal&&gal.glassR||Math.min(innerWidth,innerHeight)*.475};
   addEventListener('resize',onResize);onResize();
-  gal={renderer,cards,tex,onResize,raf:0,zoomed:null,zrect:null};
+  gal={renderer,rt,cards,tex,onResize,raf:0,zoomed:null,zrect:null,glassR:Math.min(innerWidth,innerHeight)*.475};onResize();
   // 사진 클릭 → 그 자리에서 화면 가득 커지며 크게 보기 (다시 클릭하거나 Esc로 원래 자리로 돌아감)
   const EASE='cubic-bezier(.65,0,.2,1)';
   const ray=new THREE.Raycaster(), v2=new THREE.Vector2();
-  const pick=e=>{v2.set(e.clientX/innerWidth*2-1,-(e.clientY/innerHeight)*2+1);ray.setFromCamera(v2,cam);
+  const pick=e=>{e=unfish(e.clientX,e.clientY);v2.set(e.clientX/innerWidth*2-1,-(e.clientY/innerHeight)*2+1);ray.setFromCamera(v2,cam);
     const hit=ray.intersectObjects(cards.map(c=>c.mesh))[0];return hit?cards.find(c=>c.mesh===hit.object):null};
   const openZoom=card=>{
     if(gal.zoomed) return;
@@ -747,17 +756,21 @@ async function renderGallery(){
       card.mesh.visible=true;gal.zoomed=null;gal.closingZoom=false;box.hidden=true;box.innerHTML='';box.getAnimations().forEach(a=>a.cancel())};
   };
   gal.closeZoom=closeZoom; box.addEventListener('click',closeZoom);
-  cv.addEventListener('pointerdown',e=>{drag={y:e.clientY,sx:e.clientX,sy:e.clientY,moved:0};try{cv.setPointerCapture(e.pointerId)}catch(_){}});
+  // 드래그: 위아래(또는 좌우)로 끄는 만큼 드럼이 바로 따라 돌고, 놓으면 그 빠르기로 계속 돌다가 천천히 원래 속도로 돌아감
+  const pxPerRad=()=>{const R=7.5,depth=dist-R;return R*(innerHeight/2)/Math.tan(22.5*Math.PI/180)/depth};
+  cv.addEventListener('pointerdown',e=>{drag={x:e.clientX,y:e.clientY,sx:e.clientX,sy:e.clientY,t:performance.now(),moved:0};spinV=0;try{cv.setPointerCapture(e.pointerId)}catch(_){}});
   cv.addEventListener('pointermove',e=>{
-    if(drag){spinV=(e.clientY-drag.y)*.012;drag.y=e.clientY;drag.moved=Math.max(drag.moved,Math.hypot(e.clientX-drag.sx,e.clientY-drag.sy))}
+    if(!drag)return;const now=performance.now(),dx=e.clientX-drag.x,dy=e.clientY-drag.y,d=Math.abs(dy)>=Math.abs(dx)?dy:dx;
+    const da=d/pxPerRad()*1.4;if(!gal.zoomed)spin+=da;
+    const dt=Math.max(.008,(now-drag.t)/1000);spinV=spinV*.6+(da/dt)*.4;
+    drag.x=e.clientX;drag.y=e.clientY;drag.t=now;drag.moved=Math.max(drag.moved,Math.hypot(e.clientX-drag.sx,e.clientY-drag.sy));
   });
   cv.addEventListener('pointerup',e=>{const d=drag;drag=null;if(d&&d.moved<6&&!gal.zoomed){const c=pick(e);if(c)openZoom(c)}});
   cv.addEventListener('pointercancel',()=>{drag=null});
   cv.addEventListener('wheel',e=>{e.preventDefault();distT=Math.max(DIST*.6,Math.min(DIST*1.5,distT+e.deltaY*.03))},{passive:false});
   const tick=now=>{
     const dt=Math.min(.05,(now-last)/1000);last=now;
-    if(!drag)spinV+=(.28*mot-spinV)*(1-Math.exp(-dt*1.2));
-    if(!gal.zoomed) spin+=spinV*dt;
+    if(!drag){spinV+=(.28*mot*Math.sign(spinV||1)-spinV)*(1-Math.exp(-dt*.7));if(!gal.zoomed)spin+=spinV*dt}
     dist+=(distT-dist)*.1;
     cam.position.set(0,0,dist); cam.lookAt(0,0,0);      // 정면에서 바라봄
     cards.forEach(c=>{
@@ -766,7 +779,7 @@ async function renderGallery(){
       const sh=.45+.55*(.5+.5*Math.cos(a));                         // 앞(카메라 쪽)은 밝게, 뒤는 어둡게
       c.mats[0].color.setScalar(sh);
     });
-    renderer.render(scene,cam); gal.raf=requestAnimationFrame(tick);
+    renderer.setRenderTarget(rt);renderer.render(scene,cam);renderer.setRenderTarget(null);renderer.render(post,pcam); gal.raf=requestAnimationFrame(tick);
   };
   gal.raf=requestAnimationFrame(tick);
 }
