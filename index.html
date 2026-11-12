@@ -144,6 +144,10 @@ button{font:inherit;color:inherit;cursor:inherit}
 /* 세탁기 문을 위에 얹고, 유리 원 안으로만 돌아가는 사진이 보이게 */
 #gal .gdoor{position:absolute;z-index:1;pointer-events:none;user-select:none} /* 그림자 없음: 세탁기 몸체가 배경 질감과 이어지게 */
 #galc{width:100%;height:100%;display:block;background:#000}
+/* 돌아가는 사진 한가운데 글씨: 사진이 지나가면 색이 반전돼 늘 읽힘 */
+#gal .gtitle{position:absolute;z-index:1;left:50%;top:50%;transform:translate(-50%,-50%);pointer-events:none;user-select:none;text-align:center;color:#fff;mix-blend-mode:difference;font-family:var(--f-display);line-height:.9;white-space:nowrap}
+#gal .gtitle b{display:block;font-weight:800;font-size:clamp(44px,11vw,150px);letter-spacing:.02em}
+#gal .gtitle span{display:block;margin-top:.6em;font-weight:700;font-size:clamp(12px,1.6vw,20px);letter-spacing:.35em}
 #gzoom{position:absolute;inset:0;z-index:2} /* 크게 보기는 세탁기 문 위로 */
 #gal .back{background:var(--paper);color:var(--ink);position:absolute;left:max(16px,env(safe-area-inset-left,0px));top:calc(14px + env(safe-area-inset-top,0px));z-index:2}
 #panel[data-sec="receipt"]{--pbg:var(--tomato);padding:0;overflow:hidden}
@@ -693,7 +697,7 @@ function stopGallery(){
 }
 async function renderGallery(){
   stopGallery();
-  panel.innerHTML='<div id="gal"><canvas id="galc"></canvas><img class="gdoor" src="img/washer_front.webp" alt=""><button class="back" data-back>← BACK</button><div id="gzoom" hidden></div></div>';
+  panel.innerHTML='<div id="gal"><canvas id="galc"></canvas><img class="gdoor" src="img/washer_front.webp" alt=""><div class="gtitle"><b>GOBLIN LAUNDRY</b><span>WASH · RINSE · SPIN · DRY</span></div><button class="back" data-back>← BACK</button><div id="gzoom" hidden></div></div>';
   placeDoor();
   if(!window.THREE) return;
   const NC=Math.max(15,GALLERY_PHOTOS.length), arts=[]; // 사진 수만큼 카드
