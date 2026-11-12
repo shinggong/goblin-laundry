@@ -675,13 +675,13 @@ function photoArt(img,k,W=768,H=1024){
   const sx=(img.width-sw)*((k*.173)%1), sy=(img.height-sh)*((k*.411)%1);
   g.drawImage(img,sx,sy,sw,sh,0,0,W,H);return c;
 }
-// 세탁기 문 그림 위치: 화면 가운데 크게. 그림 속 유리 원(1200×1175 기준 중심 576,574.5 / 반지름 404)에 맞춰 사진 캔버스를 둥글게 자름
+// 세탁기 앞면 그림 위치: 그림 속 유리 원(1880×2000 기준 중심 941,1074 / 반지름 391)을 화면 가운데에 두고 사진 캔버스를 그 원으로 자름
 function placeDoor(){
   const d=$('#gal .gdoor'),c=$('#galc');if(!d||!c)return;
-  const w=Math.min(innerWidth,innerHeight)*.95*1200/808,h=w*1175/1200,l=innerWidth/2-576/1200*w,t=innerHeight/2-574.5/1175*h; // 유리 원을 화면 짧은 쪽 95%로 크게, 문틀은 화면 밖으로 넘쳐도 됨
+  const w=Math.min(innerWidth,innerHeight)*.95*1880/782,h=w*2000/1880,l=innerWidth/2-941/1880*w,t=innerHeight/2-1074/2000*h; // 유리 지름 = 화면 짧은 쪽 95%, 세탁기 몸체는 화면 밖으로 넘침
   Object.assign(d.style,{width:w+'px',height:h+'px',left:l+'px',top:t+'px'});
-  c.style.clipPath=`circle(${404/1200*w}px at ${l+576/1200*w}px ${t+574.5/1175*h}px)`;
-  if(gal)gal.glassR=404/1200*w;
+  c.style.clipPath=`circle(${391/1880*w}px at ${l+941/1880*w}px ${t+1074/2000*h}px)`;
+  if(gal)gal.glassR=391/1880*w;
 }
 addEventListener('resize',placeDoor);
 function stopGallery(){
@@ -690,7 +690,7 @@ function stopGallery(){
 }
 async function renderGallery(){
   stopGallery();
-  panel.innerHTML='<div id="gal"><canvas id="galc"></canvas><img class="gdoor" src="img/washer_door_glass.webp" alt=""><button class="back" data-back>← BACK</button><div id="gzoom" hidden></div></div>';
+  panel.innerHTML='<div id="gal"><canvas id="galc"></canvas><img class="gdoor" src="img/washer_front.webp" alt=""><button class="back" data-back>← BACK</button><div id="gzoom" hidden></div></div>';
   placeDoor();
   if(!window.THREE) return;
   const NC=15, arts=[];
