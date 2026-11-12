@@ -401,20 +401,20 @@ function addHots(imgs){
   });
   R.mat.uniforms.all.value=texOf(uc);
 }
-// 글로우용 흐린 마스크를 직접 계산(사파리는 캔버스 blur 필터를 지원하지 않아서 필터를 쓰지 않음)
+// 글로우용 마스크: 물건 가장자리에서의 '거리'로 빛 세기를 정함(흐림 방식은 오목한 모서리에 빛이 몰려 두꺼워짐)
+// → 어느 곳이든 같은 두께로 퍼짐. 사파리도 지원하도록 캔버스 필터 없이 직접 계산
 function makeGlow(img){
-  const W=1024,H=512,c=canvasOf(img,W,H),g=c.getContext('2d'),id=g.getImageData(0,0,W,H),d=id.data,n=W*H;
-  const src=new Float32Array(n);for(let i=0;i<n;i++)src[i]=d[i*4+3]/255;
-  const tmp=new Float32Array(n);
-  const box=(a,r)=>{ // 가로·세로 상자 흐림 한 번
-    for(let y=0;y<H;y++){let s=0,o=y*W;for(let x=-r;x<=r;x++)s+=a[o+Math.min(W-1,Math.max(0,x))];
-      for(let x=0;x<W;x++){tmp[o+x]=s/(2*r+1);s+=a[o+Math.min(W-1,x+r+1)]-a[o+Math.max(0,x-r)]}}
-    for(let x=0;x<W;x++){let s=0;for(let y=-r;y<=r;y++)s+=tmp[Math.min(H-1,Math.max(0,y))*W+x];
-      for(let y=0;y<H;y++){a[y*W+x]=s/(2*r+1);s+=tmp[Math.min(H-1,y+r+1)*W+x]-tmp[Math.max(0,y-r)*W+x]}}
+  const W=1024,H=512,RADIUS=13,c=canvasOf(img,W,H),g=c.getContext('2d'),id=g.getImageData(0,0,W,H),d=id.data,n=W*H,INF=1e9;
+  const f=new Float64Array(n);for(let i=0;i<n;i++)f[i]=d[i*4+3]>127?0:INF;
+  const edt1=(a,len,stride,off)=>{ // 1차원 정확한 거리 변환(Felzenszwalb)
+    const v=new Int32Array(len),z=new Float64Array(len+1),q=new Float64Array(len);let k=0;v[0]=0;z[0]=-INF;z[1]=INF;
+    for(let i=0;i<len;i++)q[i]=a[off+i*stride];
+    for(let x=1;x<len;x++){let sx;do{const y=v[k];sx=((q[x]+x*x)-(q[y]+y*y))/(2*x-2*y);if(sx<=z[k])k--;else break}while(k>=0);k++;v[k]=x;z[k]=sx;z[k+1]=INF}
+    k=0;for(let x=0;x<len;x++){while(z[k+1]<x)k++;const y=v[k];a[off+x*stride]=(x-y)*(x-y)+q[y]}
   };
-  const wide=src.slice(),near=src.slice();
-  for(let k=0;k<3;k++)box(wide,5);for(let k=0;k<3;k++)box(near,2); // 숫자가 클수록 빛이 넓게 퍼짐 // 세 번 겹치면 가우시안 흐림과 비슷
-  for(let i=0;i<n;i++){const v=Math.min(1,wide[i]*1.8+near[i]*1.2);d[i*4]=d[i*4+1]=d[i*4+2]=255;d[i*4+3]=v*255}
+  for(let x=0;x<W;x++)edt1(f,H,W,x);for(let y=0;y<H;y++)edt1(f,W,1,y*W);
+  const out=new Float32Array(n);for(let i=0;i<n;i++){const dist=Math.sqrt(f[i]),t=Math.max(0,1-dist/RADIUS);out[i]=Math.pow(t,1.5)}
+  for(let i=0;i<n;i++){d[i*4]=d[i*4+1]=d[i*4+2]=255;d[i*4+3]=out[i]*255}
   g.putImageData(id,0,0);return c;
 }
 function camRot(){R._e.set(pitch*DEG,-yaw*DEG,0,'YXZ');R._m4.makeRotationFromEuler(R._e);return R._m3.setFromMatrix4(R._m4)}
