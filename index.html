@@ -3,15 +3,15 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=DotGothic16&family=IBM+Plex+Sans+KR:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Barlow+Condensed:wght@600;700;800&family=Do+Hyeon&family=DotGothic16&family=IBM+Plex+Sans+KR:wght@400;600;700&display=swap">
 <style>
 /* Layout: 드래그로 둘러보는 3D 동전빨래방(CSS 3D 큐브 방) + 사물 클릭 → 전체화면 패널 */
 :root{
   --mint:#9fd8cb; --mint-d:#4f9e8f; --ink:#1d1a17; --tomato:#ff5a36;
   --butter:#f4dd8d; --paper:#fbf7ec; --blue:#3d63d8; --led:#9dffb0;
-  --f-display:"Bagel Fat One","Arial Black",system-ui,sans-serif;
+  --f-display:"Barlow Condensed","Do Hyeon","Arial Narrow",system-ui,sans-serif; /* 세탁기 조작판(WASH·RINSE)처럼 좁고 두꺼운 레트로 고딕 */
   --f-body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
-  --f-led:"DotGothic16","Courier New",monospace;
+  --f-led:"Barlow Condensed","Do Hyeon","Arial Narrow",system-ui,sans-serif;
   color-scheme:light;
 }
 html,body{height:100%}
@@ -31,6 +31,7 @@ button{font:inherit;color:inherit;cursor:inherit}
 #gl{display:block;width:100%;height:100%}
 #hotlabel{position:fixed;z-index:25;left:0;top:0;pointer-events:none;font-family:var(--f-display);font-size:18px;color:var(--paper);background:var(--tomato);border:3px solid var(--ink);border-radius:999px;padding:3px 14px 5px;box-shadow:3px 3px 0 var(--ink);transform:translate(16px,-130%);opacity:0;transition:opacity .15s;white-space:nowrap}
 #hotlabel.on{opacity:1}
+#hotlabel,.back,#hint,#zoom button{font-weight:700;letter-spacing:.06em;text-transform:uppercase}
 
 /* ---------- UI 레이어 ---------- */
 #mute{position:fixed;z-index:20;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));width:48px;height:48px;border-radius:50%;background:var(--paper);border:3px solid var(--ink);box-shadow:3px 3px 0 var(--ink);display:grid;place-items:center}
@@ -55,7 +56,7 @@ button{font:inherit;color:inherit;cursor:inherit}
 .p-head{display:flex;align-items:center;gap:16px;flex-wrap:wrap;border-bottom:3px solid var(--pfg);padding-bottom:12px}
 .back{background:var(--pfg);color:var(--pbg);border:0;border-radius:999px;padding:6px 16px;font-family:var(--f-display);font-size:16px}
 .back:hover{background:var(--pac);color:var(--ink)}
-.p-head h2{margin:0;font-family:var(--f-display);font-weight:400;font-size:clamp(40px,8vw,96px);line-height:.9;letter-spacing:-.01em}
+.p-head h2{margin:0;font-family:var(--f-display);font-weight:700;font-size:clamp(40px,8vw,96px);line-height:.9;letter-spacing:-.01em}
 .p-head .kr{font-family:var(--f-led);font-size:16px;opacity:.75}
 .p-head .right{margin-left:auto;font-family:var(--f-led);font-size:16px}
 
@@ -80,7 +81,7 @@ button{font:inherit;color:inherit;cursor:inherit}
 .detail .cover .g{font-size:clamp(28px,5vw,48px)}
 .d-info{display:grid;gap:14px;min-width:0}
 .d-info .a{font-family:var(--f-led);font-size:16px}
-.d-info h3{margin:0;font-family:var(--f-display);font-weight:400;font-size:clamp(32px,5vw,58px);line-height:1;text-wrap:balance}
+.d-info h3{margin:0;font-family:var(--f-display);font-weight:700;font-size:clamp(32px,5vw,58px);line-height:1;text-wrap:balance}
 .d-info .meta{font-weight:600}
 .tracks{list-style:none;margin:0;padding:0;border-top:3px solid currentColor}
 .tracks li{border-bottom:2px solid currentColor}
@@ -109,14 +110,14 @@ button{font:inherit;color:inherit;cursor:inherit}
 .tour{display:grid}
 .trow{display:grid;grid-template-columns:130px minmax(0,1fr) minmax(0,1.2fr) 130px;gap:16px;align-items:center;border-bottom:3px solid var(--ink);padding:16px 0;font-weight:700;font-size:18px}
 .trow .dt{font-family:var(--f-led);font-variant-numeric:tabular-nums}
-.trow .city{font-family:var(--f-display);font-weight:400;font-size:24px}
-.st{justify-self:end;font-family:var(--f-display);font-weight:400;font-size:15px;border:3px solid var(--ink);border-radius:999px;padding:4px 14px;background:var(--paper)}
+.trow .city{font-family:var(--f-display);font-weight:700;font-size:24px}
+.st{justify-self:end;font-family:var(--f-display);font-weight:700;font-size:15px;border:3px solid var(--ink);border-radius:999px;padding:4px 14px;background:var(--paper)}
 .st.sold{background:var(--ink);color:var(--tomato);text-decoration:line-through}
 .st.few{background:var(--butter)}
 
 /* 컨택트 */
 .cgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(260px,100%),1fr));gap:30px 40px}
-.cgrid h3{margin:0 0 10px;font-family:var(--f-display);font-weight:400;font-size:30px}
+.cgrid h3{margin:0 0 10px;font-family:var(--f-display);font-weight:700;font-size:30px}
 .crow{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;padding:8px 0;border-bottom:2px solid var(--ink)}
 .crow .k{font-family:var(--f-led);font-size:14px;width:100px}
 .crow .v{font-weight:600;user-select:all;overflow-wrap:anywhere;min-width:0;flex:1}
@@ -601,7 +602,7 @@ function renderPlayer(title){
   panel.scrollTop=0;
   panel.innerHTML=`<div class="p-wrap">${head('VIDEO','영상')}<div class="player"><canvas id="cv" width="1280" height="720"></canvas>
     <div class="pctl"><button id="pp">PAUSE</button><span id="tc">0:00</span><div class="prog"><i id="pg"></i></div><span id="td">0:00</span></div>
-    <strong style="font-family:var(--f-display);font-weight:400;font-size:clamp(22px,4vw,40px)">${esc(title)}</strong></div></div>`;
+    <strong style="font-family:var(--f-display);font-weight:700;font-size:clamp(22px,4vw,40px)">${esc(title)}</strong></div></div>`;
   const cv=$('#cv'),x=cv.getContext('2d'),r=rng(title),pal=['#ff5a36','#f4dd8d','#9fd8cb','#3d63d8','#fbf7ec'];
   const bg=pal[Math.floor(r()*4)], fg=pal.filter(c=>c!==bg)[Math.floor(r()*4)];
   const bub=Array.from({length:40},()=>({x:r()*1280,y:r()*720,r:6+r()*40,s:.4+r()*1.6}));
