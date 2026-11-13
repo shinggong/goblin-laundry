@@ -773,6 +773,7 @@ async function renderGallery(){
     letters.forEach((l,i)=>{const p=Math.max(0,Math.min(1,(t-.25-i*.05)/.6));l.m.opacity=Math.min(1,p*1.6);l.mesh.position.y=-140*(1-ob(p));l.mesh.rotation.z=(1-p)*.35*(i%2?1:-1);l.mesh.scale.setScalar(.6+.4*ob(p))});
     const q=Math.max(0,Math.min(1,(t-1.1)/.7));sub.m.opacity=q;sub.mesh.scale.x=.7+.3*(1-Math.pow(1-q,3));
   };
+  const CAM_YAW=32*Math.PI/180, CAM_TILT=10*Math.PI/180; // 옆으로 32°, 위에서 10° 내려다봄
   const mot=reduce?.25:1, DIST=25; let pan=0,panT=0,spin=0,spinV=.6*mot,dist=DIST,distT=DIST,drag=null,last=performance.now();
   // 살짝 피시아이: 유리 가운데는 크게, 가장자리는 그대로 (FISH가 클수록 많이 휨)
   const FISH=.28, rt=new THREE.WebGLRenderTarget(4,4), post=new THREE.Scene(), pcam=new THREE.OrthographicCamera(-1,1,1,-1,0,1);
@@ -835,7 +836,8 @@ async function renderGallery(){
     const dt=Math.min(.05,(now-last)/1000);last=now;
     if(!drag){spinV+=(.6*mot*Math.sign(spinV||1)-spinV)*(1-Math.exp(-dt*.7));if(!gal.zoomed)spin+=spinV*dt}
     dist+=(distT-dist)*.1; pan+=(panT-pan)*.18;
-    cam.position.set(0,0,dist); cam.lookAt(0,0,0);      // 정면에서 바라봄
+    // 카메라를 옆·위로 살짝 틀어 드럼의 옆면(앞뒤 깊이)이 보이게. 가운데 글씨는 늘 카메라를 정면으로 봄
+    cam.position.set(dist*Math.sin(CAM_YAW)*Math.cos(CAM_TILT),dist*Math.sin(CAM_TILT),dist*Math.cos(CAM_YAW)*Math.cos(CAM_TILT)); cam.lookAt(0,0,0); tgrp.quaternion.copy(cam.quaternion);
     cards.forEach(c=>{
       const a=c.a0+spin;
       c.mesh.position.set(c.x+pan,-c.R*Math.sin(a),c.R*Math.cos(a));   // X는 고정, Y-Z만 이동. 회전은 하지 않고 항상 정면
