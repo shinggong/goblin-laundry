@@ -159,12 +159,12 @@ button{font:inherit;color:inherit;cursor:inherit}
 #gzoom .zinfo .zs{font-size:13px;opacity:.65;letter-spacing:.04em} /* 크게 보기는 세탁기 문 위로 */
 #gal .back{background:var(--paper);color:var(--ink);position:absolute;left:max(16px,env(safe-area-inset-left,0px));top:calc(14px + env(safe-area-inset-top,0px));z-index:2}
 #panel[data-sec="receipt"]{--pbg:var(--tomato);padding:0;overflow:hidden}
-#rc{position:absolute;inset:0;overflow:hidden;touch-action:none;--rw:min(78vw,340px,calc(80vh*.607))}
+#rc{position:absolute;inset:0;overflow:hidden;touch-action:none;--rw:min(82vw,380px,calc(80vh*.649))}
 #rc .back{position:absolute;z-index:5;left:max(16px,env(safe-area-inset-left,0px));top:calc(14px + env(safe-area-inset-top,0px));margin-top:30px}
 #rc .rbag{position:absolute;z-index:5;right:max(16px,env(safe-area-inset-right,0px));top:calc(14px + env(safe-area-inset-top,0px));margin-top:30px;font-family:var(--f-led);font-size:16px;color:var(--ink)}
 #rc .slot{position:absolute;z-index:4;left:50%;top:0;width:calc(var(--rw) + 56px);height:34px;transform:translateX(-50%);background:var(--ink);border-radius:0 0 22px 22px}
 #rc .slot::after{content:"";position:absolute;left:18px;right:18px;bottom:8px;height:7px;border-radius:4px;background:#000}
-#rc .stage{position:absolute;z-index:2;left:50%;top:26px;width:var(--rw);height:calc(var(--rw)/.607);transform:translateX(-50%)}
+#rc .stage{position:absolute;z-index:2;left:50%;top:26px;width:var(--rw);height:calc(var(--rw)/.649);transform:translateX(-50%)}
 .rcpt{position:absolute;inset:0;transform-origin:50% 0;filter:drop-shadow(0 8px 0 rgba(29,26,23,.22));touch-action:none;cursor:grab}
 .rcpt .paper{position:absolute;inset:0;background:var(--paper);color:var(--ink);display:grid;grid-template-columns:20px 1fr;padding:0 12px 26% 8px;gap:6px}
 .rcpt .perf{position:absolute;left:0;right:0;top:0;height:10px;background:radial-gradient(circle at 6px 0,var(--tomato) 3.4px,transparent 3.9px) 0 0/14px 10px repeat-x}
@@ -178,7 +178,8 @@ button{font:inherit;color:inherit;cursor:inherit}
 .rcpt .rprice i{font-style:normal;background:var(--ink);color:var(--paper);padding:0 6px;margin-left:6px;font-size:13px}
 .rcpt .rbar{height:22px;background:repeating-linear-gradient(90deg,var(--ink) 0 2px,transparent 2px 5px,var(--ink) 5px 6px,transparent 6px 10px)}
 .rcpt .rtear{font-family:var(--f-led);font-size:12px;text-align:center;letter-spacing:.1em}
-#rc .stub{position:absolute;left:0;right:0;top:0;height:16px;background:var(--paper);clip-path:polygon(0 0,100% 0,100% 55%,95% 100%,90% 55%,85% 100%,80% 55%,75% 100%,70% 55%,65% 100%,60% 55%,55% 100%,50% 55%,45% 100%,40% 55%,35% 100%,30% 55%,25% 100%,20% 55%,15% 100%,10% 55%,5% 100%,0 55%)}
+.rcpt .paper.rimg{background:none;display:block;padding:0}.rcpt .rimg img{display:block;width:100%;height:100%;pointer-events:none;user-select:none;-webkit-user-drag:none}
+#rc .stub{position:absolute;left:3.5%;right:3.5%;top:0;height:16px;background:#e4e4e1;clip-path:polygon(0 0,100% 0,100% 55%,95% 100%,90% 55%,85% 100%,80% 55%,75% 100%,70% 55%,65% 100%,60% 55%,55% 100%,50% 55%,45% 100%,40% 55%,35% 100%,30% 55%,25% 100%,20% 55%,15% 100%,10% 55%,5% 100%,0 55%)}
 @media (max-width:640px){
   .detail{grid-template-columns:1fr}
   .trow{grid-template-columns:1fr auto;gap:4px 12px}
@@ -893,15 +894,10 @@ async function renderGallery(){
 let rc=null, opening=false;
 const rcClip=torn=>{
   const top=torn?Array.from({length:21},(_,i)=>(i*5)+'% '+(i%2?'1.4%':'0%')).join(','):'0 0,100% 0';
-  return 'polygon('+top+',100% 78%,93% 85%,76% 95%,62% 100%,38% 100%,24% 95%,7% 85%,0 78%)';
+  return torn?'polygon('+top+',100% 100%,0 100%)':'none';   // 영수증 그림에 톱니 테두리가 있어서 뜯을 때 윗부분만 잘라냄
 };
-function receiptHTML(i){
-  const [n,k,p,img,so]=SHOP[i];
-  return '<div class="paper"><div class="perf"></div><div class="rside">COIN CHANGE — PLEASE TAKE ONE</div><div class="rmain">'+
-   '<div class="rhead"><span>GOBLIN LAUNDRY</span><span>NO.'+String(i+1).padStart(3,'0')+'</span></div>'+
-   '<svg viewBox="0 0 120 120" stroke="#1d1a17" stroke-width="4" stroke-linejoin="round">'+SVG[img]+'</svg>'+
-   '<div class="rname">'+esc(n)+'</div><div class="rkr">'+esc(k)+'</div>'+
-   '<div class="rprice">₩'+p.toLocaleString('ko-KR')+(so?'<i>SOLD OUT</i>':'')+'</div><div class="rbar"></div><div class="rtear">▼ TEAR HERE</div></div></div>';
+function receiptHTML(i){   // 영수증 그림(img/receipt.webp)을 그대로 찍어냄
+  return '<div class="paper rimg"><img src="img/receipt.webp" alt="RECEIPT No.'+String(i+1).padStart(6,'0')+'" draggable="false"></div>';
 }
 function printSfx(ms){if(!Au.ctx||Au.muted)return;const t=Au.ctx.currentTime;for(let k=0;k<ms/75;k++)noiseHit(t+k*.075,Au.master,.1,3000,.03,'bandpass')}
 function tearSfx(){if(!Au.ctx||Au.muted)return;const t=Au.ctx.currentTime;noiseHit(t,Au.master,.45,1800,.26,'highpass');noiseHit(t+.05,Au.master,.3,4200,.18,'highpass')}
