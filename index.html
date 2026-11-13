@@ -148,7 +148,15 @@ button{font:inherit;color:inherit;cursor:inherit}
 #gal .gtitle{position:absolute;z-index:1;left:50%;top:50%;transform:translate(-50%,-50%);pointer-events:none;user-select:none;text-align:center;color:#fff;mix-blend-mode:difference;font-family:var(--f-display);line-height:.9;white-space:nowrap}
 #gal .gtitle b{display:block;font-weight:800;font-size:clamp(44px,11vw,150px);letter-spacing:.02em}
 #gal .gtitle span{display:block;margin-top:.6em;font-weight:700;font-size:clamp(12px,1.6vw,20px);letter-spacing:.35em}
-#gzoom{position:absolute;inset:0;z-index:2} /* 크게 보기는 세탁기 문 위로 */
+#gzoom{position:absolute;inset:0;z-index:2;background:rgba(0,0,0,.82)}
+#gzoom .zx{position:absolute;z-index:3;top:calc(14px + env(safe-area-inset-top,0px));right:max(16px,env(safe-area-inset-right,0px));width:44px;height:44px;border-radius:50%;border:0;background:#fbf7ec;color:#24212A;font-size:22px;line-height:1;cursor:pointer}
+#gzoom .zx:hover{background:#FF679F;color:#fff}
+#gzoom .zinfo{position:absolute;color:#fbf7ec;font-family:var(--f-body);max-width:320px}
+#gzoom .zinfo .zno{font-family:var(--f-display);font-weight:700;letter-spacing:.2em;font-size:13px;color:#FF679F}
+#gzoom .zinfo h3{margin:6px 0 4px;font-family:var(--f-display);font-weight:800;font-size:clamp(30px,4vw,46px);line-height:.95;letter-spacing:.01em;text-transform:uppercase}
+#gzoom .zinfo .zp{font-family:var(--f-display);font-weight:700;font-size:22px;letter-spacing:.04em}
+#gzoom .zinfo p{margin:14px 0 10px;font-size:15px;line-height:1.55;opacity:.85}
+#gzoom .zinfo .zs{font-size:13px;opacity:.65;letter-spacing:.04em} /* 크게 보기는 세탁기 문 위로 */
 #gal .back{background:var(--paper);color:var(--ink);position:absolute;left:max(16px,env(safe-area-inset-left,0px));top:calc(14px + env(safe-area-inset-top,0px));z-index:2}
 #panel[data-sec="receipt"]{--pbg:var(--tomato);padding:0;overflow:hidden}
 #rc{position:absolute;inset:0;overflow:hidden;touch-action:none;--rw:min(78vw,340px,calc(80vh*.607))}
@@ -651,6 +659,29 @@ let tt; function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('o
 
 /* ===== 갤러리: 세탁기 드럼 속에서 사진 카드가 떠다니며 도는 공간 =====
    사진 바꾸기: GALLERY_PHOTOS에 이미지 경로를 넣으면 그 사진들이 돌아감 (비워 두면 앨범 커버 + 방 사진 조각) */
+// 사진 순서대로의 옷 정보(크게 보기에 표시)
+const CLOTHES=[
+ ['Cherry Ringer Tee','₩39,000','체리 자수가 들어간 링거 반팔 티셔츠. 넉넉한 기본 핏.','S / M / L'],
+ ['Corduroy Camp Shirt','₩59,000','부드러운 코듀로이 반팔 셔츠. 크림 카라와 플랩 포켓.','M / L'],
+ ['Retro Track Jacket','₩89,000','양팔 라인이 들어간 집업 트랙 재킷. 밑단 크림 시보리.','S / M / L / XL'],
+ ['Cricket Knit Vest','₩65,000','브이넥 라인 니트 베스트. 셔츠 위에 겹쳐 입기 좋아요.','FREE'],
+ ['Cable Knit Cardigan','₩79,000','도톰한 꽈배기 니트 가디건. 앞 포켓 두 개.','FREE'],
+ ['Washed Denim Jacket','₩98,000','빈티지 워싱 데님 재킷. 살짝 짧은 기장.','S / M / L'],
+ ['Star Hoodie','₩72,000','별 아플리케 후드티. 기모 안감이라 포근해요.','S / M / L / XL'],
+ ['Stripe Rugby Shirt','₩69,000','굵은 스트라이프 럭비 셔츠. 화이트 카라.','M / L / XL'],
+ ['Varsity Jacket','₩129,000','R 와펜 바시티 재킷. 울 블렌드 몸판과 래글런 소매.','S / M / L'],
+ ['Gingham Puff Blouse','₩52,000','깅엄 체크 퍼프 소매 블라우스. 리본 넥 포인트.','FREE'],
+ ['Cargo Wide Jeans','₩89,000','양옆 카고 포켓 와이드 데님. 루즈한 일자 핏.','26 / 28 / 30 / 32'],
+ ['Track Shorts','₩42,000','사이드 라인 트랙 쇼츠. 허리 스트링 조절.','S / M / L'],
+ ['Pleated Mini Skirt','₩55,000','밑단 라인 플리츠 미니스커트. 속바지 포함.','S / M'],
+ ['Cream Wide Pants','₩74,000','크림 코튼 와이드 팬츠. 롤업해서 입어도 예뻐요.','S / M / L'],
+ ['Denim Mini Skirt','₩58,000','미디엄 워싱 데님 미니스커트. A라인 실루엣.','S / M / L'],
+ ['Star Court Sneaker','₩96,000','별 패치 레트로 코트 스니커즈. 검 솔.','230–270'],
+ ['Cherry Ball Cap','₩35,000','체리 자수 워싱 볼캡. 뒤 버클 조절.','FREE'],
+ ['Canvas High Top','₩79,000','틸 컬러 캔버스 하이탑. 크림 토캡.','230–280'],
+ ['Stripe Bucket Hat','₩38,000','라인 장식 코튼 버킷햇. 체리 로고 자수.','FREE'],
+ ['Pink Western Boots','₩149,000','하트 스티치 웨스턴 부츠. 미드 힐.','225–255'],
+];
 const GALLERY_PHOTOS=['img/clothes2/01.webp','img/clothes2/02.webp','img/clothes2/03.webp','img/clothes2/04.webp','img/clothes2/05.webp','img/clothes2/06.webp','img/clothes2/07.webp','img/clothes2/08.webp','img/clothes2/09.webp','img/clothes2/10.webp','img/clothes2/11.webp','img/clothes2/12.webp','img/clothes2/13.webp','img/clothes2/14.webp','img/clothes2/15.webp','img/clothes2/16.webp','img/clothes2/17.webp','img/clothes2/18.webp','img/clothes2/19.webp','img/clothes2/20.webp']; // 굿즈 의류 이미지(img/clothes). 실제 상품 사진으로 바꾸려면 이 목록만 교체
 let gal=null;
 function roundClip(g,S,r){g.beginPath();if(g.roundRect)g.roundRect(0,0,S,S,r);else g.rect(0,0,S,S);g.clip()}
@@ -693,11 +724,11 @@ function placeDoor(){
 addEventListener('resize',placeDoor);
 function stopGallery(){
   if(!gal) return; cancelAnimationFrame(gal.raf); removeEventListener('resize',gal.onResize);
-  gal.cards.forEach(c=>c.mats.forEach(m=>m.dispose())); gal.tex.forEach(t=>t.dispose()); gal.rt&&gal.rt.dispose(); gal.renderer.dispose(); gal=null;
+  gal.cards.forEach(c=>c.mats.forEach(m=>m.dispose())); gal.tex.forEach(t=>t.dispose()); gal.rt&&gal.rt.dispose(); gal.fitTitle&&removeEventListener('resize',gal.fitTitle); gal.renderer.dispose(); gal=null;
 }
 async function renderGallery(){
   stopGallery();
-  panel.innerHTML='<div id="gal"><canvas id="galc"></canvas><img class="gdoor" src="img/washer_front.webp" alt=""><div class="gtitle"><b>GOBLIN LAUNDRY</b><span>WASH · RINSE · SPIN · DRY</span></div><button class="back" data-back>← BACK</button><div id="gzoom" hidden></div></div>';
+  panel.innerHTML='<div id="gal"><canvas id="galc"></canvas><img class="gdoor" src="img/washer_front.webp" alt=""><button class="back" data-back>← BACK</button><div id="gzoom" hidden></div></div>';
   placeDoor();
   if(!window.THREE) return;
   const NC=Math.max(15,GALLERY_PHOTOS.length), arts=[]; // 사진 수만큼 카드
@@ -725,6 +756,23 @@ async function renderGallery(){
     const mesh=new THREE.Mesh(new THREE.PlaneGeometry(CW,h),mat); scene.add(mesh);
     cards.push({mesh,meshes:[mesh],mats:[mat],x:(col-(NCOL-1)/2)*SP,R:RAD[col%RAD.length],a0:row/perCol*Math.PI*2+col*.9,idx:k,cw:CW,ch:h});
   }
+  // 가운데 글씨: 드럼 한가운데(z=0)에 놓인 판. 앞으로 오는 사진이 가리고, 뒤로 간 사진은 글씨 뒤에 있음
+  try{await Promise.race([document.fonts.load('800 200px "Barlow Condensed"'),new Promise(r=>setTimeout(r,1500))])}catch(e){}
+  const tgrp=new THREE.Group(); scene.add(tgrp); const letters=[], TFONT='800 200px "Barlow Condensed","Arial Narrow",sans-serif';
+  const mkPlane=(txt,font,h,ls)=>{const c=document.createElement('canvas'),g=c.getContext('2d');g.font=font;const w=Math.ceil(g.measureText(txt).width+ls*(txt.length))+8;
+    c.width=w;c.height=h;g.font=font;g.fillStyle='#fff';g.textBaseline='middle';if(g.letterSpacing!==undefined)g.letterSpacing=ls+'px';g.fillText(txt,4,h/2+4);
+    const t=new THREE.CanvasTexture(c),m=new THREE.MeshBasicMaterial({map:t,transparent:true,depthWrite:false,opacity:0});return{mesh:new THREE.Mesh(new THREE.PlaneGeometry(w,h),m),w,t,m}};
+  let tx=0; const TITLE='GOBLIN LAUNDRY';
+  for(const ch of TITLE){const pl=mkPlane(ch,TFONT,240,0);if(ch!==' '){pl.mesh.position.x=tx+pl.w/2;tgrp.add(pl.mesh);letters.push(pl)}tx+=ch===' '?60:pl.w-6}
+  letters.forEach(l=>l.mesh.position.x-=tx/2);
+  const sub=mkPlane('WASH · RINSE · SPIN · DRY','700 40px "Barlow Condensed","Arial Narrow",sans-serif',60,14); sub.mesh.position.y=-150; tgrp.add(sub.mesh);
+  const titleW=tx, tStart=performance.now();
+  const fitTitle=()=>{const vh=2*25*Math.tan(22.5*Math.PI/180),vw=vh*innerWidth/innerHeight,w=Math.min(vw*.8,vh*1.2)*(1-FISH);tgrp.scale.setScalar(w/titleW)}; // 피시아이가 가운데를 키우는 만큼 미리 줄임
+  const animTitle=now=>{ // 글자가 아래에서 하나씩 튀어 오르고, 그다음 작은 글씨가 퍼지며 나타남
+    const t=(now-tStart)/1000, ob=x=>{const c=1.7;x=x-1;return 1+(c+1)*x*x*x+c*x*x};
+    letters.forEach((l,i)=>{const p=Math.max(0,Math.min(1,(t-.25-i*.05)/.6));l.m.opacity=Math.min(1,p*1.6);l.mesh.position.y=-140*(1-ob(p));l.mesh.rotation.z=(1-p)*.35*(i%2?1:-1);l.mesh.scale.setScalar(.6+.4*ob(p))});
+    const q=Math.max(0,Math.min(1,(t-1.1)/.7));sub.m.opacity=q;sub.mesh.scale.x=.7+.3*(1-Math.pow(1-q,3));
+  };
   const mot=reduce?.25:1, DIST=25; let pan=0,panT=0,spin=0,spinV=.6*mot,dist=DIST,distT=DIST,drag=null,last=performance.now();
   // 살짝 피시아이: 유리 가운데는 크게, 가장자리는 그대로 (FISH가 클수록 많이 휨)
   const FISH=.28, rt=new THREE.WebGLRenderTarget(4,4), post=new THREE.Scene(), pcam=new THREE.OrthographicCamera(-1,1,1,-1,0,1);
@@ -735,8 +783,9 @@ async function renderGallery(){
   const unfish=(x,y)=>{const R=gal&&gal.glassR||300,dx=(x-innerWidth/2)/R,dy=(y-innerHeight/2)/R,f=1-FISH+FISH*Math.min(dx*dx+dy*dy,1);return{clientX:innerWidth/2+dx*f*R,clientY:innerHeight/2+dy*f*R}};
   const onResize=()=>{renderer.setSize(innerWidth,innerHeight,false);cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();
     const pr=renderer.getPixelRatio();rt.setSize(innerWidth*pr,innerHeight*pr);pmat.uniforms.res.value.set(innerWidth,innerHeight);pmat.uniforms.rad.value=gal&&gal.glassR||Math.min(innerWidth,innerHeight)*.3};
+  addEventListener('resize',fitTitle);fitTitle();
   addEventListener('resize',onResize);onResize();
-  gal={renderer,rt,cards,tex,onResize,raf:0,zoomed:null,zrect:null,glassR:Math.hypot(innerWidth,innerHeight)/2};onResize();
+  gal={fitTitle,renderer,rt,cards,tex,onResize,raf:0,zoomed:null,zrect:null,glassR:Math.hypot(innerWidth,innerHeight)/2};onResize();
   // 사진 클릭 → 그 자리에서 화면 가득 커지며 크게 보기 (다시 클릭하거나 Esc로 원래 자리로 돌아감)
   const EASE='cubic-bezier(.65,0,.2,1)';
   const ray=new THREE.Raycaster(), v2=new THREE.Vector2();
@@ -746,11 +795,18 @@ async function renderGallery(){
     if(gal.zoomed) return;
     const pts=[[-1,-1],[1,-1],[1,1],[-1,1]].map(([sx,sy])=>{const v=new THREE.Vector3(sx*card.cw/2,sy*card.ch/2,0);card.mesh.localToWorld(v);v.project(cam);return[(v.x+1)/2*innerWidth,(1-v.y)/2*innerHeight]});
     const xs=pts.map(p=>p[0]),ys=pts.map(p=>p[1]),L=Math.min(...xs),T=Math.min(...ys),Rr=Math.max(...xs),B=Math.max(...ys);
-    const asp=arts[card.idx].width/arts[card.idx].height, FH=Math.min(innerHeight*.84,innerWidth*.88/asp), FW=FH*asp;
+    const asp=arts[card.idx].width/arts[card.idx].height, wide=innerWidth>=760, IW=wide?340:0;
+    const FH=wide?Math.min(innerHeight*.8,(innerWidth-IW-120)/asp):Math.min(innerHeight*.5,innerWidth*.78/asp), FW=FH*asp;
+    const icx=wide?innerWidth/2-(IW+40)/2:innerWidth/2, icy=wide?innerHeight/2:innerHeight*.06+60+FH/2;
     const img=new Image(); img.src=arts[card.idx].toDataURL('image/jpeg',.92);
-    img.style.cssText='position:absolute;left:50%;top:50%;border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.5);width:'+FW+'px;height:'+FH+'px;margin:'+(-FH/2)+'px 0 0 '+(-FW/2)+'px';
-    box.innerHTML='';box.appendChild(img);box.hidden=false;
-    const cx=(L+Rr)/2-innerWidth/2, cy=(T+B)/2-innerHeight/2, sx=Math.max(.05,(Rr-L)/FW), sy=Math.max(.05,(B-T)/FH);
+    img.style.cssText='position:absolute;left:'+(icx-FW/2)+'px;top:'+(icy-FH/2)+'px;border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.5);width:'+FW+'px;height:'+FH+'px';
+    const info=CLOTHES[card.idx]||['GOBLIN LAUNDRY','','',''], inf=document.createElement('div'); inf.className='zinfo';
+    inf.innerHTML='<div class="zno">GL-'+String(card.idx+1).padStart(2,'0')+'</div><h3>'+esc(info[0])+'</h3><div class="zp">'+esc(info[1])+'</div><p>'+esc(info[2])+'</p><div class="zs">SIZE&nbsp; '+esc(info[3])+'</div>';
+    inf.style.cssText=wide?'left:'+(icx+FW/2+40)+'px;top:50%;transform:translateY(-50%);width:'+IW+'px':'left:max(20px,env(safe-area-inset-left,0px));right:max(20px,env(safe-area-inset-right,0px));top:'+(icy+FH/2+22)+'px;max-width:none';
+    const zx=document.createElement('button'); zx.className='zx'; zx.setAttribute('aria-label','닫기'); zx.textContent='✕';
+    box.innerHTML='';box.append(img,inf,zx);box.hidden=false;
+    inf.animate([{opacity:0,transform:inf.style.transform+' translateY(16px)'},{opacity:1,transform:inf.style.transform||'none'}],{duration:520,delay:260,easing:'cubic-bezier(.2,.8,.2,1)',fill:'backwards'});
+    const cx=(L+Rr)/2-icx, cy=(T+B)/2-icy, sx=Math.max(.05,(Rr-L)/FW), sy=Math.max(.05,(B-T)/FH);
     gal.zrect='translate('+cx+'px,'+cy+'px) scale('+sx+','+sy+')';
     card.mesh.visible=false; gal.zoomed=card;
     box.animate([{opacity:0},{opacity:1}],{duration:500,easing:'ease-out',fill:'forwards'});
@@ -762,7 +818,7 @@ async function renderGallery(){
     box.animate([{opacity:1},{opacity:0}],{duration:560,easing:'ease-in',fill:'forwards'}).onfinish=()=>{
       card.mesh.visible=true;gal.zoomed=null;gal.closingZoom=false;box.hidden=true;box.innerHTML='';box.getAnimations().forEach(a=>a.cancel())};
   };
-  gal.closeZoom=closeZoom; box.addEventListener('click',closeZoom);
+  gal.closeZoom=closeZoom; box.addEventListener('click',e=>{if(e.target===box||e.target.closest('.zx'))closeZoom()}); // 바깥이나 닫기 버튼을 누르면 닫힘
   // 드래그: 위아래(또는 좌우)로 끄는 만큼 드럼이 바로 따라 돌고, 놓으면 그 빠르기로 계속 돌다가 천천히 원래 속도로 돌아감
   const pxPerRad=()=>{const R=7.5,depth=dist-R;return R*(innerHeight/2)/Math.tan(22.5*Math.PI/180)/depth};
   cv.addEventListener('pointerdown',e=>{drag={x:e.clientX,y:e.clientY,sx:e.clientX,sy:e.clientY,t:performance.now(),moved:0};spinV=0;try{cv.setPointerCapture(e.pointerId)}catch(_){}});
@@ -786,6 +842,7 @@ async function renderGallery(){
       const sh=.45+.55*(.5+.5*Math.cos(a));                         // 앞(카메라 쪽)은 밝게, 뒤는 어둡게
       c.mats[0].color.setScalar(sh);
     });
+    animTitle(now);
     renderer.setRenderTarget(rt);renderer.render(scene,cam);renderer.setRenderTarget(null);renderer.render(post,pcam); gal.raf=requestAnimationFrame(tick);
   };
   gal.raf=requestAnimationFrame(tick);
