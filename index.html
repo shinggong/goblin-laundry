@@ -682,7 +682,8 @@ const CLOTHES=[
  ['Stripe Bucket Hat','₩38,000','라인 장식 코튼 버킷햇. 체리 로고 자수.','FREE'],
  ['Pink Western Boots','₩149,000','하트 스티치 웨스턴 부츠. 미드 힐.','225–255'],
 ];
-const CLOTH3D={8:{map:'img/cloth3d/varsity.png',dep:'img/cloth3d/varsity_depth.png'}}; // 사진 번호(0부터): 입체로 보여줄 옷
+// 모든 옷을 입체 천으로: 배경 뺀 옷 그림 + 깊이 지도(가운데일수록 볼록)
+const CLOTH3D=Object.fromEntries(Array.from({length:20},(_,i)=>{const n=String(i+1).padStart(2,'0');return[i,{map:'img/cloth3d/'+n+'.webp',dep:'img/cloth3d/'+n+'_d.png'}]}));
 const GALLERY_PHOTOS=['img/clothes2/01.webp','img/clothes2/02.webp','img/clothes2/03.webp','img/clothes2/04.webp','img/clothes2/05.webp','img/clothes2/06.webp','img/clothes2/07.webp','img/clothes2/08.webp','img/clothes2/09.webp','img/clothes2/10.webp','img/clothes2/11.webp','img/clothes2/12.webp','img/clothes2/13.webp','img/clothes2/14.webp','img/clothes2/15.webp','img/clothes2/16.webp','img/clothes2/17.webp','img/clothes2/18.webp','img/clothes2/19.webp','img/clothes2/20.webp']; // 굿즈 의류 이미지(img/clothes). 실제 상품 사진으로 바꾸려면 이 목록만 교체
 let gal=null;
 function roundClip(g,S,r){g.beginPath();if(g.roundRect)g.roundRect(0,0,S,S,r);else g.rect(0,0,S,S);g.clip()}
@@ -724,7 +725,7 @@ function placeDoor(){
 }
 addEventListener('resize',placeDoor);
 function stopGallery(){
-  if(!gal) return; cancelAnimationFrame(gal.raf); removeEventListener('resize',gal.onResize);
+  if(!gal) return; gal.stopZoom3D&&gal.stopZoom3D(); cancelAnimationFrame(gal.raf); removeEventListener('resize',gal.onResize);
   gal.cards.forEach(c=>c.mats.forEach(m=>m.dispose())); gal.tex.forEach(t=>t.dispose()); gal.rt&&gal.rt.dispose(); gal.fitTitle&&removeEventListener('resize',gal.fitTitle); gal.renderer.dispose(); gal=null;
 }
 async function renderGallery(){
@@ -816,11 +817,14 @@ async function renderGallery(){
     if(gal.zoomed) return;
     const pts=[[-1,-1],[1,-1],[1,1],[-1,1]].map(([sx,sy])=>{const v=new THREE.Vector3(sx*card.cw/2,sy*card.ch/2,0);card.mesh.localToWorld(v);v.project(cam);return[(v.x+1)/2*innerWidth,(1-v.y)/2*innerHeight]});
     const xs=pts.map(p=>p[0]),ys=pts.map(p=>p[1]),L=Math.min(...xs),T=Math.min(...ys),Rr=Math.max(...xs),B=Math.max(...ys);
-    const asp=arts[card.idx].width/arts[card.idx].height, wide=innerWidth>=760, IW=wide?340:0;
+    const ct=clothTex[card.idx], asp=ct?1:arts[card.idx].width/arts[card.idx].height, wide=innerWidth>=760, IW=wide?340:0;
     const FH=wide?Math.min(innerHeight*.8,(innerWidth-IW-120)/asp):Math.min(innerHeight*.5,innerWidth*.78/asp), FW=FH*asp;
     const icx=wide?innerWidth/2-(IW+40)/2:innerWidth/2, icy=wide?innerHeight/2:innerHeight*.06+60+FH/2;
-    const img=new Image(); img.src=arts[card.idx].toDataURL('image/jpeg',.92);
-    img.style.cssText='position:absolute;left:'+(icx-FW/2)+'px;top:'+(icy-FH/2)+'px;border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.5);width:'+FW+'px;height:'+FH+'px';
+    let img;
+    if(ct){img=document.createElement('canvas');startZoom3D(img,ct,FW,FH);
+      img.style.cssText='position:absolute;left:'+(icx-FW/2)+'px;top:'+(icy-FH/2)+'px;width:'+FW+'px;height:'+FH+'px;cursor:grab;touch-action:none'}
+    else{img=new Image(); img.src=arts[card.idx].toDataURL('image/jpeg',.92);
+      img.style.cssText='position:absolute;left:'+(icx-FW/2)+'px;top:'+(icy-FH/2)+'px;border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.5);width:'+FW+'px;height:'+FH+'px'}
     const info=CLOTHES[card.idx]||['GOBLIN LAUNDRY','','',''], inf=document.createElement('div'); inf.className='zinfo';
     inf.innerHTML='<div class="zno">GL-'+String(card.idx+1).padStart(2,'0')+'</div><h3>'+esc(info[0])+'</h3><div class="zp">'+esc(info[1])+'</div><p>'+esc(info[2])+'</p><div class="zs">SIZE&nbsp; '+esc(info[3])+'</div>';
     inf.style.cssText=wide?'left:'+(icx+FW/2+40)+'px;top:50%;transform:translateY(-50%);width:'+IW+'px':'left:max(20px,env(safe-area-inset-left,0px));right:max(20px,env(safe-area-inset-right,0px));top:'+(icy+FH/2+22)+'px;max-width:none';
@@ -833,11 +837,26 @@ async function renderGallery(){
     box.animate([{opacity:0},{opacity:1}],{duration:500,easing:'ease-out',fill:'forwards'});
     img.animate([{transform:gal.zrect},{transform:'none'}],{duration:680,easing:EASE});
   };
+  // 크게 보기용 3D: 옷 하나를 크게 띄우고, 끌면 돌아감(놓으면 관성으로 돌다 멈춤), 가만히 두면 살랑살랑
+  function startZoom3D(cv,ct,w,h){
+    const r=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:true});r.setPixelRatio(Math.min(devicePixelRatio,2));r.setSize(w,h,false);
+    const sc=new THREE.Scene(),cm=new THREE.PerspectiveCamera(35,w/h,.1,100);cm.position.set(0,0,9.5);
+    const m=clothMat(ct[0],ct[1]);m.uniforms.D.value=1.4;const me=new THREE.Mesh(new THREE.PlaneGeometry(5,5,160,160),m);sc.add(me);
+    let ry=-.35,rv=0,rx=.08,dr=null;
+    cv.addEventListener('pointerdown',e=>{dr={x:e.clientX,y:e.clientY};cv.style.cursor='grabbing';try{cv.setPointerCapture(e.pointerId)}catch(_){}});
+    cv.addEventListener('pointermove',e=>{if(!dr)return;const dx=e.clientX-dr.x,dy=e.clientY-dr.y;ry+=dx*.009;rv=dx*.009;rx=Math.max(-.45,Math.min(.45,rx+dy*.005));dr={x:e.clientX,y:e.clientY}});
+    const up=()=>{dr=null;cv.style.cursor='grab'};cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',up);
+    const z={r,m,raf:0};gal.zr=z;
+    const loop=now=>{if(!dr){ry+=rv;rv*=.95}me.rotation.set(rx,ry+Math.sin(now/1600)*.12,0);m.uniforms.time.value=now/1000;r.render(sc,cm);z.raf=requestAnimationFrame(loop)};
+    z.raf=requestAnimationFrame(loop);
+  }
+  const stopZoom3D=()=>{const z=gal&&gal.zr;if(!z)return;cancelAnimationFrame(z.raf);z.m.dispose();z.r.dispose();gal.zr=null};
+  gal.stopZoom3D=stopZoom3D;
   const closeZoom=()=>{
     const card=gal.zoomed; if(!card||gal.closingZoom) return; gal.closingZoom=true;
     box.firstChild.animate([{transform:'none'},{transform:gal.zrect}],{duration:560,easing:EASE,fill:'forwards'});
     box.animate([{opacity:1},{opacity:0}],{duration:560,easing:'ease-in',fill:'forwards'}).onfinish=()=>{
-      card.mesh.visible=true;gal.zoomed=null;gal.closingZoom=false;box.hidden=true;box.innerHTML='';box.getAnimations().forEach(a=>a.cancel())};
+      card.mesh.visible=true;gal.zoomed=null;gal.closingZoom=false;stopZoom3D();box.hidden=true;box.innerHTML='';box.getAnimations().forEach(a=>a.cancel())};
   };
   gal.closeZoom=closeZoom; box.addEventListener('click',e=>{if(e.target===box||e.target.closest('.zx'))closeZoom()}); // 바깥이나 닫기 버튼을 누르면 닫힘
   // 드래그: 위아래(또는 좌우)로 끄는 만큼 드럼이 바로 따라 돌고, 놓으면 그 빠르기로 계속 돌다가 천천히 원래 속도로 돌아감
