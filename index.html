@@ -3,7 +3,7 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Barlow+Condensed:wght@600;700;800&family=Do+Hyeon&family=DotGothic16&family=IBM+Plex+Sans+KR:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Barlow+Condensed:wght@600;700;800&family=Do+Hyeon&family=DotGothic16&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+KR:wght@400;600;700&display=swap">
 <style>
 /* Layout: 드래그로 둘러보는 3D 동전빨래방(CSS 3D 큐브 방) + 사물 클릭 → 전체화면 패널 */
 :root{
@@ -159,12 +159,12 @@ button{font:inherit;color:inherit;cursor:inherit}
 #gzoom .zinfo .zs{font-size:13px;opacity:.65;letter-spacing:.04em} /* 크게 보기는 세탁기 문 위로 */
 #gal .back{background:var(--paper);color:var(--ink);position:absolute;left:max(16px,env(safe-area-inset-left,0px));top:calc(14px + env(safe-area-inset-top,0px));z-index:2}
 #panel[data-sec="receipt"]{--pbg:var(--tomato);padding:0;overflow:hidden}
-#rc{position:absolute;inset:0;overflow:hidden;touch-action:none;--rw:min(82vw,380px,calc(80vh*.649))}
+#rc{position:absolute;inset:0;overflow:hidden;touch-action:none;--rw:min(82vw,380px,calc(80vh*.66))}
 #rc .back{position:absolute;z-index:5;left:max(16px,env(safe-area-inset-left,0px));top:calc(14px + env(safe-area-inset-top,0px));margin-top:30px}
 #rc .rbag{position:absolute;z-index:5;right:max(16px,env(safe-area-inset-right,0px));top:calc(14px + env(safe-area-inset-top,0px));margin-top:30px;font-family:var(--f-led);font-size:16px;color:var(--ink)}
 #rc .slot{position:absolute;z-index:4;left:50%;top:0;width:calc(var(--rw) + 56px);height:34px;transform:translateX(-50%);background:var(--ink);border-radius:0 0 22px 22px}
 #rc .slot::after{content:"";position:absolute;left:18px;right:18px;bottom:8px;height:7px;border-radius:4px;background:#000}
-#rc .stage{position:absolute;z-index:2;left:50%;top:26px;width:var(--rw);height:calc(var(--rw)/.649);transform:translateX(-50%)}
+#rc .stage{position:absolute;z-index:2;left:50%;top:26px;width:var(--rw);height:calc(var(--rw)/.66);transform:translateX(-50%)}
 .rcpt{position:absolute;inset:0;transform-origin:50% 0;filter:drop-shadow(0 8px 0 rgba(29,26,23,.22));touch-action:none;cursor:grab}
 .rcpt .paper{position:absolute;inset:0;background:var(--paper);color:var(--ink);display:grid;grid-template-columns:20px 1fr;padding:0 12px 26% 8px;gap:6px}
 .rcpt .perf{position:absolute;left:0;right:0;top:0;height:10px;background:radial-gradient(circle at 6px 0,var(--tomato) 3.4px,transparent 3.9px) 0 0/14px 10px repeat-x}
@@ -178,8 +178,20 @@ button{font:inherit;color:inherit;cursor:inherit}
 .rcpt .rprice i{font-style:normal;background:var(--ink);color:var(--paper);padding:0 6px;margin-left:6px;font-size:13px}
 .rcpt .rbar{height:22px;background:repeating-linear-gradient(90deg,var(--ink) 0 2px,transparent 2px 5px,var(--ink) 5px 6px,transparent 6px 10px)}
 .rcpt .rtear{font-family:var(--f-led);font-size:12px;text-align:center;letter-spacing:.1em}
-.rcpt .paper.rimg{background:none;display:block;padding:0}.rcpt .rimg img{display:block;width:100%;height:100%;pointer-events:none;user-select:none;-webkit-user-drag:none}
-#rc .stub{position:absolute;left:3.5%;right:3.5%;top:0;height:16px;background:#e4e4e1;clip-path:polygon(0 0,100% 0,100% 55%,95% 100%,90% 55%,85% 100%,80% 55%,75% 100%,70% 55%,65% 100%,60% 55%,55% 100%,50% 55%,45% 100%,40% 55%,35% 100%,30% 55%,25% 100%,20% 55%,15% 100%,10% 55%,5% 100%,0 55%)}
+.rcpt .paper.rimg{background:none;display:block;padding:0;--u:calc(var(--rw)/100);font-family:'IBM Plex Mono',monospace;color:#23242b}
+.rcpt .rimg img{pointer-events:none;user-select:none;-webkit-user-drag:none}
+.rcpt .rimg .rtpl{position:absolute;inset:0;width:100%;height:100%;display:block}
+.rcpt .rimg>span,.rcpt .ritem,.rcpt .rpic{position:absolute;mix-blend-mode:multiply}
+.rcpt .rno{right:6.7%;top:7%;transform:translateY(-50%);font-size:calc(var(--u)*5.2);font-weight:500}
+.rcpt .rdate{left:50%;top:35.5%;transform:translate(-50%,-50%);font-size:calc(var(--u)*4.3);font-weight:500;white-space:nowrap}
+.rcpt .rpic{left:5%;top:42.5%;width:37%;height:20.5%;object-fit:contain}
+.rcpt .ritem{left:44.6%;right:4.7%;top:44.8%}
+.rcpt .rtop{display:flex;justify-content:space-between;gap:3%;font-size:calc(var(--u)*4.3);font-weight:500;line-height:1.15;text-transform:uppercase}
+.rcpt .rtop b{font-weight:500}.rcpt .rtop span{white-space:nowrap}
+.rcpt .ritem p{margin:calc(var(--u)*1.8) 0 0;font-family:'IBM Plex Sans KR','IBM Plex Mono',monospace;font-size:calc(var(--u)*3.1);line-height:1.4;opacity:.85}
+.rcpt .ritem p.rsz{font-family:'IBM Plex Mono',monospace}
+.rcpt .rtot{right:5.5%;top:70.1%;transform:translateY(-50%);font-size:calc(var(--u)*5.6);font-weight:600}
+#rc .stub{position:absolute;left:0;right:0;top:0;height:20px;background:url(img/receipt_tpl.webp) 50% 100%/100% auto}
 @media (max-width:640px){
   .detail{grid-template-columns:1fr}
   .trow{grid-template-columns:1fr auto;gap:4px 12px}
@@ -892,12 +904,20 @@ async function renderGallery(){
 
 /* ===== 영수증: Change 기계에서 영수증이 찍혀 나오고, 하나씩 뜯어 가는 페이지 ===== */
 let rc=null, opening=false;
-const rcClip=torn=>{
-  const top=torn?Array.from({length:21},(_,i)=>(i*5)+'% '+(i%2?'1.4%':'0%')).join(','):'0 0,100% 0';
-  return torn?'polygon('+top+',100% 100%,0 100%)':'none';   // 영수증 그림에 톱니 테두리가 있어서 뜯을 때 윗부분만 잘라냄
-};
-function receiptHTML(i){   // 영수증 그림(img/receipt.webp)을 그대로 찍어냄
-  return '<div class="paper rimg"><img src="img/receipt.webp" alt="RECEIPT No.'+String(i+1).padStart(6,'0')+'" draggable="false"></div>';
+// 찢긴 선: 뜯을 때마다 새로 만들고, 뜯긴 영수증의 윗선 = 다음 영수증의 아랫선이 되어 딱 맞물림
+const RA=10, rcLine=()=>Array.from({length:26},(_,j)=>j%2?.65+Math.random()*.35:Math.random()*.35);
+const rcClip=(top,bot)=>{const n=bot.length-1,x=j=>(j/n*100).toFixed(2)+'% ';
+  const t=top?top.map((v,j)=>x(j)+(v*RA).toFixed(1)+'px').join(','):'0 0,100% 0';
+  const b=bot.map((v,j)=>x(j)+'calc(100% - '+((1-v)*RA).toFixed(1)+'px)').reverse().join(',');
+  return 'polygon('+t+','+b+')'};
+function receiptHTML(i){   // 빈 영수증 위에 옷마다 다른 내용을 찍음
+  const k=i%CLOTHES.length,[n,p,d,sz]=CLOTHES[k],t=new Date(),z=v=>String(v).padStart(2,'0');
+  return '<div class="paper rimg"><img class="rtpl" src="img/receipt_tpl.webp" alt="" draggable="false">'+
+   '<span class="rno">No. '+String(2677+i).padStart(6,'0')+'</span>'+
+   '<span class="rdate">DATE:&nbsp; '+z(t.getMonth()+1)+'/'+z(t.getDate())+' '+t.getFullYear()+' '+z(t.getHours())+'.'+z(t.getMinutes())+'</span>'+
+   '<img class="rpic" src="img/cloth3d/'+z(k+1)+'.webp" alt="'+esc(n)+'" draggable="false">'+
+   '<div class="ritem"><div class="rtop"><b>'+esc(n)+'</b><span>'+esc(p)+'</span></div><p>'+esc(d)+'</p><p class="rsz">SIZE: '+esc(sz)+'</p></div>'+
+   '<span class="rtot">'+esc(p)+'</span></div>';
 }
 function printSfx(ms){if(!Au.ctx||Au.muted)return;const t=Au.ctx.currentTime;for(let k=0;k<ms/75;k++)noiseHit(t+k*.075,Au.master,.1,3000,.03,'bandpass')}
 function tearSfx(){if(!Au.ctx||Au.muted)return;const t=Au.ctx.currentTime;noiseHit(t,Au.master,.45,1800,.26,'highpass');noiseHit(t+.05,Au.master,.3,4200,.18,'highpass')}
@@ -906,13 +926,13 @@ function renderReceipt(){
   stopReceipt();
   panel.innerHTML='<div id="rc"><button class="back" data-back>← BACK</button><div class="stage"></div><div class="slot"></div></div>';
   const st=$('#rc .stage');
-  rc={i:0,busy:true,cur:null,timers:[]};
+  rc={i:0,busy:true,cur:null,timers:[],line:rcLine()};
   const later=(f,ms)=>rc.timers.push(setTimeout(f,ms));
   const norm=a=>{while(a>Math.PI)a-=2*Math.PI;while(a<-Math.PI)a+=2*Math.PI;return a};
   function feed(){
     if(!rc) return;
     const i=rc.i%SHOP.length, el=document.createElement('div');
-    el.className='rcpt'; el.innerHTML=receiptHTML(i); el.firstChild.style.clipPath=rcClip(false); st.appendChild(el); rc.cur=el; rc.busy=true;
+    el.className='rcpt'; el.innerHTML=receiptHTML(rc.i); el._bot=rc.line; el.firstChild.style.clipPath=rcClip(null,el._bot); st.appendChild(el); rc.cur=el; rc.busy=true;
     const ms=reduce?1:1500; printSfx(ms);
     // 열감지 프린터처럼 찍찍 끊기며 나오다가 멈춤
     el.animate([{transform:'translateY(-102%)'},{transform:'translateY(0)'}],{duration:ms,easing:'steps(20,end)'}).onfinish=()=>{if(!rc)return;rc.busy=false;st.querySelectorAll('.stub').forEach(s=>s.remove())};
@@ -950,8 +970,8 @@ function renderReceipt(){
   function tear(el,s){
     if(!rc||(rc.busy&&rc.cur!==el)||el.dataset.torn) return; rc.busy=true; el.dataset.torn=1;
     el.style.transition='none'; el.style.transformOrigin=s.right?'0% 0%':'100% 0%';
-    el.firstChild.style.clipPath=rcClip(true); tearSfx();
-    const stub=document.createElement('div');stub.className='stub';st.appendChild(stub);
+    const nl=rcLine(); rc.line=nl; el.firstChild.style.clipPath=rcClip(nl,el._bot); tearSfx();
+    const stub=document.createElement('div');stub.className='stub';stub.style.clipPath=rcClip(null,nl);st.appendChild(stub);
     rc.i++; later(feed,reduce?1:420);   // 다음 영수증은 뜯은 순간부터 0.42초 뒤에 나옴
     const dir=s.right?1:-1;
     let x=0,y=0,rot=s.rot||0,vx=s.vx||0,vy=s.vy||0,w=s.w||0;
