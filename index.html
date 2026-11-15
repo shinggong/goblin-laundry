@@ -162,6 +162,12 @@ button{font:inherit;color:inherit;cursor:inherit}
 #rc{position:absolute;inset:0;overflow:hidden;touch-action:none;--rw:min(82vw,380px,calc(80vh*820/1266))}
 #rc .back{position:absolute;z-index:5;left:max(16px,env(safe-area-inset-left,0px));top:calc(14px + env(safe-area-inset-top,0px));margin-top:30px}
 #rc .rbag{position:absolute;z-index:5;right:max(16px,env(safe-area-inset-right,0px));top:calc(14px + env(safe-area-inset-top,0px));margin-top:30px;font-family:var(--f-led);font-size:16px;color:var(--ink)}
+/* 슬롯에서 나오는 종이가 살짝 휘어 보이게: 슬롯 바로 밑은 그늘, 그 아래 볼록한 부분은 살짝 밝게, 양옆은 둥글게 어둡게 */
+#rc .curl{position:absolute;z-index:3;left:50%;top:34px;width:var(--rw);height:120px;transform:translateX(-50%);pointer-events:none;opacity:0;transition:opacity .4s;
+  background:linear-gradient(rgba(29,22,16,.5),rgba(29,22,16,.18) 12%,rgba(255,255,255,.34) 32%,rgba(255,255,255,0) 56%,rgba(29,22,16,.07) 74%,rgba(29,22,16,0))}
+#rc .curl::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(29,22,16,.32),rgba(29,22,16,0) 11%,rgba(29,22,16,0) 89%,rgba(29,22,16,.32));
+  -webkit-mask-image:linear-gradient(#000,transparent);mask-image:linear-gradient(#000,transparent)}
+#rc.fed .curl{opacity:1}
 #rc .slot{position:absolute;z-index:4;left:50%;top:0;width:calc(var(--rw) + 56px);height:34px;transform:translateX(-50%);background:var(--ink);border-radius:0 0 22px 22px}
 #rc .slot::after{content:"";position:absolute;left:18px;right:18px;bottom:8px;height:7px;border-radius:4px;background:#000}
 #rc .stage{position:absolute;z-index:2;left:50%;top:calc(26px + var(--rw)/.649*.07);width:var(--rw);height:calc(var(--rw)*1266/820);transform:translateX(-50%)}
@@ -918,7 +924,7 @@ function tearSfx(){if(!Au.ctx||Au.muted)return;const t=Au.ctx.currentTime;noiseH
 function stopReceipt(){if(!rc)return;rc.timers.forEach(clearTimeout);removeEventListener('keydown',rc.onKey);rc=null}
 function renderReceipt(){
   stopReceipt();
-  panel.innerHTML='<div id="rc"><button class="back" data-back>← BACK</button><div class="stage"></div><div class="slot"></div></div>';
+  panel.innerHTML='<div id="rc"><button class="back" data-back>← BACK</button><div class="stage"></div><div class="curl"></div><div class="slot"></div></div>';
   const st=$('#rc .stage');
   rc={i:0,busy:true,cur:null,timers:[],next:null};
   const later=(f,ms)=>rc.timers.push(setTimeout(f,ms));
@@ -933,7 +939,7 @@ function renderReceipt(){
     rc.cur=el; rc.busy=true;
     rc.OV=OV; const ms=reduce?1:1500, from=first?-102:-(100-OV), K={duration:ms,easing:'steps(20,end)'}; printSfx(ms);
     // 열감지 프린터처럼 찍찍 끊기며 나오다가 멈춤
-    el.animate([{transform:'translateY('+from+'%)'},{transform:'translateY(0)'}],K).onfinish=()=>{if(!rc)return;rc.busy=false};
+    el.animate([{transform:'translateY('+from+'%)'},{transform:'translateY(0)'}],K).onfinish=()=>{if(!rc)return;rc.busy=false;$('#rc')&&$('#rc').classList.add('fed')};
     nx.animate([{transform:'translateY('+(from-(100-OV))+'%)'},{transform:'translateY(-'+(100-OV)+'%)'}],K);
     // 잡은 쪽부터 뜯김: 잡은 곳의 반대쪽 윗모서리가 경첩이 되어, 잡은 쪽이 먼저 떨어져 나가며 휘어짐.
     // 충분히 젖히거나 빠르게 채면 놓는 순간의 방향·속도·회전 그대로 날아감.
