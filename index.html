@@ -931,7 +931,7 @@ function renderReceipt(){
     el.style.pointerEvents='';el.style.transform='';
     const nx=mk(rc.i+1); nx.style.pointerEvents='none'; nx.style.transform='translateY(-'+(100-OV)+'%)'; st.insertBefore(nx,el); rc.next=nx;
     rc.cur=el; rc.busy=true;
-    const ms=reduce?1:1500, from=first?-102:-(100-OV), K={duration:ms,easing:'steps(20,end)'}; printSfx(ms);
+    rc.OV=OV; const ms=reduce?1:1500, from=first?-102:-(100-OV)+(rc.peek||0), K={duration:ms,easing:'steps(20,end)'}; printSfx(ms); rc.peek=0;
     // 열감지 프린터처럼 찍찍 끊기며 나오다가 멈춤
     el.animate([{transform:'translateY('+from+'%)'},{transform:'translateY(0)'}],K).onfinish=()=>{if(!rc)return;rc.busy=false};
     nx.animate([{transform:'translateY('+(from-(100-OV))+'%)'},{transform:'translateY(-'+(100-OV)+'%)'}],K);
@@ -970,6 +970,8 @@ function renderReceipt(){
     if(!rc||(rc.busy&&rc.cur!==el)||el.dataset.torn) return; rc.busy=true; el.dataset.torn=1;
     el.style.transition='none'; el.style.transformOrigin=s.right?'0% 0%':'100% 0%';
     tearSfx();
+    // 뜯는 순간 붙어 있던 다음 영수증이 슬롯 아래로 살짝 딸려 나와 보임
+    if(rc.next){const a=-(100-rc.OV),b=a+7;rc.peek=7;rc.next.style.transform='translateY('+b+'%)';rc.next.animate([{transform:'translateY('+a+'%)'},{transform:'translateY('+b+'%)'}],{duration:reduce?1:280,easing:'cubic-bezier(.2,1.5,.4,1)'})}
     rc.i++; later(feed,reduce?1:420);   // 다음 영수증은 뜯은 순간부터 0.42초 뒤에 나옴
     const dir=s.right?1:-1;
     let x=0,y=0,rot=s.rot||0,vx=s.vx||0,vy=s.vy||0,w=s.w||0;
