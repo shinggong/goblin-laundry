@@ -906,7 +906,7 @@ async function renderGallery(){
 let rc=null, opening=false;
 function receiptHTML(i){   // 빈 영수증 위에 옷마다 다른 내용을 찍음
   const k=i%CLOTHES.length,[n,p,d,sz]=CLOTHES[k],t=new Date(),z=v=>String(v).padStart(2,'0');
-  return '<div class="paper rimg"><img class="rtpl" src="img/receipt_roll.webp" alt="" draggable="false"><div class="rin">'+
+  return '<div class="paper rimg"><img class="rtpl" src="img/receipt_roll2.webp" alt="" draggable="false"><div class="rin">'+
    '<span class="rno">No. '+String(2677+i).padStart(6,'0')+'</span>'+
    '<span class="rdate">DATE:&nbsp; '+z(t.getMonth()+1)+'/'+z(t.getDate())+' '+t.getFullYear()+' '+z(t.getHours())+'.'+z(t.getMinutes())+'</span>'+
    '<img class="rpic" src="img/cloth3d/'+z(k+1)+'.webp" alt="'+esc(n)+'" draggable="false">'+
