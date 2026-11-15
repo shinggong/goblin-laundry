@@ -159,12 +159,12 @@ button{font:inherit;color:inherit;cursor:inherit}
 #gzoom .zinfo .zs{font-size:13px;opacity:.65;letter-spacing:.04em} /* 크게 보기는 세탁기 문 위로 */
 #gal .back{background:var(--paper);color:var(--ink);position:absolute;left:max(16px,env(safe-area-inset-left,0px));top:calc(14px + env(safe-area-inset-top,0px));z-index:2}
 #panel[data-sec="receipt"]{--pbg:var(--tomato);padding:0;overflow:hidden}
-#rc{position:absolute;inset:0;overflow:hidden;touch-action:none;--rw:min(82vw,380px,calc(80vh*.649))}
+#rc{position:absolute;inset:0;overflow:hidden;touch-action:none;--rw:min(82vw,380px,calc(80vh*820/1266))}
 #rc .back{position:absolute;z-index:5;left:max(16px,env(safe-area-inset-left,0px));top:calc(14px + env(safe-area-inset-top,0px));margin-top:30px}
 #rc .rbag{position:absolute;z-index:5;right:max(16px,env(safe-area-inset-right,0px));top:calc(14px + env(safe-area-inset-top,0px));margin-top:30px;font-family:var(--f-led);font-size:16px;color:var(--ink)}
 #rc .slot{position:absolute;z-index:4;left:50%;top:0;width:calc(var(--rw) + 56px);height:34px;transform:translateX(-50%);background:var(--ink);border-radius:0 0 22px 22px}
 #rc .slot::after{content:"";position:absolute;left:18px;right:18px;bottom:8px;height:7px;border-radius:4px;background:#000}
-#rc .stage{position:absolute;z-index:2;left:50%;top:calc(26px + var(--rw)/.649*.07);width:var(--rw);height:calc(var(--rw)/.649);transform:translateX(-50%)}
+#rc .stage{position:absolute;z-index:2;left:50%;top:calc(26px + var(--rw)/.649*.07);width:var(--rw);height:calc(var(--rw)*1266/820);transform:translateX(-50%)}
 .rcpt{position:absolute;inset:0;transform-origin:50% 0;filter:drop-shadow(0 8px 0 rgba(29,26,23,.22));touch-action:none;cursor:grab}
 .rcpt .paper{position:absolute;inset:0;background:var(--paper);color:var(--ink);display:grid;grid-template-columns:20px 1fr;padding:0 12px 26% 8px;gap:6px}
 .rcpt .perf{position:absolute;left:0;right:0;top:0;height:10px;background:radial-gradient(circle at 6px 0,var(--tomato) 3.4px,transparent 3.9px) 0 0/14px 10px repeat-x}
@@ -181,7 +181,7 @@ button{font:inherit;color:inherit;cursor:inherit}
 .rcpt .paper.rimg{background:none;display:block;padding:0;--u:calc(var(--rw)/100);font-family:'IBM Plex Mono',monospace;color:#23242b}
 .rcpt .rimg img{pointer-events:none;user-select:none;-webkit-user-drag:none}
 .rcpt .rimg .rtpl{position:absolute;inset:0;width:100%;height:100%;display:block}
-.rcpt .rin{position:absolute;left:.32%;top:1.26%;width:99.36%;height:97.75%}
+.rcpt .rin{position:absolute;left:.32%;top:1.257%;width:99.36%;height:97.52%}
 .rcpt .rin>span,.rcpt .ritem,.rcpt .rpic{position:absolute;mix-blend-mode:multiply}
 .rcpt .rno{right:6.7%;top:7%;transform:translateY(-50%);font-size:calc(var(--u)*5.2);font-weight:500}
 .rcpt .rdate{left:50%;top:35.5%;transform:translate(-50%,-50%);font-size:calc(var(--u)*4.3);font-weight:500;white-space:nowrap}
@@ -906,7 +906,7 @@ async function renderGallery(){
 let rc=null, opening=false;
 function receiptHTML(i){   // 빈 영수증 위에 옷마다 다른 내용을 찍음
   const k=i%CLOTHES.length,[n,p,d,sz]=CLOTHES[k],t=new Date(),z=v=>String(v).padStart(2,'0');
-  return '<div class="paper rimg"><img class="rtpl" src="img/receipt_paper.webp" alt="" draggable="false"><div class="rin">'+
+  return '<div class="paper rimg"><img class="rtpl" src="img/receipt_strip.webp" alt="" draggable="false"><div class="rin">'+
    '<span class="rno">No. '+String(2677+i).padStart(6,'0')+'</span>'+
    '<span class="rdate">DATE:&nbsp; '+z(t.getMonth()+1)+'/'+z(t.getDate())+' '+t.getFullYear()+' '+z(t.getHours())+'.'+z(t.getMinutes())+'</span>'+
    '<img class="rpic" src="img/cloth3d/'+z(k+1)+'.webp" alt="'+esc(n)+'" draggable="false">'+
@@ -926,7 +926,7 @@ function renderReceipt(){
   function feed(){
     if(!rc) return;
     // 영수증 그림을 그대로 이어 붙임: 지금 영수증 바로 위에 다음 영수증이 붙어 있어서 같이 밀려 나옴(OV=톱니가 겹치는 만큼 %)
-    const OV=1.1, mk=k=>{const e=document.createElement('div');e.className='rcpt';e.innerHTML=receiptHTML(k);return e};
+    const OV=15/1266*100, mk=k=>{const e=document.createElement('div');e.className='rcpt';e.innerHTML=receiptHTML(k);return e};
     const first=!rc.next, el=rc.next||mk(rc.i); if(first)st.appendChild(el);
     el.style.pointerEvents='';el.style.transform='';
     const nx=mk(rc.i+1); nx.style.pointerEvents='none'; nx.style.transform='translateY(-'+(100-OV)+'%)'; st.insertBefore(nx,el); rc.next=nx;
