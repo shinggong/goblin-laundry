@@ -167,8 +167,8 @@ button{font:inherit;color:inherit;cursor:inherit}
 /* 종이는 슬롯 검은 틈 한가운데에서 나옴(틈 아래 턱보다 앞에 걸쳐짐) */
 #rc .feedwin{position:absolute;z-index:5;left:0;right:0;top:calc(var(--st) + var(--rw)*78/981);bottom:0;overflow:hidden;pointer-events:none}
 /* 슬롯 입구 그늘: 영수증에 붙지 않고 슬롯에 고정. 슬롯 밖으로 살짝 나온 종이가 깊숙한 안쪽처럼 어둡게 */
-#rc .slotshade{position:absolute;z-index:3;left:var(--cx);top:0;width:var(--rw);height:var(--peek);transform:translateX(-50%);pointer-events:none;opacity:0;transition:opacity .3s;
-  background:linear-gradient(rgba(20,14,9,.86),rgba(20,14,9,.66) 22%,rgba(20,14,9,.42) 45%,rgba(20,14,9,.2) 68%,rgba(20,14,9,.07) 86%,rgba(20,14,9,0))}
+#rc .slotshade{position:absolute;z-index:3;left:var(--cx);top:0;width:var(--rw);height:calc(var(--peek) + var(--rw)*.09);transform:translateX(-50%);pointer-events:none;opacity:0;transition:opacity .3s;
+  background:linear-gradient(rgba(20,14,9,.86),rgba(20,14,9,.62) calc(var(--peek)*.5),rgba(20,14,9,.36) var(--peek),rgba(20,14,9,.18) calc(var(--peek) + var(--rw)*.03),rgba(20,14,9,.07) calc(var(--peek) + var(--rw)*.06),rgba(20,14,9,0))}
 #rc.has .slotshade{opacity:1}
 #rc .rcphoto{transition:opacity .7s}
 /* 슬롯: 피그마 시안 그림(낡은 베이지 금속 틀). 종이는 검은 입구 윗변에서 나와 틀 아랫부분 앞에 걸쳐짐 */
@@ -437,6 +437,7 @@ const PANO={room:'pano/room.jpg',hspan:360,hot:[
   {src:'pano/hot_contact.png',sec:'contact',label:'CONTACT'},
   {src:'pano/hot_shop_vend.png',sec:'shop',label:'SHOP'},
   {src:'pano/hot_shop_bag.png',sec:'shop',label:'SHOP'},
+  {src:'pano/hot_window.png',sec:'window',label:'WINDOW'},
 ]};
 const DEG=Math.PI/180, MW=1024, MH=512; // MW×MH: 클릭 판정용 축소 마스크
 /* 렌즈: 바밍타이거(krpano)와 같은 설정 — fisheye 0.3 + stereographic, 화면 긴 쪽 기준 시야(MFOV) 120°, 확대·축소 70°~140°
@@ -478,9 +479,10 @@ function initGL(room){
   const maxW=renderer.capabilities.maxTextureSize,pw=Math.min(room.width,maxW),asp=room.height/room.width;
   const mat=new THREE.ShaderMaterial({
     uniforms:{pano:{value:texOf(pw<room.width?canvasOf(room,pw,Math.round(pw*asp)):room)},hot:{value:null},hotGlow:{value:null},all:{value:null},hotOn:{value:0},allOn:{value:0},
-      rot:{value:new THREE.Matrix3()},res:{value:new THREE.Vector2(1,1)},sc:{value:1},dist:{value:FISHEYE},time:{value:0},vspan:{value:Math.PI},hspan:{value:2*Math.PI},topCol:{value:new THREE.Color()},botCol:{value:new THREE.Color()}},
+      rot:{value:new THREE.Matrix3()},res:{value:new THREE.Vector2(1,1)},sc:{value:1},dist:{value:FISHEYE},time:{value:0},vspan:{value:Math.PI},hspan:{value:2*Math.PI},topCol:{value:new THREE.Color()},botCol:{value:new THREE.Color()},vid:{value:null},vidOn:{value:0},
+      vr:{value:new THREE.Vector4(3832/4096,514/2048,522/4096,539/2048)},wr:{value:new THREE.Vector4(3944/4096,730/2048,284/4096,1034/2048)}},
     vertexShader:'varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position.xy,0.,1.);}',
-    fragmentShader:`precision highp float;uniform sampler2D pano,hot,hotGlow,all;uniform mat3 rot;uniform vec2 res;uniform float sc,dist,hotOn,allOn,time,vspan,hspan;uniform vec3 topCol,botCol;varying vec2 vUv;
+    fragmentShader:`precision highp float;uniform sampler2D pano,hot,hotGlow,all,vid;uniform mat3 rot;uniform vec2 res;uniform float sc,dist,hotOn,allOn,time,vspan,hspan,vidOn;uniform vec4 vr,wr;uniform vec3 topCol,botCol;varying vec2 vUv;
       float ring(sampler2D t,vec2 uv,vec2 st){float a=texture2D(t,uv).a,g=0.;
         for(int i=0;i<16;i++){float an=float(i)*.3927;vec2 o=vec2(cos(an),sin(an));g=max(g,texture2D(t,uv+o*st).a);g=max(g,texture2D(t,uv+o*st*.5).a);}
         return smoothstep(.35,.65,g)*(1.-smoothstep(.35,.65,a));}
@@ -495,6 +497,11 @@ function initGL(room){
         float L=(h>1.57||s<=a)?lat:sign(lat)*(a+(h-a)*sin((s-a)/(1.5707963-a)*1.5707963));
         vec2 uv=vec2(atan(w.x,-w.z)/hspan+.5,.5+L/vspan);
         vec3 c=texture2D(pano,uv).rgb;
+        // 창문 블라인드 영상: 영상이 잘려 나온 파노라마 자리(vr)에 맞춰 읽고, 창문 둘레(wr)만 부드럽게 섞음
+        if(vidOn>.001){float px=uv.x,py=1.-uv.y,dx=fract(px-vr.x);vec2 vu=vec2(dx/vr.z,(py-vr.y)/vr.w);
+          if(vu.x>0.&&vu.x<1.&&vu.y>0.&&vu.y<1.){float wx=fract(px-wr.x);vec2 fe=vec2(10./4096.,10./2048.);
+            float m=smoothstep(0.,fe.x,wx)*smoothstep(0.,fe.x,wr.z-wx)*smoothstep(wr.y,wr.y+fe.y,py)*smoothstep(wr.w,wr.w-fe.y,py);
+            c=mix(c,texture2D(vid,vec2(vu.x,1.-vu.y)).rgb,m*vidOn);}}
         c=mix(c,topCol,smoothstep(1.,1.12,uv.y));c=mix(c,botCol,1.-smoothstep(-.12,0.,uv.y)); // 그림 위아래 밖은 천장·바닥 색으로 채움
         vec2 st=vec2(.0016/max(cos(lat),.25),.0032*3.14159265/vspan),gs=st*6.;vec3 Y=vec3(1.,.404,.624); // 선택 테두리 색 #FF679F
         if(hotOn>.01){float g=texture2D(hotGlow,uv).a*(1.-smoothstep(.55,.95,texture2D(hot,uv).a));c=mix(c,Y,min(.9,pow(g,.9)*1.3)*hotOn);} // 미리 흐리게 만든 빛 그림을 읽어 매끈하게
@@ -614,7 +621,7 @@ function frame(t){
   if(!R||(!panel.hidden&&!fading))return; // 패널이 열려 있으면 그리기 쉼
   const u=R.mat.uniforms,s=t/1000;R.hotT+=((hov!==null?1:0)-R.hotT)*.2;u.hotOn.value=R.hotT;u.time.value=s;
   u.allOn.value=touchOnly&&!intro?Math.max(0,Math.sin(s*1.6))*.45:0; // 터치 기기는 누를 수 있는 물건이 은은하게 깜빡임
-  u.rot.value.copy(camRot());u.sc.value=lensScale();
+  u.rot.value.copy(camRot());u.sc.value=lensScale();u.vidOn.value=blind.on;
   R.renderer.render(R.post,R.ortho);
 }
 const pdist=()=>{const [a,b]=[...pts.values()];return Math.hypot(a.x-b.x,a.y-b.y)||1};
@@ -642,7 +649,7 @@ function endDrag(e){
   if(!pts.size)document.body.classList.remove('grabbing');
   if(!drag||e.pointerId!==drag.id) return;
   // 클릭 시 메뉴 이동은 잠시 꺼 둠: if(drag.moved<7&&drag.hot&&e.type==='pointerup'){vy=vp=0;setHover(null);open(drag.hot.sec)}
-  if(drag.moved<7&&drag.hot&&e.type==='pointerup'){if(drag.hot.sec==='tour')showBoard(e.clientX,e.clientY);else if(drag.hot.sec==='music')enterPage('gallery','music');else if(/shop_vend/.test(drag.hot.src))enterPage('receipt','shop');else if(/shop_bag/.test(drag.hot.src))enterPage('cart','shop',drag.hot);else if(drag.hot.sec==='contact')enterPage('dial','contact')}
+  if(drag.moved<7&&drag.hot&&e.type==='pointerup'){if(drag.hot.sec==='window')playBlind();else if(drag.hot.sec==='tour')showBoard(e.clientX,e.clientY);else if(drag.hot.sec==='music')enterPage('gallery','music');else if(/shop_vend/.test(drag.hot.src))enterPage('receipt','shop');else if(/shop_bag/.test(drag.hot.src))enterPage('cart','shop',drag.hot);else if(drag.hot.sec==='contact')enterPage('dial','contact')}
   drag=null;
 }
 view.addEventListener('pointerup',endDrag);view.addEventListener('pointercancel',endDrag);
@@ -1265,6 +1272,17 @@ function showBoard(x,y){const b=$('#board');if(b.classList.contains('on'))return
 function hideBoard(){const b=$('#board');b.classList.remove('on');b.setAttribute('aria-hidden','true')}
 $('#board').addEventListener('click',hideBoard);
 addEventListener('keydown',e=>{if(e.key==='Escape'&&$('#board').classList.contains('on'))hideBoard()});
+
+/* ===== 창문: 누르면 블라인드가 내려갔다 올라가는 영상을 방 그림의 창문 자리에 겹쳐 재생 ===== */
+const blind={v:null,on:0};
+function playBlind(){
+  if(!R)return;
+  if(!blind.v){const v=document.createElement('video');v.src='pano/window_blind.mp4';v.muted=true;v.playsInline=true;v.setAttribute('playsinline','');v.preload='auto';
+    const t=new THREE.VideoTexture(v);t.minFilter=THREE.LinearFilter;t.generateMipmaps=false;R.mat.uniforms.vid.value=t;
+    v.addEventListener('playing',()=>setTimeout(()=>{blind.on=1},80));   // 첫 장면이 올라온 뒤에 켬(검은 화면 방지)
+    v.addEventListener('ended',()=>{blind.on=0});blind.v=v}
+  const v=blind.v;if(!v.paused&&!v.ended)return;v.currentTime=0;v.play().catch(()=>{});
+}
 
 /* ===== 로딩 → 입장 ===== */
 requestAnimationFrame(frame);
