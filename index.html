@@ -168,16 +168,16 @@ button{font:inherit;color:inherit;cursor:inherit}
 #rc .feedwin{position:absolute;z-index:5;left:0;right:0;top:calc(var(--st) + var(--rw)*78/981);bottom:0;overflow:hidden;pointer-events:none}
 /* 슬롯 입구 그늘: 영수증에 붙지 않고 슬롯에 고정. 슬롯 밖으로 살짝 나온 종이가 깊숙한 안쪽처럼 어둡게 */
 #rc .slotshade{position:absolute;z-index:3;left:var(--cx);top:0;width:var(--rw);height:var(--peek);transform:translateX(-50%);pointer-events:none;opacity:0;transition:opacity .3s;
-  background:linear-gradient(rgba(20,14,9,.86),rgba(20,14,9,.5) 70%,rgba(20,14,9,.38))}
+  background:linear-gradient(rgba(20,14,9,.86),rgba(20,14,9,.66) 22%,rgba(20,14,9,.42) 45%,rgba(20,14,9,.2) 68%,rgba(20,14,9,.07) 86%,rgba(20,14,9,0))}
 #rc.has .slotshade{opacity:1}
 #rc .rcphoto{transition:opacity .7s}
 /* 슬롯: 피그마 시안 그림(낡은 베이지 금속 틀). 종이는 검은 입구 윗변에서 나와 틀 아랫부분 앞에 걸쳐짐 */
 /* 좁은 화면에선 슬롯이 BACK 버튼과 겹치지 않게 아래로 */
 /* 2단 뷰: 왼쪽 모델 사진, 오른쪽 가운데에 슬롯+영수증. 좁은 세로 화면에선 사진이 위, 영수증이 아래 */
-#rc .rcphoto{position:absolute;z-index:1;left:0;top:0;width:100%;height:var(--top);object-fit:cover;object-position:50% 18%;pointer-events:none;user-select:none}
+#rc .rcphoto{position:absolute;z-index:1;left:0;top:0;width:100%;height:var(--top);object-fit:cover;object-position:var(--op,50% 18%);pointer-events:none;user-select:none}
 @media (min-width:760px) and (min-aspect-ratio:1/1){
   #rc{--top:0%;--cx:75%;--rw:min(36vw,580px,calc((100vh - 40px)/1.669))}
-  #rc .rcphoto{width:50%;height:100%;object-position:50% 12%}
+  #rc .rcphoto{width:50%;height:100%;object-position:var(--op,50% 12%)}
 }
 #rc .slot{position:absolute;z-index:4;left:var(--cx);top:var(--st);width:calc(var(--rw)*1204/981);height:calc(var(--rw)*300/981);transform:translateX(-50%);background:url(img/rc_slot.webp) 0 0/100% 100% no-repeat}
 #rc .stage{position:absolute;z-index:2;left:var(--cx);top:var(--peek);pointer-events:none;width:var(--rw);height:calc(var(--rw)*1266/820);transform:translateX(-50%)}
@@ -1004,7 +1004,12 @@ async function renderGallery(){
 let rc=null, opening=false;
 // 왼쪽 아웃핏 사진과 그 영수증 내용. 사진을 더 넣으면 영수증을 뜯을 때마다 다음 아웃핏으로 넘어감
 const OUTFITS=[
-  {photo:'img/rc_model.webp',style:'sweet sunday',items:[['Pink Ruffle Tee','₩48,000'],['Cream Bloomer Shorts','₩42,000'],['Ribbon Lace-up Flats','₩69,000'],['Pearl Drop Earrings','₩22,000']]},
+  {photo:'img/rc_model.webp',pos:'50% 12%',style:'sweet sunday',items:[['Pink Ruffle Tee','₩48,000'],['Cream Bloomer Shorts','₩42,000'],['Ribbon Lace-up Flats','₩69,000'],['Pearl Drop Earrings','₩22,000']]},
+  {photo:'img/rc_look2.webp',pos:'50% 18%',style:'garden tea party',items:[['Floral Collar Blouse','₩58,000'],['Pink Pleated Frill Shorts','₩52,000'],['Satin Headband','₩18,000']]},
+  {photo:'img/rc_look3.webp',pos:'50% 22%',style:'mint candy',items:[['White Ruffle Button Top','₩54,000'],['Mint Frill Shorts','₩46,000'],['Buckle Strap Boots','₩138,000']]},
+  {photo:'img/rc_look4.webp',pos:'50% 20%',style:'pigtail princess',items:[['White Ruffle Mini Dress','₩79,000'],['Mint Sheer Tights','₩16,000'],['Clear Strap Wedges','₩98,000'],['Hair Charm Set','₩14,000']]},
+  {photo:'img/rc_look5.webp',pos:'50% 25%',style:'ballet core',items:[['Pink Satin Slip Dress','₩89,000'],['Ribbon Lace Tights','₩19,000'],['Fluffy Leg Warmers','₩28,000'],['Pearl Mary Jane Sneakers','₩112,000'],['Blue Ribbon Bow','₩15,000']]},
+  {photo:'img/rc_look6.webp',pos:'50% 30%',style:'lazy morning',items:[['Puff Sleeve Nightdress','₩65,000'],['Lace Trim Bloomers','₩32,000'],['Velvet Hair Rollers','₩12,000'],['Floral Body Lotion','₩48,000']]},
 ];
 function receiptHTML(i){   // 빈 종이 위에 아웃핏 영수증을 글자로 찍음
   const o=OUTFITS[i%OUTFITS.length],t=new Date(),z=v=>String(v).padStart(2,'0'),num=v=>+String(v).replace(/[^0-9]/g,''),won=v=>'₩'+v.toLocaleString('ko-KR');
@@ -1026,14 +1031,14 @@ function receiptHTML(i){   // 빈 종이 위에 아웃핏 영수증을 글자로
 }
 function setLook(k){   // 왼쪽 사진을 k번째 아웃핏으로 (겹쳐서 부드럽게 바뀜)
   const o=OUTFITS[k%OUTFITS.length],cur=$('#rc .rcphoto:last-of-type');if(!cur||cur.getAttribute('src')===o.photo)return;
-  const n=cur.cloneNode();n.src=o.photo;n.style.opacity=0;cur.after(n);requestAnimationFrame(()=>requestAnimationFrame(()=>{n.style.opacity=1}));setTimeout(()=>cur.remove(),750);
+  const n=cur.cloneNode();n.src=o.photo;n.style.setProperty('--op',o.pos||'');n.style.opacity=0;cur.after(n);requestAnimationFrame(()=>requestAnimationFrame(()=>{n.style.opacity=1}));setTimeout(()=>cur.remove(),750);
 }
 function printSfx(ms){if(!Au.ctx||Au.muted)return;const t=Au.ctx.currentTime;for(let k=0;k<ms/75;k++)noiseHit(t+k*.075,Au.master,.1,3000,.03,'bandpass')}
 function tearSfx(){if(!Au.ctx||Au.muted)return;const t=Au.ctx.currentTime;noiseHit(t,Au.master,.45,1800,.26,'highpass');noiseHit(t+.05,Au.master,.3,4200,.18,'highpass')}
 function stopReceipt(){if(!rc)return;rc.timers.forEach(clearTimeout);removeEventListener('keydown',rc.onKey);rc=null}
 function renderReceipt(){
   stopReceipt();
-  panel.innerHTML='<div id="rc"><img class="rcphoto" src="'+OUTFITS[0].photo+'" alt="" draggable="false"><button class="back" data-back>← BACK</button><div class="slot"></div><div class="feedwin"><div class="stage"></div><div class="slotshade"></div></div></div>';
+  panel.innerHTML='<div id="rc"><img class="rcphoto" style="--op:'+OUTFITS[0].pos+'" src="'+OUTFITS[0].photo+'" alt="" draggable="false"><button class="back" data-back>← BACK</button><div class="slot"></div><div class="feedwin"><div class="stage"></div><div class="slotshade"></div></div></div>';
   const st=$('#rc .stage');
   rc={i:0,busy:true,cur:null,timers:[],next:null};
   const later=(f,ms)=>rc.timers.push(setTimeout(f,ms));
@@ -1041,11 +1046,11 @@ function renderReceipt(){
   function feed(){
     if(!rc) return;
     // 영수증 그림을 그대로 이어 붙임: 지금 영수증 바로 위에 다음 영수증이 붙어 있어서 같이 밀려 나옴(OV=톱니가 겹치는 만큼 %)
-    const OV=15/1266*100, mk=k=>{const e=document.createElement('div');e.className='rcpt';e.innerHTML=receiptHTML(k);return e};
+    const OV=15/1266*100, mk=k=>{const e=document.createElement('div');e.className='rcpt';e.dataset.i=k;e.innerHTML=receiptHTML(k);return e};
     const first=!rc.next, el=rc.next||mk(rc.i); if(first)st.appendChild(el);
     el.style.pointerEvents='';el.style.transform='';$('#rc').classList.add('has');
     const nx=mk(rc.i+1); nx.style.pointerEvents='none'; nx.style.transform='translateY(-'+(100-OV)+'%)'; st.insertBefore(nx,el); rc.next=nx;
-    rc.cur=el; rc.busy=true;
+    rc.cur=el; rc.busy=true; setLook(+el.dataset.i);   // 왼쪽 사진은 지금 나오는 영수증의 아웃핏으로
     rc.OV=OV; const ms=reduce?1:1700, from=first?-102:-(100-OV); printSfx(ms*.8);
     // 진짜 영수증 프린터처럼: 한 줄씩 찍으며 짧게 멈췄다 밀려 나오고, 다 나오면 매달린 종이가 살짝 흔들리다 멈춤.
     // 두 장이 같은 점(슬롯 입구)을 축으로 같이 흔들려서 이음매가 벌어지지 않음
@@ -1091,7 +1096,7 @@ function renderReceipt(){
     if(!rc||(rc.busy&&rc.cur!==el)||el.dataset.torn) return; rc.busy=true; el.dataset.torn=1;
     el.style.transition='none'; el.style.transformOrigin=s.right?'0% 0%':'100% 0%';
     tearSfx();
-    rc.i++; setLook(rc.i); later(feed,reduce?1:420);   // 다음 영수증은 뜯은 순간부터 0.42초 뒤에 나옴
+    rc.i++; later(feed,reduce?1:420);   // 다음 영수증은 뜯은 순간부터 0.42초 뒤에 나옴
     const dir=s.right?1:-1;
     let x=0,y=0,rot=s.rot||0,vx=s.vx||0,vy=s.vy||0,w=s.w||0;
     if(Math.abs(w)<.002) w=dir*.002; w=Math.max(-.012,Math.min(.012,w));
