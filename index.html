@@ -159,7 +159,7 @@ button{font:inherit;color:inherit;cursor:inherit}
 #gzoom .zinfo .zs{font-size:13px;opacity:.65;letter-spacing:.04em} /* 크게 보기는 세탁기 문 위로 */
 #gal .back{background:var(--paper);color:var(--ink);position:absolute;left:max(16px,env(safe-area-inset-left,0px));top:calc(14px + env(safe-area-inset-top,0px));z-index:2}
 #panel[data-sec="receipt"]{--pbg:#f3d6ba;padding:0;overflow:hidden}
-#rc{position:absolute;inset:0;overflow:hidden;touch-action:none;--top:26%;--cx:50%;--rw:min(90vw,440px,calc((74vh - 40px)/1.669));--peek:calc(var(--rw)*.045);
+#rc{position:absolute;inset:0;overflow:hidden;touch-action:none;--top:32%;--cx:50%;--rw:min(90vw,440px,calc((68vh - 40px)/1.669));--peek:calc(var(--rw)*.045);
   --st:max(calc(var(--top) + 8px),calc(var(--top) + (100% - var(--top) - var(--rw)*1.669)/2));background:url(img/rc_bg.webp) 0 0/calc(var(--rw)*800/981) auto repeat}
 #rc .back{position:absolute;z-index:6;left:max(16px,env(safe-area-inset-left,0px));top:calc(14px + env(safe-area-inset-top,0px));margin-top:30px}
 #rc .rbag{position:absolute;z-index:5;right:max(16px,env(safe-area-inset-right,0px));top:calc(14px + env(safe-area-inset-top,0px));margin-top:30px;font-family:var(--f-led);font-size:16px;color:var(--ink)}
@@ -174,11 +174,13 @@ button{font:inherit;color:inherit;cursor:inherit}
 /* 슬롯: 피그마 시안 그림(낡은 베이지 금속 틀). 종이는 검은 입구 윗변에서 나와 틀 아랫부분 앞에 걸쳐짐 */
 /* 좁은 화면에선 슬롯이 BACK 버튼과 겹치지 않게 아래로 */
 /* 2단 뷰: 왼쪽 모델 사진, 오른쪽 가운데에 슬롯+영수증. 좁은 세로 화면에선 사진이 위, 영수증이 아래 */
-#rc .rcphoto{position:absolute;z-index:1;left:0;top:0;width:100%;height:var(--top);object-fit:cover;object-position:var(--op,50% 18%);pointer-events:none;user-select:none}
+#rc .rcphoto{position:absolute;z-index:1;left:0;top:0;width:100%;height:var(--top);background:#f3f3f2;object-fit:contain;object-position:var(--op,50% 18%);pointer-events:none;user-select:none}
 @media (min-width:760px) and (min-aspect-ratio:1/1){
   #rc{--top:0%;--cx:75%;--rw:min(36vw,580px,calc((100vh - 40px)/1.669))}
-  #rc .rcphoto{width:50%;height:100%;object-position:var(--op,50% 12%)}
+  #rc .rcphoto{width:50%;height:100%;object-fit:cover;object-position:var(--op,50% 12%)}
 }
+/* PC에서 왼쪽 칸이 사진보다 세로로 길면(화면 비율 8:5 미만) 사진을 좌우 폭에 맞추고 위아래는 사진 바탕색으로 */
+@media (min-width:760px) and (min-aspect-ratio:1/1) and (max-aspect-ratio:8/5){#rc .rcphoto{object-fit:contain;object-position:50% 50%}}
 #rc .slot{position:absolute;z-index:4;left:var(--cx);top:var(--st);width:calc(var(--rw)*1204/981);height:calc(var(--rw)*300/981);transform:translateX(-50%);background:url(img/rc_slot.webp) 0 0/100% 100% no-repeat}
 #rc .stage{position:absolute;z-index:2;left:var(--cx);top:var(--peek);pointer-events:none;width:var(--rw);height:calc(var(--rw)*1266/820);transform:translateX(-50%)}
 .rcpt{position:absolute;inset:0;transform-origin:50% 0;pointer-events:auto;isolation:isolate;touch-action:none;cursor:grab}
@@ -438,6 +440,7 @@ const PANO={room:'pano/room.jpg',hspan:360,hot:[
   {src:'pano/hot_shop_vend.png',sec:'shop',label:'SHOP'},
   {src:'pano/hot_shop_bag.png',sec:'shop',label:'SHOP'},
   {src:'pano/hot_window.png',sec:'window',label:'WINDOW'},
+  {src:'pano/hot_locker.png',sec:'locker',label:'LOCKER'},
 ]};
 const DEG=Math.PI/180, MW=1024, MH=512; // MW×MH: 클릭 판정용 축소 마스크
 /* 렌즈: 바밍타이거(krpano)와 같은 설정 — fisheye 0.3 + stereographic, 화면 긴 쪽 기준 시야(MFOV) 120°, 확대·축소 70°~140°
@@ -479,10 +482,11 @@ function initGL(room){
   const maxW=renderer.capabilities.maxTextureSize,pw=Math.min(room.width,maxW),asp=room.height/room.width;
   const mat=new THREE.ShaderMaterial({
     uniforms:{pano:{value:texOf(pw<room.width?canvasOf(room,pw,Math.round(pw*asp)):room)},hot:{value:null},hotGlow:{value:null},all:{value:null},hotOn:{value:0},allOn:{value:0},
-      rot:{value:new THREE.Matrix3()},res:{value:new THREE.Vector2(1,1)},sc:{value:1},dist:{value:FISHEYE},time:{value:0},vspan:{value:Math.PI},hspan:{value:2*Math.PI},topCol:{value:new THREE.Color()},botCol:{value:new THREE.Color()},vid:{value:null},vidOn:{value:0},
+      rot:{value:new THREE.Matrix3()},res:{value:new THREE.Vector2(1,1)},sc:{value:1},dist:{value:FISHEYE},time:{value:0},vspan:{value:Math.PI},hspan:{value:2*Math.PI},topCol:{value:new THREE.Color()},botCol:{value:new THREE.Color()},vid:{value:null},vidOn:{value:0},vid2:{value:null},vid2On:{value:0},
+      vr2:{value:new THREE.Vector4(278/4096,813/2048,267/4096,538/2048)},wr2:{value:new THREE.Vector4(390/4096,866/2048,80/4096,1317/2048)},
       vr:{value:new THREE.Vector4(3832/4096,514/2048,522/4096,539/2048)},wr:{value:new THREE.Vector4(3944/4096,730/2048,284/4096,1034/2048)}},
     vertexShader:'varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position.xy,0.,1.);}',
-    fragmentShader:`precision highp float;uniform sampler2D pano,hot,hotGlow,all,vid;uniform mat3 rot;uniform vec2 res;uniform float sc,dist,hotOn,allOn,time,vspan,hspan,vidOn;uniform vec4 vr,wr;uniform vec3 topCol,botCol;varying vec2 vUv;
+    fragmentShader:`precision highp float;uniform sampler2D pano,hot,hotGlow,all,vid,vid2;uniform mat3 rot;uniform vec2 res;uniform float sc,dist,hotOn,allOn,time,vspan,hspan,vidOn,vid2On;uniform vec4 vr,wr,vr2,wr2;uniform vec3 topCol,botCol;varying vec2 vUv;
       float ring(sampler2D t,vec2 uv,vec2 st){float a=texture2D(t,uv).a,g=0.;
         for(int i=0;i<16;i++){float an=float(i)*.3927;vec2 o=vec2(cos(an),sin(an));g=max(g,texture2D(t,uv+o*st).a);g=max(g,texture2D(t,uv+o*st*.5).a);}
         return smoothstep(.35,.65,g)*(1.-smoothstep(.35,.65,a));}
@@ -491,17 +495,21 @@ function initGL(room){
         for(int r=1;r<=5;r++){float d=float(r)/5.,w=1.-d*.75;
           for(int i=0;i<12;i++){float an=float(i)*.5236+float(r)*.3;g+=texture2D(t,uv+vec2(cos(an),sin(an))*st*d).a*w;}}
         return clamp(g/24.,0.,1.)*(1.-smoothstep(.2,.8,a));}
+      // 방 그림 위에 영상 겹치기: 영상이 잘려 나온 자리(r)에 맞춰 읽고, 움직이는 곳(w) 둘레만 부드럽게 섞음
+      vec3 vlay(vec3 c,sampler2D t,float on,vec4 r,vec4 w,vec2 uv){
+        float px=uv.x,py=1.-uv.y,dx=fract(px-r.x);vec2 vu=vec2(dx/r.z,(py-r.y)/r.w);
+        if(vu.x<=0.||vu.x>=1.||vu.y<=0.||vu.y>=1.)return c;
+        float wx=fract(px-w.x);vec2 fe=vec2(10./4096.,10./2048.);
+        float m=smoothstep(0.,fe.x,wx)*smoothstep(0.,fe.x,w.z-wx)*smoothstep(w.y,w.y+fe.y,py)*smoothstep(w.w,w.w-fe.y,py);
+        return mix(c,texture2D(t,vec2(vu.x,1.-vu.y)).rgb,m*on);}
       void main(){vec2 q=(vUv-.5)*res/sc;float r=length(q);float th=atan(r)+asin(r*dist/sqrt(1.+r*r));
         vec3 d=r>1e-5?vec3(sin(th)*q/r,-cos(th)):vec3(0.,0.,-1.);vec3 w=normalize(rot*d);
         float lat=asin(clamp(w.y,-1.,1.)),h=vspan*.5,a=h*.7,s=abs(lat);
         float L=(h>1.57||s<=a)?lat:sign(lat)*(a+(h-a)*sin((s-a)/(1.5707963-a)*1.5707963));
         vec2 uv=vec2(atan(w.x,-w.z)/hspan+.5,.5+L/vspan);
         vec3 c=texture2D(pano,uv).rgb;
-        // 창문 블라인드 영상: 영상이 잘려 나온 파노라마 자리(vr)에 맞춰 읽고, 창문 둘레(wr)만 부드럽게 섞음
-        if(vidOn>.001){float px=uv.x,py=1.-uv.y,dx=fract(px-vr.x);vec2 vu=vec2(dx/vr.z,(py-vr.y)/vr.w);
-          if(vu.x>0.&&vu.x<1.&&vu.y>0.&&vu.y<1.){float wx=fract(px-wr.x);vec2 fe=vec2(10./4096.,10./2048.);
-            float m=smoothstep(0.,fe.x,wx)*smoothstep(0.,fe.x,wr.z-wx)*smoothstep(wr.y,wr.y+fe.y,py)*smoothstep(wr.w,wr.w-fe.y,py);
-            c=mix(c,texture2D(vid,vec2(vu.x,1.-vu.y)).rgb,m*vidOn);}}
+        if(vidOn>.001)c=vlay(c,vid,vidOn,vr,wr,uv);      // 창문 블라인드
+        if(vid2On>.001)c=vlay(c,vid2,vid2On,vr2,wr2,uv); // 캐비닛 문
         c=mix(c,topCol,smoothstep(1.,1.12,uv.y));c=mix(c,botCol,1.-smoothstep(-.12,0.,uv.y)); // 그림 위아래 밖은 천장·바닥 색으로 채움
         vec2 st=vec2(.0016/max(cos(lat),.25),.0032*3.14159265/vspan),gs=st*6.;vec3 Y=vec3(1.,.404,.624); // 선택 테두리 색 #FF679F
         if(hotOn>.01){float g=texture2D(hotGlow,uv).a*(1.-smoothstep(.55,.95,texture2D(hot,uv).a));c=mix(c,Y,min(.9,pow(g,.9)*1.3)*hotOn);} // 미리 흐리게 만든 빛 그림을 읽어 매끈하게
@@ -621,7 +629,7 @@ function frame(t){
   if(!R||(!panel.hidden&&!fading))return; // 패널이 열려 있으면 그리기 쉼
   const u=R.mat.uniforms,s=t/1000;R.hotT+=((hov!==null?1:0)-R.hotT)*.2;u.hotOn.value=R.hotT;u.time.value=s;
   u.allOn.value=touchOnly&&!intro?Math.max(0,Math.sin(s*1.6))*.45:0; // 터치 기기는 누를 수 있는 물건이 은은하게 깜빡임
-  u.rot.value.copy(camRot());u.sc.value=lensScale();blindTick();u.vidOn.value=blind.on;
+  u.rot.value.copy(camRot());u.sc.value=lensScale();u.vidOn.value=blind.tick();u.vid2On.value=locker.tick();
   R.renderer.render(R.post,R.ortho);
 }
 const pdist=()=>{const [a,b]=[...pts.values()];return Math.hypot(a.x-b.x,a.y-b.y)||1};
@@ -649,7 +657,7 @@ function endDrag(e){
   if(!pts.size)document.body.classList.remove('grabbing');
   if(!drag||e.pointerId!==drag.id) return;
   // 클릭 시 메뉴 이동은 잠시 꺼 둠: if(drag.moved<7&&drag.hot&&e.type==='pointerup'){vy=vp=0;setHover(null);open(drag.hot.sec)}
-  if(drag.moved<7&&drag.hot&&e.type==='pointerup'){if(drag.hot.sec==='window')playBlind();else if(drag.hot.sec==='tour')showBoard(e.clientX,e.clientY);else if(drag.hot.sec==='music')enterPage('gallery','music');else if(/shop_vend/.test(drag.hot.src))enterPage('receipt','shop');else if(/shop_bag/.test(drag.hot.src))enterPage('cart','shop',drag.hot);else if(drag.hot.sec==='contact')enterPage('dial','contact')}
+  if(drag.moved<7&&drag.hot&&e.type==='pointerup'){if(drag.hot.sec==='window')playBlind();else if(drag.hot.sec==='locker')locker.press();else if(drag.hot.sec==='tour')showBoard(e.clientX,e.clientY);else if(drag.hot.sec==='music')enterPage('gallery','music');else if(/shop_vend/.test(drag.hot.src))enterPage('receipt','shop');else if(/shop_bag/.test(drag.hot.src))enterPage('cart','shop',drag.hot);else if(drag.hot.sec==='contact')enterPage('dial','contact')}
   drag=null;
 }
 view.addEventListener('pointerup',endDrag);view.addEventListener('pointercancel',endDrag);
@@ -1078,7 +1086,7 @@ function renderReceipt(){
     el.addEventListener('pointermove',e=>{
       if(!d)return;
       const dx=e.clientX-d.x,dy=e.clientY-d.y;
-      const th=Math.max(-1.2,Math.min(1.2,norm(Math.atan2(d.py+dy,d.px+dx)-Math.atan2(d.py,d.px))));
+      const th0=Math.max(-1.2,Math.min(1.2,norm(Math.atan2(d.py+dy,d.px+dx)-Math.atan2(d.py,d.px)))),th=d.right?Math.max(0,th0):Math.min(0,th0);   // 슬롯 위로는 못 들림
       d.th=th; d.s.push({t:e.timeStamp,x:e.clientX,y:e.clientY,th});while(d.s.length>2&&e.timeStamp-d.s[0].t>90)d.s.shift();
       el.style.transform='rotate('+th+'rad)';
       if(Math.abs(th)>.5||Math.hypot(dx,dy)>170) go();
@@ -1101,12 +1109,12 @@ function renderReceipt(){
     rc.i++; later(feed,reduce?1:420);   // 다음 영수증은 뜯은 순간부터 0.42초 뒤에 나옴
     const dir=s.right?1:-1;
     let x=0,y=0,rot=s.rot||0,vx=s.vx||0,vy=s.vy||0,w=s.w||0;
-    if(Math.abs(w)<.002) w=dir*.002; w=Math.max(-.012,Math.min(.012,w));
+    if(w*dir<.002) w=dir*.002; w=Math.max(-.012,Math.min(.012,w)); vy=Math.max(0,vy); rot=dir*Math.max(0,rot*dir);   // 슬롯 위로는 못 날림
     let last=performance.now();
     const step=now=>{
       if(!el.isConnected) return;
       const dt=Math.min(32,now-last);last=now;
-      vy+=.0022*dt; x+=vx*dt; y+=vy*dt; rot+=w*dt;      // 중력 + 놓은 순간의 속도·회전 그대로
+      vy+=.0022*dt; x+=vx*dt; y+=vy*dt; rot=dir*Math.min(1.45,(rot+w*dt)*dir);      // 중력 + 놓은 순간의 속도·회전 (아래쪽으로만, 90도 안쪽까지)
       el.style.transform='translate('+x+'px,'+y+'px) rotate('+rot+'rad)';
       if(y>innerHeight*1.3||Math.abs(x)>innerWidth*1.3){el.remove();return}
       requestAnimationFrame(step);
@@ -1268,34 +1276,35 @@ function hideBoard(){const b=$('#board');b.classList.remove('on');b.setAttribute
 $('#board').addEventListener('click',hideBoard);
 addEventListener('keydown',e=>{if(e.key==='Escape'&&$('#board').classList.contains('on'))hideBoard()});
 
-/* ===== 창문: 누를 때마다 블라인드가 닫히고, 다시 누르면 열림. 영상에서 그 구간만 재생하고 멈춤 ===== */
-// 영상(1.8초) = 닫히는 장면 0~0.9초 + 그걸 거꾸로 돌린 장면 0.9~1.8초. 열 때는 닫힘을 역재생한 것처럼 보임
-const blind={v:null,on:0,state:'open',stopAt:0,done:null},BLIND_CLOSE=[0,.9],BLIND_OPEN=[.9,1.75];
-// 영상은 통째로 미리 받아 둠(중간 위치로 바로 넘길 수 있게, 누를 때 기다리지 않게)
-let blindSrc=null;const blindLoad=()=>blindSrc||(blindSrc=fetch('pano/window_blind.mp4').then(r=>{if(!r.ok)throw 0;return r.blob()}).then(b=>URL.createObjectURL(b)).catch(()=>'pano/window_blind.mp4'));
-function playBlind(){
-  if(!R||blind.state==='closing'||blind.state==='opening'||blind.wait)return;
-  if(!blind.v){blind.wait=1;blindLoad().then(src=>{blind.wait=0;startBlind(src)});return}
-  startBlind();
+/* ===== 창문·캐비닛: 누를 때마다 닫힘↔열림. 영상 = 앞 장면 + 그걸 거꾸로 돌린 장면이라, 되돌릴 땐 역재생처럼 보임 ===== */
+// 창문: 0~0.9초 블라인드 닫힘, 0.9~1.75초 다시 열림 / 캐비닛: 0~0.7초 문 열림, 0.7~1.38초 다시 닫힘
+function makeToggle(src,uni,seg1,seg2){
+  const T={v:null,on:0,cur:0,moved:false,busy:false,stopAt:0,done:null,wait:false,srcP:null};
+  T.load=()=>T.srcP||(T.srcP=fetch(src).then(r=>{if(!r.ok)throw 0;return r.blob()}).then(b=>URL.createObjectURL(b)).catch(()=>src));   // 통째로 미리 받아 둠
+  T.press=()=>{
+    if(!R||T.busy||T.wait)return;
+    if(!T.v){T.wait=true;T.load().then(u=>{T.wait=false;make(u);T.press()});return}
+    const v=T.v,fwd=!T.moved,seg=fwd?seg1:seg2;T.busy=true;T.stopAt=seg[1];
+    T.done=()=>{T.busy=false;T.moved=fwd;if(!fwd)T.on=0};   // 원래대로 돌아오면 방 그림으로
+    const go=()=>v.play().catch(()=>{T.busy=false});
+    const seek=()=>{v.currentTime=seg[0];if(v.seeking)v.addEventListener('seeked',go,{once:true});else go()};
+    if(v.readyState<1)v.addEventListener('loadedmetadata',seek,{once:true});else seek();
+  };
+  function make(u){const v=document.createElement('video');v.src=u;v.muted=true;v.playsInline=true;v.setAttribute('playsinline','');v.preload='auto';
+    const t=new THREE.VideoTexture(v);t.minFilter=THREE.LinearFilter;t.generateMipmaps=false;R.mat.uniforms[uni].value=t;
+    v.addEventListener('playing',()=>setTimeout(()=>{if(T.busy||T.moved)T.on=1},60));T.v=v}
+  T.tick=()=>{const v=T.v;if(v&&T.stopAt&&v.currentTime>=T.stopAt){v.pause();T.stopAt=0;const d=T.done;T.done=null;d&&d()}
+    T.cur+=(T.on-T.cur)*.35;if(Math.abs(T.on-T.cur)<.01)T.cur=T.on;return T.cur};   // 켜고 끌 때 살짝 페이드
+  return T;
 }
-function startBlind(src){
-  if(!blind.v){const v=document.createElement('video');v.src=src;v.muted=true;v.playsInline=true;v.setAttribute('playsinline','');v.preload='auto';
-    const t=new THREE.VideoTexture(v);t.minFilter=THREE.LinearFilter;t.generateMipmaps=false;R.mat.uniforms.vid.value=t;
-    v.addEventListener('playing',()=>setTimeout(()=>{if(blind.state!=='open')blind.on=1},80));   // 첫 장면이 올라온 뒤에 켬(검은 화면 방지)
-    blind.v=v}
-  const v=blind.v,closing=blind.state==='open',seg=closing?BLIND_CLOSE:BLIND_OPEN;
-  blind.state=closing?'closing':'opening';blind.stopAt=seg[1];
-  blind.done=closing?()=>{blind.state='closed'}:()=>{blind.state='open';blind.on=0};   // 열리고 나면 원래 방 그림으로
-  const go=()=>v.play().catch(()=>{blind.state=closing?'open':'closed'});
-  const seek=()=>{v.currentTime=seg[0];if(v.seeking)v.addEventListener('seeked',go,{once:true});else go()};   // 그 구간 시작점으로 옮긴 뒤 재생
-  if(v.readyState<1)v.addEventListener('loadedmetadata',seek,{once:true});else seek();
-}
-function blindTick(){const v=blind.v;if(v&&blind.stopAt&&v.currentTime>=blind.stopAt){v.pause();blind.stopAt=0;const d=blind.done;blind.done=null;d&&d()}}
+const blind=makeToggle('pano/window_blind.mp4','vid',[0,.9],[.9,1.75]);
+const locker=makeToggle('pano/locker_door.mp4','vid2',[0,.7],[.7,1.38]);
+const playBlind=()=>blind.press();
 
 /* ===== 로딩 → 입장 ===== */
 requestAnimationFrame(frame);
 const built=buildRoom().catch(e=>console.error(e));
 // 그림이 준비되면 분홍 화면이 사라지고 바로 방이 보임. 소리는 첫 터치/클릭 때 시작(브라우저 규칙)
-built.then(()=>{setTimeout(blindLoad,1500);yaw=startYaw();pitch=-4;$('#loader').classList.add('gone');setTimeout(()=>$('#hint').classList.add('off'),9000)});
+built.then(()=>{setTimeout(()=>{blind.load();locker.load()},1500);yaw=startYaw();pitch=-4;$('#loader').classList.add('gone');setTimeout(()=>$('#hint').classList.add('off'),9000)});
 addEventListener('pointerdown',()=>audioInit(),{once:true});
 </script>
