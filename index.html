@@ -159,25 +159,35 @@ button{font:inherit;color:inherit;cursor:inherit}
 #gzoom .zinfo .zs{font-size:13px;opacity:.65;letter-spacing:.04em} /* 크게 보기는 세탁기 문 위로 */
 #gal .back{background:var(--paper);color:var(--ink);position:absolute;left:max(16px,env(safe-area-inset-left,0px));top:calc(14px + env(safe-area-inset-top,0px));z-index:2}
 #panel[data-sec="receipt"]{--pbg:#f3d6ba;padding:0;overflow:hidden}
-#rc{position:absolute;inset:0;overflow:hidden;touch-action:none;--rw:min(82vw,380px,calc(80vh*820/1266));--peek:calc(var(--rw)*.045);--st:6px;background:url(img/rc_bg.webp) 0 0/calc(var(--rw)*800/981) auto repeat}
+#rc{position:absolute;inset:0;overflow:hidden;touch-action:none;--rw:min(82vw,380px,calc(80vh*820/1266));--peek:calc(var(--rw)*.045);--st:max(6px,calc((100% - var(--rw)*1.669)/2));background:url(img/rc_bg.webp) 0 0/calc(var(--rw)*800/981) auto repeat}
 #rc .back{position:absolute;z-index:6;left:max(16px,env(safe-area-inset-left,0px));top:calc(14px + env(safe-area-inset-top,0px));margin-top:30px}
 #rc .rbag{position:absolute;z-index:5;right:max(16px,env(safe-area-inset-right,0px));top:calc(14px + env(safe-area-inset-top,0px));margin-top:30px;font-family:var(--f-led);font-size:16px;color:var(--ink)}
 /* 슬롯에서 나오는 종이가 살짝 휘어 보이게: 슬롯 바로 밑은 그늘, 그 아래 볼록한 부분은 살짝 밝게, 양옆은 둥글게 어둡게 */
 /* 종이는 슬롯 검은 틈 한가운데에서 나옴(틈 아래 턱보다 앞에 걸쳐짐) */
 #rc .feedwin{position:absolute;z-index:5;left:0;right:0;top:calc(var(--st) + var(--rw)*78/981);bottom:0;overflow:hidden;pointer-events:none}
-/* 그늘은 종이가 있는 높이만큼만 보임: 뜯으면 살짝 나온 다음 장 높이로 줄고, 나올 때 다시 늘어남 */
-#rc .curl{position:absolute;z-index:3;left:50%;top:0;width:var(--rw);height:var(--peek);transform:translateX(-50%);overflow:hidden;opacity:0;transition:height .3s linear,opacity .3s;
-  background:linear-gradient(rgba(29,22,16,.78),rgba(29,22,16,.42) 9%,rgba(29,22,16,.14) 22%,rgba(255,255,255,.5) 40%,rgba(255,255,255,0) 64%,rgba(29,22,16,.12) 82%,rgba(29,22,16,0)) 0 0/100% 130px no-repeat}
-#rc .curl::after{content:"";position:absolute;left:0;right:0;top:0;height:130px;background:linear-gradient(90deg,rgba(29,22,16,.5),rgba(29,22,16,0) 13%,rgba(29,22,16,0) 87%,rgba(29,22,16,.5));
-  -webkit-mask-image:linear-gradient(#000,transparent);mask-image:linear-gradient(#000,transparent)}
-#rc.has .curl{opacity:1}
-#rc.fed .curl{height:130px}
+/* 슬롯 안쪽 그늘은 '다음 장'에만: 슬롯 밖으로 살짝 나온 부분이 깊숙한 안쪽처럼 어둡게 */
+.rcpt .rdeep{position:absolute;left:0;right:0;bottom:0;height:calc(var(--peek) + 15/1266*100%);z-index:3;pointer-events:none;opacity:0;transition:opacity .35s;
+  background:linear-gradient(rgba(20,14,9,.86),rgba(20,14,9,.5) 70%,rgba(20,14,9,.38))}
+.rcpt.nx .rdeep{opacity:1}
+/* 원근 그림자: 슬롯 가까운 위쪽은 벽에 붙어 짙고 또렷, 아래로 갈수록 벽에서 떨어져 넓게 번지고 연해지며 아래로 밀림.
+   들어 올리거나 뜯어 날리면(--lift) 더 멀어져서 그림자가 연해지고 옆·아래로 이동 */
+.rcpt .rsh{position:absolute;inset:0;z-index:-1;pointer-events:none;transition:opacity .35s;
+  transform:translate(calc(var(--lift,0)*22px),calc(var(--lift,0)*38px)) scale(calc(1 + var(--lift,0)*.04));opacity:calc(1 - var(--lift,0)*.65)}
+.rcpt .rsh i{position:absolute;top:0;left:-15%;right:-15%;bottom:-15%}   /* 번진 그림자가 마스크에 잘리지 않게 종이보다 크게 */
+.rcpt .rsh b{position:absolute;inset:0;background:#3a2614}
+.rcpt .rsh .s1{filter:blur(1.5px);opacity:calc(.45 - var(--lift,0)*.9);-webkit-mask-image:linear-gradient(#000,transparent 30%);mask-image:linear-gradient(#000,transparent 30%)}
+.rcpt .rsh .s1 b{top:1px;bottom:14.8%;left:11.54%;right:11.54%}
+.rcpt .rsh .s2{filter:blur(calc(8px + var(--lift,0)*10px));opacity:.34;-webkit-mask-image:linear-gradient(transparent 2.6%,#000 24.3%);mask-image:linear-gradient(transparent 2.6%,#000 24.3%)}
+.rcpt .rsh .s2 b{left:9.23%;right:9.23%;bottom:10%;clip-path:polygon(3% 0,97% 0,100% 100%,0 100%)}
+.rcpt .rsh .s3{filter:blur(calc(22px + var(--lift,0)*14px));opacity:.3;-webkit-mask-image:linear-gradient(transparent 19%,#000 65%);mask-image:linear-gradient(transparent 19%,#000 65%)}
+.rcpt .rsh .s3 b{top:3.48%;left:5.38%;right:5.38%;bottom:6.09%;clip-path:polygon(8% 0,92% 0,100% 100%,0 100%)}
+.rcpt.nx .rsh{opacity:0}
 /* 슬롯: 피그마 시안 그림(낡은 베이지 금속 틀). 종이는 검은 입구 윗변에서 나와 틀 아랫부분 앞에 걸쳐짐 */
 /* 좁은 화면에선 슬롯이 BACK 버튼과 겹치지 않게 아래로 */
-@media (max-width:600px){#rc{--st:calc(84px + env(safe-area-inset-top,0px))}}
+@media (max-width:600px){#rc{--st:max(calc(84px + env(safe-area-inset-top,0px)),calc((100% - var(--rw)*1.669)/2))}}
 #rc .slot{position:absolute;z-index:4;left:50%;top:var(--st);width:calc(var(--rw)*1204/981);height:calc(var(--rw)*300/981);transform:translateX(-50%);background:url(img/rc_slot.webp) 0 0/100% 100% no-repeat}
 #rc .stage{position:absolute;z-index:2;left:50%;top:var(--peek);pointer-events:none;width:var(--rw);height:calc(var(--rw)*1266/820);transform:translateX(-50%)}
-.rcpt{position:absolute;inset:0;transform-origin:50% 0;pointer-events:auto;filter:drop-shadow(0 3px 5px rgba(29,26,23,.22));touch-action:none;cursor:grab}
+.rcpt{position:absolute;inset:0;transform-origin:50% 0;pointer-events:auto;isolation:isolate;touch-action:none;cursor:grab}
 .rcpt .paper{position:absolute;inset:0;background:var(--paper);color:var(--ink);display:grid;grid-template-columns:20px 1fr;padding:0 12px 26% 8px;gap:6px}
 .rcpt .perf{position:absolute;left:0;right:0;top:0;height:10px;background:radial-gradient(circle at 6px 0,var(--tomato) 3.4px,transparent 3.9px) 0 0/14px 10px repeat-x}
 .rcpt .rside{writing-mode:vertical-rl;transform:rotate(180deg);align-self:center;font-family:var(--f-led);font-size:11px;letter-spacing:.06em;opacity:.7;padding-top:26px}
@@ -921,7 +931,7 @@ async function renderGallery(){
 let rc=null, opening=false;
 function receiptHTML(i){   // 빈 영수증 위에 옷마다 다른 내용을 찍음
   const k=i%CLOTHES.length,[n,p,d,sz]=CLOTHES[k],t=new Date(),z=v=>String(v).padStart(2,'0');
-  return '<div class="paper rimg"><img class="rtpl" src="img/receipt_roll2.webp" alt="" draggable="false"><div class="rin">'+
+  return '<div class="rsh"><i class="s1"><b></b></i><i class="s2"><b></b></i><i class="s3"><b></b></i></div><div class="rdeep"></div><div class="paper rimg"><img class="rtpl" src="img/receipt_roll2.webp" alt="" draggable="false"><div class="rin">'+
    '<span class="rno">No. '+String(2677+i).padStart(6,'0')+'</span>'+
    '<span class="rdate">DATE:&nbsp; '+z(t.getMonth()+1)+'/'+z(t.getDate())+' '+t.getFullYear()+' '+z(t.getHours())+'.'+z(t.getMinutes())+'</span>'+
    '<img class="rpic" src="img/cloth3d/'+z(k+1)+'.webp" alt="'+esc(n)+'" draggable="false">'+
@@ -933,7 +943,7 @@ function tearSfx(){if(!Au.ctx||Au.muted)return;const t=Au.ctx.currentTime;noiseH
 function stopReceipt(){if(!rc)return;rc.timers.forEach(clearTimeout);removeEventListener('keydown',rc.onKey);rc=null}
 function renderReceipt(){
   stopReceipt();
-  panel.innerHTML='<div id="rc"><button class="back" data-back>← BACK</button><div class="slot"></div><div class="feedwin"><div class="stage"></div><div class="curl"></div></div></div>';
+  panel.innerHTML='<div id="rc"><button class="back" data-back>← BACK</button><div class="slot"></div><div class="feedwin"><div class="stage"></div></div></div>';
   const st=$('#rc .stage');
   rc={i:0,busy:true,cur:null,timers:[],next:null};
   const later=(f,ms)=>rc.timers.push(setTimeout(f,ms));
@@ -943,8 +953,8 @@ function renderReceipt(){
     // 영수증 그림을 그대로 이어 붙임: 지금 영수증 바로 위에 다음 영수증이 붙어 있어서 같이 밀려 나옴(OV=톱니가 겹치는 만큼 %)
     const OV=15/1266*100, mk=k=>{const e=document.createElement('div');e.className='rcpt';e.innerHTML=receiptHTML(k);return e};
     const first=!rc.next, el=rc.next||mk(rc.i); if(first)st.appendChild(el);
-    el.style.pointerEvents='';el.style.transform='';
-    const nx=mk(rc.i+1); nx.style.pointerEvents='none'; nx.style.transform='translateY(-'+(100-OV)+'%)'; st.insertBefore(nx,el); rc.next=nx;
+    el.style.pointerEvents='';el.style.transform='';el.classList.remove('nx');
+    const nx=mk(rc.i+1); nx.style.pointerEvents='none';nx.classList.add('nx'); nx.style.transform='translateY(-'+(100-OV)+'%)'; st.insertBefore(nx,el); rc.next=nx;
     rc.cur=el; rc.busy=true;
     rc.OV=OV; const ms=reduce?1:1700, from=first?-102:-(100-OV); printSfx(ms*.8);
     // 진짜 영수증 프린터처럼: 한 줄씩 찍으며 짧게 멈췄다 밀려 나오고, 다 나오면 매달린 종이가 살짝 흔들리다 멈춤.
@@ -954,7 +964,6 @@ function renderReceipt(){
       for(let k=0;k<=N;k++){const y=a+(b-a)*k/N,t=PR*k/N;f.push({offset:t,...T(y,0)});if(k<N)f.push({offset:t+PR/N*(.45+.25*Math.random()),...T(y,0)})}
       f.push({offset:.87,...T(b,.55)},{offset:.94,...T(b,-.3)},{offset:1,...T(b,0)});return f};
     el.style.transformOrigin='50% '+(-pk)+'px'; nx.style.transformOrigin='50% '+((100-OV)/100*H-pk)+'px';
-    const R=$('#rc'); R.classList.add('has'); later(()=>{rc&&$('#rc')&&$('#rc').classList.add('fed')},ms*.12);
     el.animate(kf(from,0),{duration:ms}).onfinish=()=>{if(!rc)return;rc.busy=false;el.style.transformOrigin=''};
     nx.animate(kf(from-(100-OV),-(100-OV)),{duration:ms});
     // 잡은 쪽부터 뜯김: 잡은 곳의 반대쪽 윗모서리가 경첩이 되어, 잡은 쪽이 먼저 떨어져 나가며 휘어짐.
@@ -974,7 +983,7 @@ function renderReceipt(){
       const dx=e.clientX-d.x,dy=e.clientY-d.y;
       const th=Math.max(-1.2,Math.min(1.2,norm(Math.atan2(d.py+dy,d.px+dx)-Math.atan2(d.py,d.px))));
       d.th=th; d.s.push({t:e.timeStamp,x:e.clientX,y:e.clientY,th});while(d.s.length>2&&e.timeStamp-d.s[0].t>90)d.s.shift();
-      el.style.transform='rotate('+th+'rad)';
+      el.style.transform='rotate('+th+'rad)'; el.style.setProperty('--lift',Math.min(.6,Math.abs(th)*1.1+Math.hypot(dx,dy)/600));
       if(Math.abs(th)>.5||Math.hypot(dx,dy)>170) go();
     });
     const up=e=>{
@@ -982,26 +991,27 @@ function renderReceipt(){
       const dx=e.clientX-d.x,dy=e.clientY-d.y,dist=Math.hypot(dx,dy),v=vel(),sp=Math.hypot(v.vx,v.vy);
       if(dist<8&&sp<.2){const r=d.right;d=null;return tear(el,{rot:0,vx:r?.1:-.1,vy:-.05,w:r?.0045:-.0045,right:r})}   // 그냥 클릭: 잡은 쪽이 톡 뜯김
       if((sp>.9&&dist>28)||(Math.abs(d.th)>.25&&Math.abs(v.w)>.0015)) return go();                                    // 빠르게 채기
-      d=null; el.style.transition='transform .4s cubic-bezier(.2,1.8,.4,1)'; el.style.transform='rotate(0rad)';          // 덜 당기면 제자리로
+      d=null; el.style.transition='transform .4s cubic-bezier(.2,1.8,.4,1)'; el.style.transform='rotate(0rad)';el.style.setProperty('--lift',0);          // 덜 당기면 제자리로
       later(()=>{el.style.transition='';el.style.transform='';el.style.transformOrigin=''},450);
     };
     el.addEventListener('pointerup',up);
-    el.addEventListener('pointercancel',()=>{d=null;el.style.transition='transform .3s ease-out';el.style.transform='';});
+    el.addEventListener('pointercancel',()=>{d=null;el.style.transition='transform .3s ease-out';el.style.transform='';el.style.setProperty('--lift',0)});
   }
   function tear(el,s){
     if(!rc||(rc.busy&&rc.cur!==el)||el.dataset.torn) return; rc.busy=true; el.dataset.torn=1;
     el.style.transition='none'; el.style.transformOrigin=s.right?'0% 0%':'100% 0%';
-    tearSfx(); $('#rc')&&$('#rc').classList.remove('fed');   // 뜯으면 그늘도 남은 종이 높이로 줄어듦
+    tearSfx();
     rc.i++; later(feed,reduce?1:420);   // 다음 영수증은 뜯은 순간부터 0.42초 뒤에 나옴
     const dir=s.right?1:-1;
     let x=0,y=0,rot=s.rot||0,vx=s.vx||0,vy=s.vy||0,w=s.w||0;
     if(Math.abs(w)<.002) w=dir*.002; w=Math.max(-.012,Math.min(.012,w));
-    let last=performance.now();
+    let last=performance.now(), lift=parseFloat(el.style.getPropertyValue('--lift'))||0;
     const step=now=>{
       if(!el.isConnected) return;
       const dt=Math.min(32,now-last);last=now;
       vy+=.0022*dt; x+=vx*dt; y+=vy*dt; rot+=w*dt;      // 중력 + 놓은 순간의 속도·회전 그대로
       el.style.transform='translate('+x+'px,'+y+'px) rotate('+rot+'rad)';
+      lift=Math.min(1,lift+dt/450); el.style.setProperty('--lift',lift);   // 날아가며 벽에서 멀어짐 → 그림자 연해지고 밀려남
       if(y>innerHeight*1.3||Math.abs(x)>innerWidth*1.3){el.remove();return}
       requestAnimationFrame(step);
     };
