@@ -287,6 +287,12 @@ button{font:inherit;color:inherit;cursor:inherit}
   #ct .ct-co{right:auto;left:50%;transform:translateX(-50%);top:auto;bottom:calc(22px + env(safe-area-inset-bottom,0px));width:min(80vw,340px);height:52px}
   #ct .ct-drawer{top:auto;left:0;right:0;width:auto;height:82%;border-radius:22px 22px 0 0;transform:translateY(105%);box-shadow:0 -6px 0 var(--ink)}
 }
+/* 게시판: 누르면 페이지 이동 없이 방 위에 크게 띄움 */
+#board{position:fixed;inset:0;z-index:60;display:grid;place-items:center;background:rgba(29,26,23,.6);opacity:0;pointer-events:none;transition:opacity .35s}
+#board.on{opacity:1;pointer-events:auto;cursor:zoom-out}
+#board img{width:min(92vw,1100px,calc(84vh*868/580));height:auto;border-radius:6px;box-shadow:0 20px 50px rgba(0,0,0,.5);transform:translate(var(--fx,0),var(--fy,0)) scale(.2) rotate(-4deg);transition:transform .55s cubic-bezier(.2,1.15,.3,1)}
+#board.on img{transform:none}
+#board .x{position:absolute;top:calc(16px + env(safe-area-inset-top,0px));right:max(16px,env(safe-area-inset-right,0px));width:44px;height:44px;border-radius:50%;border:0;background:var(--paper);color:var(--ink);font-size:24px;line-height:1;cursor:pointer}
 </style>
 
 <div id="view" aria-label="빨래방 3D 공간. 드래그해서 둘러보세요"><canvas id="gl"></canvas></div>
@@ -298,6 +304,7 @@ button{font:inherit;color:inherit;cursor:inherit}
 <section id="panel" hidden></section>
 <div id="vthumb"></div>
 <div id="toast" role="status"></div>
+<div id="board" aria-hidden="true"><img src="img/board.webp" alt="게시판" draggable="false"><button class="x" aria-label="닫기">×</button></div>
 
 <div id="loader" aria-label="불러오는 중"></div>
 
@@ -632,7 +639,7 @@ function endDrag(e){
   if(!pts.size)document.body.classList.remove('grabbing');
   if(!drag||e.pointerId!==drag.id) return;
   // 클릭 시 메뉴 이동은 잠시 꺼 둠: if(drag.moved<7&&drag.hot&&e.type==='pointerup'){vy=vp=0;setHover(null);open(drag.hot.sec)}
-  if(drag.moved<7&&drag.hot&&e.type==='pointerup'){if(drag.hot.sec==='music')enterPage('gallery','music');else if(/shop_vend/.test(drag.hot.src))enterPage('receipt','shop');else if(/shop_bag/.test(drag.hot.src))enterPage('cart','shop',drag.hot);else if(drag.hot.sec==='contact')enterPage('dial','contact')}
+  if(drag.moved<7&&drag.hot&&e.type==='pointerup'){if(drag.hot.sec==='tour')showBoard(e.clientX,e.clientY);else if(drag.hot.sec==='music')enterPage('gallery','music');else if(/shop_vend/.test(drag.hot.src))enterPage('receipt','shop');else if(/shop_bag/.test(drag.hot.src))enterPage('cart','shop',drag.hot);else if(drag.hot.sec==='contact')enterPage('dial','contact')}
   drag=null;
 }
 view.addEventListener('pointerup',endDrag);view.addEventListener('pointercancel',endDrag);
@@ -1226,6 +1233,13 @@ function renderCart(){
   };
   addEventListener('pointermove',ct.mv);addEventListener('pointerup',ct.up);addEventListener('pointercancel',ct.up);
 }
+
+/* ===== 게시판 크게 보기: 누른 자리에서 튀어나오듯 커짐. 아무 데나 누르거나 Esc로 닫기 ===== */
+function showBoard(x,y){const b=$('#board');if(b.classList.contains('on'))return;setHover(null);vy=vp=0;
+  b.style.setProperty('--fx',(x-innerWidth/2)+'px');b.style.setProperty('--fy',(y-innerHeight/2)+'px');void b.offsetWidth;b.classList.add('on');b.setAttribute('aria-hidden','false');b.querySelector('.x').focus({preventScroll:true})}
+function hideBoard(){const b=$('#board');b.classList.remove('on');b.setAttribute('aria-hidden','true')}
+$('#board').addEventListener('click',hideBoard);
+addEventListener('keydown',e=>{if(e.key==='Escape'&&$('#board').classList.contains('on'))hideBoard()});
 
 /* ===== 로딩 → 입장 ===== */
 requestAnimationFrame(frame);
