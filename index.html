@@ -159,7 +159,8 @@ button{font:inherit;color:inherit;cursor:inherit}
 #gzoom .zinfo .zs{font-size:13px;opacity:.65;letter-spacing:.04em} /* 크게 보기는 세탁기 문 위로 */
 #gal .back{background:var(--paper);color:var(--ink);position:absolute;left:max(16px,env(safe-area-inset-left,0px));top:calc(14px + env(safe-area-inset-top,0px));z-index:2}
 #panel[data-sec="receipt"]{--pbg:#f3d6ba;padding:0;overflow:hidden}
-#rc{position:absolute;inset:0;overflow:hidden;touch-action:none;--rw:min(82vw,380px,calc(80vh*820/1266));--peek:calc(var(--rw)*.045);--st:max(6px,calc((100% - var(--rw)*1.669)/2));background:url(img/rc_bg.webp) 0 0/calc(var(--rw)*800/981) auto repeat}
+#rc{position:absolute;inset:0;overflow:hidden;touch-action:none;--top:30%;--cx:50%;--rw:min(82vw,380px,calc((70vh - 56px)/1.669));--peek:calc(var(--rw)*.045);
+  --st:max(calc(var(--top) + 8px),calc(var(--top) + (100% - var(--top) - var(--rw)*1.669)/2));background:url(img/rc_bg.webp) 0 0/calc(var(--rw)*800/981) auto repeat}
 #rc .back{position:absolute;z-index:6;left:max(16px,env(safe-area-inset-left,0px));top:calc(14px + env(safe-area-inset-top,0px));margin-top:30px}
 #rc .rbag{position:absolute;z-index:5;right:max(16px,env(safe-area-inset-right,0px));top:calc(14px + env(safe-area-inset-top,0px));margin-top:30px;font-family:var(--f-led);font-size:16px;color:var(--ink)}
 /* 슬롯에서 나오는 종이가 살짝 휘어 보이게: 슬롯 바로 밑은 그늘, 그 아래 볼록한 부분은 살짝 밝게, 양옆은 둥글게 어둡게 */
@@ -184,9 +185,14 @@ button{font:inherit;color:inherit;cursor:inherit}
 .rcpt.nx .rsh{opacity:0}
 /* 슬롯: 피그마 시안 그림(낡은 베이지 금속 틀). 종이는 검은 입구 윗변에서 나와 틀 아랫부분 앞에 걸쳐짐 */
 /* 좁은 화면에선 슬롯이 BACK 버튼과 겹치지 않게 아래로 */
-@media (max-width:600px){#rc{--st:max(calc(84px + env(safe-area-inset-top,0px)),calc((100% - var(--rw)*1.669)/2))}}
-#rc .slot{position:absolute;z-index:4;left:50%;top:var(--st);width:calc(var(--rw)*1204/981);height:calc(var(--rw)*300/981);transform:translateX(-50%);background:url(img/rc_slot.webp) 0 0/100% 100% no-repeat}
-#rc .stage{position:absolute;z-index:2;left:50%;top:var(--peek);pointer-events:none;width:var(--rw);height:calc(var(--rw)*1266/820);transform:translateX(-50%)}
+/* 2단 뷰: 왼쪽 모델 사진, 오른쪽 가운데에 슬롯+영수증. 좁은 세로 화면에선 사진이 위, 영수증이 아래 */
+#rc .rcphoto{position:absolute;z-index:1;left:0;top:0;width:100%;height:var(--top);object-fit:cover;object-position:50% 18%;pointer-events:none;user-select:none}
+@media (min-width:760px) and (min-aspect-ratio:1/1){
+  #rc{--top:0%;--cx:75%;--rw:min(28vw,460px,calc(80vh*820/1266))}
+  #rc .rcphoto{width:50%;height:100%;object-position:50% 12%}
+}
+#rc .slot{position:absolute;z-index:4;left:var(--cx);top:var(--st);width:calc(var(--rw)*1204/981);height:calc(var(--rw)*300/981);transform:translateX(-50%);background:url(img/rc_slot.webp) 0 0/100% 100% no-repeat}
+#rc .stage{position:absolute;z-index:2;left:var(--cx);top:var(--peek);pointer-events:none;width:var(--rw);height:calc(var(--rw)*1266/820);transform:translateX(-50%)}
 .rcpt{position:absolute;inset:0;transform-origin:50% 0;pointer-events:auto;isolation:isolate;touch-action:none;cursor:grab}
 .rcpt .paper{position:absolute;inset:0;background:var(--paper);color:var(--ink);display:grid;grid-template-columns:20px 1fr;padding:0 12px 26% 8px;gap:6px}
 .rcpt .perf{position:absolute;left:0;right:0;top:0;height:10px;background:radial-gradient(circle at 6px 0,var(--tomato) 3.4px,transparent 3.9px) 0 0/14px 10px repeat-x}
@@ -943,7 +949,7 @@ function tearSfx(){if(!Au.ctx||Au.muted)return;const t=Au.ctx.currentTime;noiseH
 function stopReceipt(){if(!rc)return;rc.timers.forEach(clearTimeout);removeEventListener('keydown',rc.onKey);rc=null}
 function renderReceipt(){
   stopReceipt();
-  panel.innerHTML='<div id="rc"><button class="back" data-back>← BACK</button><div class="slot"></div><div class="feedwin"><div class="stage"></div></div></div>';
+  panel.innerHTML='<div id="rc"><img class="rcphoto" src="img/rc_model.webp" alt="" draggable="false"><button class="back" data-back>← BACK</button><div class="slot"></div><div class="feedwin"><div class="stage"></div></div></div>';
   const st=$('#rc .stage');
   rc={i:0,busy:true,cur:null,timers:[],next:null};
   const later=(f,ms)=>rc.timers.push(setTimeout(f,ms));
