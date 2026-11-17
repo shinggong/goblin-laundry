@@ -621,7 +621,7 @@ function frame(t){
   if(!R||(!panel.hidden&&!fading))return; // 패널이 열려 있으면 그리기 쉼
   const u=R.mat.uniforms,s=t/1000;R.hotT+=((hov!==null?1:0)-R.hotT)*.2;u.hotOn.value=R.hotT;u.time.value=s;
   u.allOn.value=touchOnly&&!intro?Math.max(0,Math.sin(s*1.6))*.45:0; // 터치 기기는 누를 수 있는 물건이 은은하게 깜빡임
-  u.rot.value.copy(camRot());u.sc.value=lensScale();u.vidOn.value=blind.on;
+  u.rot.value.copy(camRot());u.sc.value=lensScale();blindTick();u.vidOn.value=blind.on;
   R.renderer.render(R.post,R.ortho);
 }
 const pdist=()=>{const [a,b]=[...pts.values()];return Math.hypot(a.x-b.x,a.y-b.y)||1};
@@ -1273,21 +1273,34 @@ function hideBoard(){const b=$('#board');b.classList.remove('on');b.setAttribute
 $('#board').addEventListener('click',hideBoard);
 addEventListener('keydown',e=>{if(e.key==='Escape'&&$('#board').classList.contains('on'))hideBoard()});
 
-/* ===== 창문: 누르면 블라인드가 내려갔다 올라가는 영상을 방 그림의 창문 자리에 겹쳐 재생 ===== */
-const blind={v:null,on:0};
+/* ===== 창문: 누를 때마다 블라인드가 닫히고, 다시 누르면 열림. 영상에서 그 구간만 재생하고 멈춤 ===== */
+// 영상(4초) 안의 구간: 0.6~1.4초 닫힘, 2.1~2.85초 열림 (앞뒤 여유를 조금 둠)
+const blind={v:null,on:0,state:'open',stopAt:0,done:null},BLIND_CLOSE=[.55,1.45],BLIND_OPEN=[2.05,2.95];
+// 영상은 통째로 미리 받아 둠(중간 위치로 바로 넘길 수 있게, 누를 때 기다리지 않게)
+let blindSrc=null;const blindLoad=()=>blindSrc||(blindSrc=fetch('pano/window_blind.mp4').then(r=>{if(!r.ok)throw 0;return r.blob()}).then(b=>URL.createObjectURL(b)).catch(()=>'pano/window_blind.mp4'));
 function playBlind(){
-  if(!R)return;
-  if(!blind.v){const v=document.createElement('video');v.src='pano/window_blind.mp4';v.muted=true;v.playsInline=true;v.setAttribute('playsinline','');v.preload='auto';
-    const t=new THREE.VideoTexture(v);t.minFilter=THREE.LinearFilter;t.generateMipmaps=false;R.mat.uniforms.vid.value=t;
-    v.addEventListener('playing',()=>setTimeout(()=>{blind.on=1},80));   // 첫 장면이 올라온 뒤에 켬(검은 화면 방지)
-    v.addEventListener('ended',()=>{blind.on=0});blind.v=v}
-  const v=blind.v;if(!v.paused&&!v.ended)return;v.currentTime=0;v.play().catch(()=>{});
+  if(!R||blind.state==='closing'||blind.state==='opening'||blind.wait)return;
+  if(!blind.v){blind.wait=1;blindLoad().then(src=>{blind.wait=0;startBlind(src)});return}
+  startBlind();
 }
+function startBlind(src){
+  if(!blind.v){const v=document.createElement('video');v.src=src;v.muted=true;v.playsInline=true;v.setAttribute('playsinline','');v.preload='auto';
+    const t=new THREE.VideoTexture(v);t.minFilter=THREE.LinearFilter;t.generateMipmaps=false;R.mat.uniforms.vid.value=t;
+    v.addEventListener('playing',()=>setTimeout(()=>{if(blind.state!=='open')blind.on=1},80));   // 첫 장면이 올라온 뒤에 켬(검은 화면 방지)
+    blind.v=v}
+  const v=blind.v,closing=blind.state==='open',seg=closing?BLIND_CLOSE:BLIND_OPEN;
+  blind.state=closing?'closing':'opening';blind.stopAt=seg[1];
+  blind.done=closing?()=>{blind.state='closed'}:()=>{blind.state='open';blind.on=0};   // 열리고 나면 원래 방 그림으로
+  const go=()=>v.play().catch(()=>{blind.state=closing?'open':'closed'});
+  const seek=()=>{v.currentTime=seg[0];if(v.seeking)v.addEventListener('seeked',go,{once:true});else go()};   // 그 구간 시작점으로 옮긴 뒤 재생
+  if(v.readyState<1)v.addEventListener('loadedmetadata',seek,{once:true});else seek();
+}
+function blindTick(){const v=blind.v;if(v&&blind.stopAt&&v.currentTime>=blind.stopAt){v.pause();blind.stopAt=0;const d=blind.done;blind.done=null;d&&d()}}
 
 /* ===== 로딩 → 입장 ===== */
 requestAnimationFrame(frame);
 const built=buildRoom().catch(e=>console.error(e));
 // 그림이 준비되면 분홍 화면이 사라지고 바로 방이 보임. 소리는 첫 터치/클릭 때 시작(브라우저 규칙)
-built.then(()=>{yaw=startYaw();pitch=-4;$('#loader').classList.add('gone');setTimeout(()=>$('#hint').classList.add('off'),9000)});
+built.then(()=>{setTimeout(blindLoad,1500);yaw=startYaw();pitch=-4;$('#loader').classList.add('gone');setTimeout(()=>$('#hint').classList.add('off'),9000)});
 addEventListener('pointerdown',()=>audioInit(),{once:true});
 </script>
