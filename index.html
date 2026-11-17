@@ -244,8 +244,8 @@ button{font:inherit;color:inherit;cursor:inherit}
 #ct{position:absolute;inset:0;overflow:hidden;touch-action:none;color:var(--ink);
   background:radial-gradient(#fbf3e2 23%,transparent 24.5%) 0 0/56px 56px,radial-gradient(#fbf3e2 23%,transparent 24.5%) 28px 28px/56px 56px,#f4a3c0}
 #ct .back{position:absolute;z-index:6;left:max(16px,env(safe-area-inset-left,0px));top:calc(14px + env(safe-area-inset-top,0px));margin-top:30px;background:var(--ink);color:#fbf3e2}
-#ct .ct-tip{position:absolute;z-index:2;left:50%;top:calc(52px + env(safe-area-inset-top,0px));transform:translateX(-50%);font-family:var(--f-display);font-size:clamp(15px,1.6vw,20px);letter-spacing:.06em;background:#fbf3e2;padding:6px 16px;border-radius:999px;white-space:nowrap;box-shadow:0 3px 0 var(--ink)}
-#ct .ct-items{position:absolute;z-index:3;left:max(16px,4vw);top:15%;width:58%;height:78%;display:grid;grid-template-columns:repeat(5,1fr);grid-template-rows:repeat(4,1fr);gap:1vw}
+#ct .ct-tip{position:absolute;z-index:2;left:50%;top:calc(104px + env(safe-area-inset-top,0px));transform:translateX(-50%);font-family:var(--f-display);font-size:clamp(15px,1.6vw,20px);letter-spacing:.06em;background:#fbf3e2;padding:6px 16px;border-radius:999px;white-space:nowrap;box-shadow:0 3px 0 var(--ink)}
+#ct .ct-items{position:absolute;z-index:3;left:max(16px,4vw);top:21%;width:58%;height:71%;display:grid;grid-template-columns:repeat(5,1fr);grid-template-rows:repeat(4,1fr);gap:1vw}
 #ct .ct-it{display:grid;place-items:center;cursor:grab;touch-action:none;transform:rotate(var(--r));transition:opacity .2s,transform .25s}
 #ct .ct-it:hover{transform:rotate(var(--r)) scale(1.08)}
 #ct .ct-it img{width:100%;height:100%;object-fit:contain;pointer-events:none;user-select:none;filter:drop-shadow(0 4px 0 rgba(29,26,23,.18))}
@@ -286,8 +286,8 @@ button{font:inherit;color:inherit;cursor:inherit}
 #ct .ct-done small{font-family:inherit;font-size:15px;opacity:.6}
 @media (max-width:760px),(max-aspect-ratio:1/1){
   #ct{background-size:40px 40px;background-position:0 0,20px 20px,0 0}
-  #ct .ct-tip{top:calc(94px + env(safe-area-inset-top,0px));font-size:14px}
-  #ct .ct-items{left:3%;width:94%;top:17%;height:46%;grid-template-columns:repeat(5,1fr);grid-template-rows:repeat(4,1fr);gap:2px}
+  #ct .ct-tip{top:calc(136px + env(safe-area-inset-top,0px));font-size:14px}
+  #ct .ct-items{left:3%;width:94%;top:22%;height:42%;grid-template-columns:repeat(5,1fr);grid-template-rows:repeat(4,1fr);gap:2px}
   #ct .ct-cart{right:auto;left:50%;top:auto;bottom:calc(92px + env(safe-area-inset-bottom,0px));width:min(56vw,300px);transform:translateX(-50%)}
   #ct .ct-cart.hot{transform:translateX(-50%) scale(1.05)}
   #ct .ct-co{right:auto;left:50%;transform:translateX(-50%);top:auto;bottom:calc(22px + env(safe-area-inset-bottom,0px));width:min(80vw,340px);height:52px}
@@ -299,6 +299,34 @@ button{font:inherit;color:inherit;cursor:inherit}
 #board img{width:min(92vw,1100px,calc(84vh*868/580));height:auto;border-radius:6px;box-shadow:0 20px 50px rgba(0,0,0,.5);transform:translate(var(--fx,0),var(--fy,0)) scale(.2) rotate(-4deg);transition:transform .55s cubic-bezier(.2,1.15,.3,1)}
 #board.on img{transform:none}
 #board .x{position:absolute;top:calc(16px + env(safe-area-inset-top,0px));right:max(16px,env(safe-area-inset-right,0px));width:44px;height:44px;border-radius:50%;border:0;background:var(--paper);color:var(--ink);font-size:24px;line-height:1;cursor:pointer}
+/* 쇼핑카트 페이지 탭: SHOP(끌어 담기) / LAUNDRY GAME(빨래 받기) */
+#ct .ct-shop,#ct .ct-game{position:absolute;inset:0}
+#ct [hidden]{display:none}
+#ct .ct-tabs{position:absolute;z-index:8;left:50%;top:calc(44px + env(safe-area-inset-top,0px));transform:translateX(-50%);display:flex;gap:4px;background:#fbf3e2;padding:5px;border-radius:999px;box-shadow:0 3px 0 var(--ink);white-space:nowrap}
+#ct .ct-tabs button{border:0;background:none;color:var(--ink);font-family:var(--f-display);font-size:16px;letter-spacing:.06em;padding:7px 16px;border-radius:999px;cursor:pointer}
+#ct .ct-tabs button.on{background:var(--ink);color:#fbf3e2}
+/* 빨래 받기 미니게임 */
+#ct .ct-game{overflow:hidden;touch-action:none;cursor:ew-resize}
+#ct .g-hud{position:absolute;z-index:5;left:50%;top:calc(100px + env(safe-area-inset-top,0px));transform:translateX(-50%);display:flex;gap:10px;font-family:var(--f-display);font-size:18px;letter-spacing:.06em;pointer-events:none}
+#ct .g-hud span{white-space:nowrap;background:#fbf3e2;padding:4px 14px;border-radius:999px;box-shadow:0 3px 0 var(--ink)}
+#ct .g-hud .g-score{background:var(--tomato);color:#fff}
+#ct .g-item{position:absolute;left:0;top:0;width:var(--gs);height:var(--gs);object-fit:contain;pointer-events:none;filter:drop-shadow(0 4px 0 rgba(29,26,23,.18));will-change:transform}
+#ct .g-pop{position:absolute;z-index:6;font-family:var(--f-display);font-size:22px;color:var(--ink);pointer-events:none;animation:gPop .6s ease-out forwards}
+#ct .g-pop.miss{color:#b0466f}
+@keyframes gPop{from{transform:translate(-50%,0);opacity:1}to{transform:translate(-50%,-46px);opacity:0}}
+#ct .g-cart{position:absolute;z-index:4;left:0;bottom:calc(5% + env(safe-area-inset-bottom,0px));width:min(24vw,270px);aspect-ratio:200/170;will-change:transform}
+#ct .g-cart svg{position:absolute;inset:0;width:100%;height:100%;z-index:2;overflow:visible}
+#ct .g-cart .ct-pile img{width:44%}
+#ct .g-over{position:absolute;z-index:7;left:50%;top:52%;transform:translate(-50%,-50%);width:min(86vw,380px);background:#fbf3e2;border-radius:22px;box-shadow:0 6px 0 var(--ink);padding:26px 24px 22px;text-align:center;cursor:default}
+#ct .g-over h3{margin:0 0 8px;font-family:var(--f-display);font-size:34px;letter-spacing:.06em}
+#ct .g-over p{margin:0 0 16px;font-size:14px;line-height:1.55;opacity:.75}
+#ct .g-over .g-res{font-family:var(--f-display);font-size:22px;opacity:1;margin-bottom:14px}
+@media (max-width:760px),(max-aspect-ratio:1/1){
+  #ct .ct-tabs{top:calc(88px + env(safe-area-inset-top,0px))}
+  #ct .g-hud{top:calc(140px + env(safe-area-inset-top,0px));font-size:16px}
+  #ct .g-cart{width:min(46vw,240px)}
+}
+#ct .g-start{height:54px;padding:0 34px;border:0;border-radius:999px;background:var(--tomato);color:#fff;font-family:var(--f-display);font-size:22px;letter-spacing:.08em;box-shadow:0 4px 0 var(--ink);cursor:pointer}
 </style>
 
 <div id="view" aria-label="빨래방 3D 공간. 드래그해서 둘러보세요"><canvas id="gl"></canvas></div>
@@ -1210,7 +1238,7 @@ function renderDial(){
 
 /* ===== 쇼핑카트(임시): 옷을 끌어서 카트에 넣고 CHECKOUT → 옆에서 결제창. 실제 결제는 없음 ===== */
 let ct=null;
-function stopCart(){if(!ct)return;removeEventListener('pointermove',ct.mv);removeEventListener('pointerup',ct.up);removeEventListener('pointercancel',ct.up);ct.ghost&&ct.ghost.remove();ct=null}
+function stopCart(){if(!ct)return;ct.g&&ct.g.stop();removeEventListener('pointermove',ct.mv);removeEventListener('pointerup',ct.up);removeEventListener('pointercancel',ct.up);ct.ghost&&ct.ghost.remove();ct=null}
 function renderCart(){
   stopCart();
   const won=v=>'₩'+v.toLocaleString('ko-KR'), num=t=>+String(t).replace(/[^0-9]/g,''), pic=i=>'img/cloth3d/'+String(i+1).padStart(2,'0')+'.webp';
@@ -1218,11 +1246,15 @@ function renderCart(){
     '<path d="M6 22h22l12 20"/><path d="M40 42h152l-16 70H54z" fill="rgba(251,243,226,.42)"/>'+
     '<path d="M71 42l6 70M102 42v70M133 42l-4 70M164 42l-9 70M44 65h143M49 89h133" stroke-width="3.5"/>'+
     '<path d="M54 112l6 18h118"/><circle cx="74" cy="148" r="11" fill="#1d1a17"/><circle cx="164" cy="148" r="11" fill="#1d1a17"/></svg>';
-  panel.innerHTML='<div id="ct"><button class="back" data-back>← BACK</button><div class="ct-tip">옷을 끌어서 카트에 쏙 넣어 보세요</div>'+
+  panel.innerHTML='<div id="ct"><button class="back" data-back>← BACK</button><div class="ct-tabs" role="tablist"><button class="on" data-tab="shop" role="tab">SHOP</button><button data-tab="game" role="tab">LAUNDRY GAME</button></div>'+
+    '<div class="ct-shop"><div class="ct-tip">옷을 끌어서 카트에 쏙 넣어 보세요</div>'+
     '<div class="ct-items">'+CLOTHES.map((c,i)=>'<div class="ct-it" data-i="'+i+'" style="--r:'+((i*37%13)-6)+'deg"><img src="'+pic(i)+'" alt="'+c[0]+'" draggable="false"></div>').join('')+'</div>'+
     '<div class="ct-cart"><div class="ct-pile"></div>'+CART_SVG+'<span class="ct-n">0</span></div>'+
     '<button class="ct-co" disabled>CHECKOUT</button><div class="ct-dim"></div>'+
-    '<aside class="ct-drawer" aria-label="결제"><button class="x" aria-label="닫기">×</button><div class="ct-body"></div></aside></div>';
+    '<aside class="ct-drawer" aria-label="결제"><button class="x" aria-label="닫기">×</button><div class="ct-body"></div></aside></div>'+
+    '<div class="ct-game" hidden><div class="g-hud"><span class="g-score">0</span><span class="g-time">30s</span><span class="g-best">BEST 0</span></div><div class="g-field"></div>'+
+    '<div class="g-cart"><div class="ct-pile"></div>'+CART_SVG+'</div>'+
+    '<div class="g-over"><h3>LAUNDRY CATCH</h3><p>건조기에서 날아오는 빨래를 카트로 받아요!<br>마우스·손가락으로 끌거나 ← → 키로 움직여요</p><button class="g-start">START</button></div></div></div>';
   const root=$('#ct'), cartEl=root.querySelector('.ct-cart'), pile=root.querySelector('.ct-pile'), nEl=root.querySelector('.ct-n'), co=root.querySelector('.ct-co'), body=root.querySelector('.ct-body');
   ct={items:[],d:null,ghost:null};
   const sync=()=>{nEl.textContent=ct.items.length;co.disabled=!ct.items.length;co.textContent=ct.items.length?'CHECKOUT ('+ct.items.length+')':'CHECKOUT'};
@@ -1267,6 +1299,62 @@ function renderCart(){
     a.onfinish=()=>{g.remove();it.classList.remove('held');if(inCart&&ct)addToCart(i)};
   };
   addEventListener('pointermove',ct.mv);addEventListener('pointerup',ct.up);addEventListener('pointercancel',ct.up);
+  // 탭 전환
+  const shopEl=root.querySelector('.ct-shop'),gameEl=root.querySelector('.ct-game');
+  root.querySelectorAll('.ct-tabs button').forEach(b=>b.onclick=()=>{
+    const g=b.dataset.tab==='game';root.querySelectorAll('.ct-tabs button').forEach(x=>x.classList.toggle('on',x===b));
+    shopEl.hidden=g;gameEl.hidden=!g;if(!g)ct.g.stop(true);
+  });
+  ct.g=laundryGame(gameEl,pic);
+}
+/* 빨래 받기 미니게임: 30초 동안 위에서 떨어지는 옷을 카트로 받기. 점점 빨라짐. 최고 점수는 이 기기에 저장 */
+function laundryGame(el,pic){
+  const field=el.querySelector('.g-field'),cart=el.querySelector('.g-cart'),pile=cart.querySelector('.ct-pile'),over=el.querySelector('.g-over');
+  const sc=el.querySelector('.g-score'),tm=el.querySelector('.g-time'),bs=el.querySelector('.g-best'),DUR=30;
+  let best=+(localStorage.getItem('gl_laundry_best')||0),run=false,raf=0,items=[],x=.5,tx=.5,key=0,score=0,left=DUR,last=0,next=0,el0=0;
+  bs.textContent='BEST '+best;
+  const W=()=>el.clientWidth,H=()=>el.clientHeight,cw=()=>cart.offsetWidth,ch=()=>cart.offsetHeight;
+  const place=()=>{const w=W(),c=cw();cart.style.transform='translateX('+Math.max(0,Math.min(w-c,x*w-c/2))+'px)'};
+  const pop=(px,py,t,miss)=>{const d=document.createElement('div');d.className='g-pop'+(miss?' miss':'');d.textContent=t;d.style.left=px+'px';d.style.top=py+'px';el.appendChild(d);setTimeout(()=>d.remove(),650)};
+  function spawn(){
+    const w=W(),size=Math.max(54,Math.min(96,w*.075)),im=document.createElement('img');im.className='g-item';im.src=pic(Math.floor(Math.random()*20));im.alt='';
+    im.style.setProperty('--gs',size+'px');field.appendChild(im);
+    const t=DUR-left;items.push({im,size,x:size/2+Math.random()*(w-size),y:-size,v:(.2+t*.011)*H(),r:Math.random()*360,w:(Math.random()-.5)*240,done:false});
+  }
+  function frame(now){
+    if(!run)return;const dt=Math.min(.05,(now-last)/1000);last=now;
+    left-=dt;tm.textContent=Math.max(0,Math.ceil(left))+'s';
+    if(key)tx=Math.max(0,Math.min(1,tx+key*dt*1.1));x+=(tx-x)*Math.min(1,dt*14);place();
+    if((next-=dt)<=0){spawn();next=Math.max(.38,1-(DUR-left)*.022)*(.7+Math.random()*.6)}
+    const w=W(),h=H(),c=cw(),cl=Math.max(0,Math.min(w-c,x*w-c/2)),rim=h-ch()-h*.05+ch()*.24;
+    for(const it of items){
+      if(it.done)continue;const py=it.y;it.y+=it.v*dt;it.r+=it.w*dt;
+      if(py+it.size*.6<rim&&it.y+it.size*.6>=rim){   // 카트 테두리를 지나는 순간 판정
+        if(it.x>cl+c*.18&&it.x<cl+c*.95){it.done=true;it.im.remove();score++;sc.textContent=score;pop(it.x,rim-30,'+1');
+          const p=document.createElement('img');p.src=it.im.src;p.alt='';const k=pile.children.length;p.style.left=(2+(k*23)%50)+'%';p.style.bottom=Math.min(40,6+Math.floor(k/3)*6)+'%';p.style.setProperty('--r',((k*53%31)-15)+'deg');pile.appendChild(p);
+          if(pile.children.length>14)pile.firstElementChild.remove();continue}
+      }
+      if(it.y>h){it.done=true;it.im.remove();pop(it.x,h-40,'MISS',true);continue}
+      it.im.style.transform='translate('+(it.x-it.size/2)+'px,'+it.y+'px) rotate('+it.r+'deg)';
+    }
+    items=items.filter(i=>!i.done);
+    if(left<=0)return end();
+    raf=requestAnimationFrame(frame);
+  }
+  function clear(){items.forEach(i=>i.im.remove());items=[];field.innerHTML=''}
+  function start(){clear();pile.innerHTML='';score=0;left=DUR;next=.4;sc.textContent='0';tm.textContent=DUR+'s';over.hidden=true;run=true;last=performance.now();raf=requestAnimationFrame(frame)}
+  function end(){run=false;cancelAnimationFrame(raf);clear();
+    const nb=score>best;if(nb){best=score;try{localStorage.setItem('gl_laundry_best',best)}catch(e){}}bs.textContent='BEST '+best;
+    over.innerHTML='<h3>'+(nb?'NEW BEST!':'TIME UP!')+'</h3><p class="g-res">빨래 '+score+'벌 받았어요</p><button class="g-start">AGAIN</button>';over.hidden=false;over.querySelector('.g-start').onclick=start}
+  over.querySelector('.g-start').onclick=start;
+  const mv=e=>{if(!run)return;const r=el.getBoundingClientRect();tx=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width))};
+  el.addEventListener('pointermove',mv);el.addEventListener('pointerdown',mv);
+  const kd=e=>{if(el.hidden)return;if(e.key==='ArrowLeft'){key=-1;e.preventDefault()}else if(e.key==='ArrowRight'){key=1;e.preventDefault()}};
+  const ku=e=>{if((e.key==='ArrowLeft'&&key<0)||(e.key==='ArrowRight'&&key>0))key=0};
+  addEventListener('keydown',kd);addEventListener('keyup',ku);
+  requestAnimationFrame(place);
+  return {stop(keep){if(run){run=false;cancelAnimationFrame(raf);clear();over.innerHTML='<h3>LAUNDRY CATCH</h3><p>건조기에서 날아오는 빨래를 카트로 받아요!<br>마우스·손가락으로 끌거나 ← → 키로 움직여요</p><button class="g-start">START</button>';over.hidden=false;over.querySelector('.g-start').onclick=start}
+    if(!keep){removeEventListener('keydown',kd);removeEventListener('keyup',ku)}}};
 }
 
 /* ===== 게시판 크게 보기: 누른 자리에서 튀어나오듯 커짐. 아무 데나 누르거나 Esc로 닫기 ===== */
