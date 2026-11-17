@@ -3,7 +3,7 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Barlow+Condensed:wght@600;700;800&family=Do+Hyeon&family=DotGothic16&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+KR:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Barlow+Condensed:wght@600;700;800&family=Do+Hyeon&family=Cinzel:wght@500;700&family=DotGothic16&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+KR:wght@400;600;700&display=swap">
 <style>
 /* Layout: 드래그로 둘러보는 3D 동전빨래방(CSS 3D 큐브 방) + 사물 클릭 → 전체화면 패널 */
 :root{
@@ -207,6 +207,20 @@ button{font:inherit;color:inherit;cursor:inherit}
 .rcpt .ritem p{margin:calc(var(--u)*1.8) 0 0;font-family:'IBM Plex Sans KR','IBM Plex Mono',monospace;font-size:calc(var(--u)*3.1);line-height:1.4;opacity:.85}
 .rcpt .ritem p.rsz{font-family:'IBM Plex Mono',monospace}
 .rcpt .rtot{right:5.5%;top:70.1%;transform:translateY(-50%);font-size:calc(var(--u)*5.6);font-weight:600}
+#panel[data-sec="dial"]{--pbg:#2a0004;--pfg:var(--paper);padding:0;overflow:hidden}
+#dl{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3vh;touch-action:none}
+#dl .back{position:absolute;left:max(16px,env(safe-area-inset-left,0px));top:calc(14px + env(safe-area-inset-top,0px));background:#efe3bf;color:#2a0004}
+#dnum{font-family:"Cinzel","Times New Roman",serif;font-weight:700;font-size:clamp(26px,7vmin,56px);letter-spacing:.32em;margin-right:-.32em;color:#efe3bf;min-height:1.2em;transition:opacity .4s}
+#dnum.calling{animation:dblink .9s steps(2,jump-none) infinite}
+@keyframes dblink{50%{opacity:.35}}
+#dsvg{width:min(88vw,60vh);height:auto;touch-action:none;transition:transform .8s cubic-bezier(.65,0,.2,1);user-select:none;-webkit-user-select:none}
+#dl.on #dsvg{transform:translateY(-9vh) scale(.62)}
+#dinfo{position:absolute;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);width:min(92vw,520px);max-height:34vh;overflow:auto;background:#efe3bf;color:#2a0004;border-radius:16px;padding:14px 16px;box-shadow:0 10px 40px rgba(0,0,0,.45)}
+#dinfo[hidden]{display:none}
+#dinfo h3{margin:6px 0 4px;font-family:"Cinzel","Times New Roman",serif;font-size:16px;letter-spacing:.12em}
+#dinfo .crow{border-bottom:1px solid rgba(42,0,4,.25);padding:5px 0}
+#dinfo .crow .k{width:96px}
+#dinfo .hang{display:block;margin:12px auto 2px;background:#2a0004;color:#efe3bf;border:0;border-radius:999px;padding:8px 22px;font-family:var(--f-display);font-size:15px}
 @media (max-width:640px){
   .detail{grid-template-columns:1fr}
   .trow{grid-template-columns:1fr auto;gap:4px 12px}
@@ -524,6 +538,8 @@ function pick(x,y){
   const cu=Math.atan2(d.x,-d.z)/R.hspan+.5;if(cu<0||cu>=1) return null;const col=Math.min(MW-1,Math.floor(cu*MW)),fr=.5-imgLat(Math.asin(Math.max(-1,Math.min(1,d.y))))/R.vspan;
   if(fr<0||fr>=1) return null;const row=Math.floor(fr*MH);
   for(let i=R.hots.length-1;i>=0;i--)if(R.hots[i].a[row*MW+col]>100)return R.hots[i];
+  // 전화기처럼 아주 작은 물건은 주변 몇 픽셀 안을 눌러도 인식
+  for(const h of R.hots){if(h.sec!=='contact')continue;for(let dy=-7;dy<=7;dy++)for(let dx=-7;dx<=7;dx++){const rr=row+dy,cc=col+dx;if(rr>=0&&rr<MH&&cc>=0&&cc<MW&&h.a[rr*MW+cc]>100)return h}}
   return null;
 }
 function showHint(t){const h=$('#hint');h.textContent=t;h.classList.remove('off')}
@@ -616,7 +632,7 @@ function endDrag(e){
   if(!pts.size)document.body.classList.remove('grabbing');
   if(!drag||e.pointerId!==drag.id) return;
   // 클릭 시 메뉴 이동은 잠시 꺼 둠: if(drag.moved<7&&drag.hot&&e.type==='pointerup'){vy=vp=0;setHover(null);open(drag.hot.sec)}
-  if(drag.moved<7&&drag.hot&&e.type==='pointerup'){if(drag.hot.sec==='music')enterPage('gallery','music');else if(/shop_vend/.test(drag.hot.src))enterPage('receipt','shop');else if(/shop_bag/.test(drag.hot.src))enterPage('cart','shop',drag.hot)}
+  if(drag.moved<7&&drag.hot&&e.type==='pointerup'){if(drag.hot.sec==='music')enterPage('gallery','music');else if(/shop_vend/.test(drag.hot.src))enterPage('receipt','shop');else if(/shop_bag/.test(drag.hot.src))enterPage('cart','shop',drag.hot);else if(drag.hot.sec==='contact')enterPage('dial','contact')}
   drag=null;
 }
 view.addEventListener('pointerup',endDrag);view.addEventListener('pointercancel',endDrag);
@@ -638,17 +654,17 @@ let current=null, rafId=0, bag=0;
 function head(title,kr,right=''){return `<div class="p-head"><button class="back" data-back>← BACK</button><h2>${title}</h2>${kr?`<span class="kr">${kr}</span>`:''}${right?`<span class="right">${right}</span>`:''}</div>`}
 function open(sec){
   current=sec; panel.dataset.sec=sec; panel.hidden=false; panel.scrollTop=0; $('#hint').classList.add('off');
-  ({cart:renderCart,receipt:renderReceipt,gallery:renderGallery,music:renderMusic,video:renderVideo,tour:renderTour,contact:renderContact,shop:renderShop})[sec]();
+  ({dial:renderDial,cart:renderCart,receipt:renderReceipt,gallery:renderGallery,music:renderMusic,video:renderVideo,tour:renderTour,contact:renderContact,shop:renderShop})[sec]();
   panel.querySelector('[data-back]')?.focus({preventScroll:true});
 }
 function closePanelNow(silent){
-  if(panel.hidden) return; panel.style.animation=''; stopReceipt(); stopCart(); stopGallery(); stopPreview(); cancelAnimationFrame(rafId); $('#vthumb').style.opacity=0;
+  if(panel.hidden) return; panel.style.animation=''; stopDial(); stopReceipt(); stopCart(); stopGallery(); stopPreview(); cancelAnimationFrame(rafId); $('#vthumb').style.opacity=0;
   panel.hidden=true; panel.innerHTML=''; panel.getAnimations().forEach(a=>a.cancel()); // 닫을 때 남은 페이드 효과 제거(다음에 열 때 투명하게 남는 것 방지)
   if(!silent&&current) document.querySelector(`[data-go="${current}"]`)?.focus({preventScroll:true});
 }
 function closePanel(silent){
   if(panel.hidden||closing) return;
-  if((current==='gallery'||current==='cart'||current==='receipt')&&!reduce&&saved){
+  if((current==='gallery'||current==='cart'||current==='receipt'||current==='dial')&&!reduce&&saved){
     closing=true;fading=true;
     camTo(saved.yaw,saved.pitch,saved.Z,1000);
     panel.animate([{clipPath:'circle(150vmax at 50% 50%)'},{clipPath:'circle(0px at 50% 50%)'}],{duration:750,easing:'cubic-bezier(.7,0,.3,1)',fill:'forwards'}).onfinish=()=>{closePanelNow(true);fading=false;closing=false};
@@ -1066,6 +1082,88 @@ function renderReceipt(){
   rc.onKey=e=>{if((e.key==='Enter'||e.key===' '||e.key==='ArrowDown')&&rc.cur&&!rc.busy){e.preventDefault();const r=rc.i%2===0;tear(rc.cur,{rot:0,vx:r?.1:-.1,vy:-.05,w:r?.0045:-.0045,right:r})}};
   addEventListener('keydown',rc.onKey);
   later(feed,reduce?1:350);
+}
+
+/* ===== 전화기: 로터리 다이얼을 손가락 멈춤쇠까지 돌렸다 놓으면 되감기며 숫자가 눌림 ===== */
+let dl=null;
+const DIAL_HA={1:29.4,2:57.2,3:86,4:115,5:144.6,6:171,7:197.6,8:222.3,9:246,0:270}, DIAL_STOP=-66, DIAL_RH=376, DIAL_LEN=7;
+const dialMax=n=>(DIAL_HA[n]-DIAL_STOP+360)%360;
+function dialTick(v){if(!Au.ctx||!Au.master||Au.muted)return;noiseHit(Au.ctx.currentTime,Au.master,v,2600,.015,'highpass')}
+function dialRing(){if(!Au.ctx||!Au.master||Au.muted)return;const t=Au.ctx.currentTime;[0,1.5].forEach(o=>[440,480].forEach(f=>tone(t+o,Au.master,f,.9,.06,'sine',2500)))}
+function stopDial(){if(!dl)return;cancelAnimationFrame(dl.raf);dl.timers.forEach(clearTimeout);dl=null}
+function dialSVG(){
+  const ns=[1,2,3,4,5,6,7,8,9,0], pos=n=>[DIAL_RH*Math.cos(DIAL_HA[n]*DEG),-DIAL_RH*Math.sin(DIAL_HA[n]*DEG)];
+  let back='',rings='',holes='',scr='';
+  ns.forEach(n=>{const [x,y]=pos(n).map(v=>+v.toFixed(1));
+    back+='<circle cx="'+x+'" cy="'+y+'" r="82" fill="#efe3bf"/><circle cx="'+x+'" cy="'+y+'" r="70" fill="none" stroke="#cdbb8a" stroke-width="2"/><text x="'+x+'" y="'+(y+38)+'" text-anchor="middle" font-size="112" font-family="Helvetica Neue,Arial,sans-serif" font-weight="600" fill="#17120d">'+n+'</text>';
+    holes+='<circle cx="'+x+'" cy="'+y+'" r="80" fill="#000"/>';
+    rings+='<circle cx="'+x+'" cy="'+y+'" r="84" fill="none" stroke="#17100a" stroke-width="7"/><circle cx="'+x+'" cy="'+y+'" r="91" fill="none" stroke="#f1e4ae" stroke-width="3" opacity=".8"/>';
+  });
+  const r=rng('brass');for(let i=0;i<46;i++){const a=r()*Math.PI*2,r1=290+r()*60,r2=r1+60+r()*120;scr+='<line x1="'+(r1*Math.cos(a)).toFixed(1)+'" y1="'+(r1*Math.sin(a)).toFixed(1)+'" x2="'+(r2*Math.cos(a)).toFixed(1)+'" y2="'+(r2*Math.sin(a)).toFixed(1)+'"/>'}
+  return '<svg id="dsvg" viewBox="-520 -520 1040 1040" aria-label="로터리 다이얼">'+
+   '<defs><radialGradient id="brass" cx=".38" cy=".3" r=".9"><stop offset="0" stop-color="#e3d29c"/><stop offset=".5" stop-color="#b79f60"/><stop offset=".85" stop-color="#8d7a45"/><stop offset="1" stop-color="#cbb77a"/></radialGradient>'+
+   '<linearGradient id="brassD" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#d8c68b"/><stop offset=".5" stop-color="#8a7640"/><stop offset="1" stop-color="#c3ae6f"/></linearGradient>'+
+   '<mask id="hm" maskUnits="userSpaceOnUse" x="-520" y="-520" width="1040" height="1040"><rect x="-520" y="-520" width="1040" height="1040" fill="#fff"/><circle r="272" fill="#000"/>'+holes+'</mask></defs>'+
+   '<circle r="492" fill="#1b0f0a"/>'+back+
+   '<g id="wheel"><g mask="url(#hm)"><circle r="488" fill="url(#brass)"/><circle r="488" fill="none" stroke="#efe0a6" stroke-width="6"/><circle r="300" fill="none" stroke="#fff" stroke-opacity=".07" stroke-width="3"/><g stroke="#fff" stroke-opacity=".09" stroke-width="2">'+scr+'</g></g>'+rings+'</g>'+
+   '<circle r="276" fill="#241a0e"/><circle r="262" fill="url(#brassD)"/><circle r="240" fill="#1a1409"/><circle r="231" fill="#eadfba"/>'+
+   '<g font-family="Cinzel,Trajan Pro,Georgia,serif" font-weight="700" font-size="60" text-anchor="middle" fill="#17120d"><text id="dt1" y="-48">IT’S TIME</text><text id="dt2" y="16">TO TELL</text><text id="dt3" y="82">YOUR STORY</text></g>'+
+   '<path d="M112 300 Q116 286 140 288 Q162 290 177 318 L256 416 Q264 428 250 430 L152 442 Q132 443 128 422 Z" fill="url(#brassD)" stroke="#2b2110" stroke-width="5"/></svg>';
+}
+function renderDial(){
+  stopDial();
+  panel.innerHTML='<div id="dl"><button class="back" data-back>← BACK</button><div id="dnum"></div>'+dialSVG()+
+    '<div id="dinfo" hidden></div></div>';
+  const box=$('#dl'), svg=$('#dsvg'), wheel=$('#wheel'), num=$('#dnum');
+  dl={rot:0,n:null,busy:false,digits:'',raf:0,timers:[]};
+  const later=(f,ms)=>dl.timers.push(setTimeout(f,ms));
+  const showNum=()=>{const d=dl.digits.split('');while(d.length<DIAL_LEN)d.push('_');num.textContent=d.join(' ')};
+  const setRot=v=>{dl.rot=v;wheel.setAttribute('transform','rotate('+v.toFixed(2)+')')};
+  const pt=e=>{const r=svg.getBoundingClientRect(),k=1040/r.width;return[(e.clientX-r.left-r.width/2)*k,(e.clientY-r.top-r.height/2)*k]};
+  const ang=p=>Math.atan2(-p[1],p[0])/DEG;
+  const norm=a=>{while(a>180)a-=360;while(a<-180)a+=360;return a};
+  const holeAt=p=>{for(const n of [1,2,3,4,5,6,7,8,9,0]){const a=(DIAL_HA[n]-dl.rot)*DEG,x=DIAL_RH*Math.cos(a),y=-DIAL_RH*Math.sin(a);if(Math.hypot(p[0]-x,p[1]-y)<=95)return n}return null};
+  showNum();
+  let g=null;
+  svg.addEventListener('pointerdown',e=>{
+    if(dl.busy||g)return; const p=pt(e),n=holeAt(p); if(n===null)return;
+    audioInit(); g={id:e.pointerId,n,prev:ang(p),mx:dialMax(n),tick:Math.floor(dl.rot/13)}; dl.n=n; try{svg.setPointerCapture(e.pointerId)}catch(_){}
+  });
+  svg.addEventListener('pointermove',e=>{
+    if(!g||e.pointerId!==g.id)return; const a=ang(pt(e)),d=norm(g.prev-a); g.prev=a;
+    const v=Math.max(0,Math.min(g.mx,dl.rot+d)); setRot(v);
+    const t=Math.floor(v/13); if(t!==g.tick){g.tick=t;dialTick(.1)}   // 감을 때 달각달각
+  });
+  const release=e=>{
+    if(!g||(e&&e.pointerId!==g.id))return; const n=g.n,reached=dl.rot>=g.mx-6; g=null;
+    dl.busy=true; const from=dl.rot, pulses=reached?(n===0?10:n):0;
+    const dur=Math.max(from/300,(pulses*.1)+.2)*1000, t0=performance.now();   // 되감기는 일정한 속도(조속기)
+    for(let k=0;k<pulses;k++) later(()=>dialTick(.35),Math.max(0,dur-(pulses-k)*100));
+    const step=now=>{
+      const p=Math.min(1,(now-t0)/dur); setRot(from*(1-p));
+      if(p<1){dl.raf=requestAnimationFrame(step);return}
+      dl.busy=false;
+      if(reached){dl.digits+=String(n);showNum();if(dl.digits.length>=DIAL_LEN)call()}
+    };
+    dl.raf=requestAnimationFrame(step);
+  };
+  svg.addEventListener('pointerup',release); svg.addEventListener('pointercancel',release);
+  function say(a,b,c){$('#dt1').textContent=a;$('#dt2').textContent=b;$('#dt3').textContent=c}
+  function call(){
+    dl.busy=true; num.classList.add('calling'); dialRing();
+    later(()=>{
+      num.classList.remove('calling'); say('HELLO?','','');
+      box.classList.add('on');
+      const info=$('#dinfo');
+      info.innerHTML=CONTACT.map(([h,rows])=>'<h3>'+h+'</h3>'+rows.map(([k,v])=>'<div class="crow"><span class="k">'+k+'</span><span class="v">'+esc(v)+'</span></div>').join('')).join('')+'<button class="hang">HANG UP</button>';
+      info.hidden=false; dialTick(.5);
+      info.querySelector('.hang').onclick=hang;
+    },3200);
+  }
+  function hang(){
+    dialTick(.5); $('#dinfo').hidden=true; box.classList.remove('on'); say('IT’S TIME','TO TELL','YOUR STORY');
+    dl.digits=''; showNum(); dl.busy=false;
+  }
 }
 
 /* ===== 쇼핑카트(임시): 옷을 끌어서 카트에 넣고 CHECKOUT → 옆에서 결제창. 실제 결제는 없음 ===== */
