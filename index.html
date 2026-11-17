@@ -1293,6 +1293,10 @@ function makeToggle(src,uni,seg1,seg2){
   function make(u){const v=document.createElement('video');v.src=u;v.muted=true;v.playsInline=true;v.setAttribute('playsinline','');v.preload='auto';
     const t=new THREE.VideoTexture(v);t.minFilter=THREE.LinearFilter;t.generateMipmaps=false;R.mat.uniforms[uni].value=t;
     v.addEventListener('playing',()=>setTimeout(()=>{if(T.busy||T.moved)T.on=1},60));T.v=v}
+  // 처음 상태를 '움직인 뒤'(블라인드 닫힘·캐비닛 열림)로: 앞 장면 끝 직전으로 옮겨 잠깐 재생 후 멈춤
+  T.preset=()=>T.load().then(u=>new Promise(res=>{if(!R)return res();make(u);const v=T.v;
+    const at=()=>{v.currentTime=Math.max(0,seg1[1]-.08);v.addEventListener('seeked',()=>{T.moved=true;T.stopAt=seg1[1];v.play().then(()=>setTimeout(res,150),res)},{once:true})};
+    if(v.readyState<1)v.addEventListener('loadedmetadata',at,{once:true});else at();}));
   T.tick=()=>{const v=T.v;if(v&&T.stopAt&&v.currentTime>=T.stopAt){v.pause();T.stopAt=0;const d=T.done;T.done=null;d&&d()}
     T.cur+=(T.on-T.cur)*.35;if(Math.abs(T.on-T.cur)<.01)T.cur=T.on;return T.cur};   // 켜고 끌 때 살짝 페이드
   return T;
@@ -1305,6 +1309,7 @@ const playBlind=()=>blind.press();
 requestAnimationFrame(frame);
 const built=buildRoom().catch(e=>console.error(e));
 // 그림이 준비되면 분홍 화면이 사라지고 바로 방이 보임. 소리는 첫 터치/클릭 때 시작(브라우저 규칙)
-built.then(()=>{setTimeout(()=>{blind.load();locker.load()},1500);yaw=startYaw();pitch=-4;$('#loader').classList.add('gone');setTimeout(()=>$('#hint').classList.add('off'),9000)});
+built.then(()=>Promise.race([Promise.all([blind.preset(),locker.preset()]),new Promise(r=>setTimeout(r,3000))])).then(()=>{yaw=startYaw();   // 기본: 창문 닫힘·캐비닛 열림이 준비된 뒤 입장
+  pitch=-4;$('#loader').classList.add('gone');setTimeout(()=>$('#hint').classList.add('off'),9000)});
 addEventListener('pointerdown',()=>audioInit(),{once:true});
 </script>
