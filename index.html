@@ -1011,12 +1011,7 @@ async function renderGallery(){
 let rc=null, opening=false;
 // 왼쪽 아웃핏 사진과 그 영수증 내용. 사진을 더 넣으면 영수증을 뜯을 때마다 다음 아웃핏으로 넘어감
 const OUTFITS=[
-  {photo:'img/rc_model.webp',pos:'50% 12%',style:'sweet sunday',items:[['Pink Ruffle Tee','₩48,000'],['Cream Bloomer Shorts','₩42,000'],['Ribbon Lace-up Flats','₩69,000'],['Pearl Drop Earrings','₩22,000']]},
-  {photo:'img/rc_look2.webp',pos:'50% 18%',style:'garden tea party',items:[['Floral Collar Blouse','₩58,000'],['Pink Pleated Frill Shorts','₩52,000'],['Satin Headband','₩18,000']]},
-  {photo:'img/rc_look3.webp',pos:'50% 22%',style:'mint candy',items:[['White Ruffle Button Top','₩54,000'],['Mint Frill Shorts','₩46,000'],['Buckle Strap Boots','₩138,000']]},
-  {photo:'img/rc_look4.webp',pos:'50% 20%',style:'pigtail princess',items:[['White Ruffle Mini Dress','₩79,000'],['Mint Sheer Tights','₩16,000'],['Clear Strap Wedges','₩98,000'],['Hair Charm Set','₩14,000']]},
-  {photo:'img/rc_look5.webp',pos:'50% 25%',style:'ballet core',items:[['Pink Satin Slip Dress','₩89,000'],['Ribbon Lace Tights','₩19,000'],['Fluffy Leg Warmers','₩28,000'],['Pearl Mary Jane Sneakers','₩112,000'],['Blue Ribbon Bow','₩15,000']]},
-  {photo:'img/rc_look6.webp',pos:'50% 30%',style:'lazy morning',items:[['Puff Sleeve Nightdress','₩65,000'],['Lace Trim Bloomers','₩32,000'],['Velvet Hair Rollers','₩12,000'],['Floral Body Lotion','₩48,000']]},
+  {photo:'img/rc_look7.webp',pos:'50% 85%',style:'travel day',items:[['Tan Bomber Jacket','₩98,000'],['Blue Oxford Shirt','₩49,000'],['Butter Wide Trousers','₩62,000'],['Pony Hair Clogs','₩119,000'],['Tortoise Oval Sunglasses','₩38,000']]},
 ];
 function receiptHTML(i){   // 빈 종이 위에 아웃핏 영수증을 글자로 찍음
   const o=OUTFITS[i%OUTFITS.length],t=new Date(),z=v=>String(v).padStart(2,'0'),num=v=>+String(v).replace(/[^0-9]/g,''),won=v=>'₩'+v.toLocaleString('ko-KR');
@@ -1274,8 +1269,8 @@ $('#board').addEventListener('click',hideBoard);
 addEventListener('keydown',e=>{if(e.key==='Escape'&&$('#board').classList.contains('on'))hideBoard()});
 
 /* ===== 창문: 누를 때마다 블라인드가 닫히고, 다시 누르면 열림. 영상에서 그 구간만 재생하고 멈춤 ===== */
-// 영상(4초) 안의 구간: 0.6~1.4초 닫힘, 2.1~2.85초 열림 (앞뒤 여유를 조금 둠)
-const blind={v:null,on:0,state:'open',stopAt:0,done:null},BLIND_CLOSE=[.55,1.45],BLIND_OPEN=[2.05,2.95];
+// 영상(1.8초) = 닫히는 장면 0~0.9초 + 그걸 거꾸로 돌린 장면 0.9~1.8초. 열 때는 닫힘을 역재생한 것처럼 보임
+const blind={v:null,on:0,state:'open',stopAt:0,done:null},BLIND_CLOSE=[0,.9],BLIND_OPEN=[.9,1.75];
 // 영상은 통째로 미리 받아 둠(중간 위치로 바로 넘길 수 있게, 누를 때 기다리지 않게)
 let blindSrc=null;const blindLoad=()=>blindSrc||(blindSrc=fetch('pano/window_blind.mp4').then(r=>{if(!r.ok)throw 0;return r.blob()}).then(b=>URL.createObjectURL(b)).catch(()=>'pano/window_blind.mp4'));
 function playBlind(){
