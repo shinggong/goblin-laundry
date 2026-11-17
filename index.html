@@ -378,7 +378,8 @@ const yawMax=()=>R&&R.hspan<2*Math.PI-1e-3?Math.max(0,(R.hspan/2-edgeLon())/DEG)
 function imgLat(lat){const h=R.vspan/2,a=h*.7,s=Math.abs(lat);if(h>=Math.PI/2-1e-3||s<=a)return lat;return Math.sign(lat)*(a+(h-a)*Math.sin((s-a)/(Math.PI/2-a)*Math.PI/2))}
 function realLat(L){const h=R.vspan/2,a=h*.7,s=Math.abs(L);if(h>=Math.PI/2-1e-3||s<=a)return L;return Math.sign(L)*(a+Math.asin(Math.min(1,(s-a)/(h-a)))*2/Math.PI*(Math.PI/2-a))}
 
-function loadImg(src){return new Promise((ok,no)=>{const i=new Image();i.onload=()=>ok(i);i.onerror=()=>no(new Error(src));i.src=src})}
+// 네트워크가 잠깐 끊겨도 실패하지 않게 최대 3번 다시 받기
+function loadImg(src,n=0){return new Promise((ok,no)=>{const i=new Image();i.onload=()=>ok(i);i.onerror=()=>n<3?setTimeout(()=>loadImg(src,n+1).then(ok,no),600*(n+1)):no(new Error(src));i.src=n?src+(src.includes('?')?'&':'?')+'r='+n:src})}
 function canvasOf(img,w,h){const c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);return c}
 function texOf(src){const t=new THREE.Texture(src);t.minFilter=THREE.LinearFilter;t.generateMipmaps=false;t.wrapS=t.wrapT=THREE.ClampToEdgeWrapping;t.needsUpdate=true;return t}
 
