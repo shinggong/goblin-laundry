@@ -158,13 +158,13 @@ button{font:inherit;color:inherit;cursor:inherit}
 #gzoom .zinfo p{margin:14px 0 10px;font-size:15px;line-height:1.55;opacity:.85}
 #gzoom .zinfo .zs{font-size:13px;opacity:.65;letter-spacing:.04em} /* 크게 보기는 세탁기 문 위로 */
 #gal .back{background:var(--paper);color:var(--ink);position:absolute;left:max(16px,env(safe-area-inset-left,0px));top:calc(14px + env(safe-area-inset-top,0px));z-index:2}
-#panel[data-sec="receipt"]{--pbg:var(--tomato);padding:0;overflow:hidden}
-#rc{position:absolute;inset:0;overflow:hidden;touch-action:none;--rw:min(82vw,380px,calc(80vh*820/1266));--peek:calc(var(--rw)*.045)}
-#rc .back{position:absolute;z-index:5;left:max(16px,env(safe-area-inset-left,0px));top:calc(14px + env(safe-area-inset-top,0px));margin-top:30px}
+#panel[data-sec="receipt"]{--pbg:#f3d6ba;padding:0;overflow:hidden}
+#rc{position:absolute;inset:0;overflow:hidden;touch-action:none;--rw:min(82vw,380px,calc(80vh*820/1266));--peek:calc(var(--rw)*.045);--st:6px;background:url(img/rc_bg.webp) 0 0/calc(var(--rw)*800/981) auto repeat}
+#rc .back{position:absolute;z-index:6;left:max(16px,env(safe-area-inset-left,0px));top:calc(14px + env(safe-area-inset-top,0px));margin-top:30px}
 #rc .rbag{position:absolute;z-index:5;right:max(16px,env(safe-area-inset-right,0px));top:calc(14px + env(safe-area-inset-top,0px));margin-top:30px;font-family:var(--f-led);font-size:16px;color:var(--ink)}
 /* 슬롯에서 나오는 종이가 살짝 휘어 보이게: 슬롯 바로 밑은 그늘, 그 아래 볼록한 부분은 살짝 밝게, 양옆은 둥글게 어둡게 */
 /* 종이는 슬롯 검은 틈 한가운데에서 나옴(틈 아래 턱보다 앞에 걸쳐짐) */
-#rc .feedwin{position:absolute;z-index:5;left:0;right:0;top:23px;bottom:0;overflow:hidden;pointer-events:none}
+#rc .feedwin{position:absolute;z-index:5;left:0;right:0;top:calc(var(--st) + var(--rw)*78/981);bottom:0;overflow:hidden;pointer-events:none}
 /* 그늘은 종이가 있는 높이만큼만 보임: 뜯으면 살짝 나온 다음 장 높이로 줄고, 나올 때 다시 늘어남 */
 #rc .curl{position:absolute;z-index:3;left:50%;top:0;width:var(--rw);height:var(--peek);transform:translateX(-50%);overflow:hidden;opacity:0;transition:height .3s linear,opacity .3s;
   background:linear-gradient(rgba(29,22,16,.78),rgba(29,22,16,.42) 9%,rgba(29,22,16,.14) 22%,rgba(255,255,255,.5) 40%,rgba(255,255,255,0) 64%,rgba(29,22,16,.12) 82%,rgba(29,22,16,0)) 0 0/100% 130px no-repeat}
@@ -172,8 +172,10 @@ button{font:inherit;color:inherit;cursor:inherit}
   -webkit-mask-image:linear-gradient(#000,transparent);mask-image:linear-gradient(#000,transparent)}
 #rc.has .curl{opacity:1}
 #rc.fed .curl{height:130px}
-#rc .slot{position:absolute;z-index:4;left:50%;top:0;width:calc(var(--rw) + 56px);height:34px;transform:translateX(-50%);background:var(--ink);border-radius:0 0 22px 22px}
-#rc .slot::after{content:"";position:absolute;left:18px;right:18px;bottom:7px;height:9px;border-radius:5px;background:#000;box-shadow:inset 0 3px 4px rgba(0,0,0,.9),0 1px 0 rgba(255,255,255,.08)}
+/* 슬롯: 피그마 시안 그림(낡은 베이지 금속 틀). 종이는 검은 입구 윗변에서 나와 틀 아랫부분 앞에 걸쳐짐 */
+/* 좁은 화면에선 슬롯이 BACK 버튼과 겹치지 않게 아래로 */
+@media (max-width:600px){#rc{--st:calc(84px + env(safe-area-inset-top,0px))}}
+#rc .slot{position:absolute;z-index:4;left:50%;top:var(--st);width:calc(var(--rw)*1204/981);height:calc(var(--rw)*300/981);transform:translateX(-50%);background:url(img/rc_slot.webp) 0 0/100% 100% no-repeat}
 #rc .stage{position:absolute;z-index:2;left:50%;top:var(--peek);pointer-events:none;width:var(--rw);height:calc(var(--rw)*1266/820);transform:translateX(-50%)}
 .rcpt{position:absolute;inset:0;transform-origin:50% 0;pointer-events:auto;filter:drop-shadow(0 3px 5px rgba(29,26,23,.22));touch-action:none;cursor:grab}
 .rcpt .paper{position:absolute;inset:0;background:var(--paper);color:var(--ink);display:grid;grid-template-columns:20px 1fr;padding:0 12px 26% 8px;gap:6px}
