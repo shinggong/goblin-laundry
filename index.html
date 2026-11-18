@@ -3,7 +3,7 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Pacifico&family=Barlow+Condensed:wght@600;700;800&family=Do+Hyeon&family=Cinzel:wght@500;700&family=DotGothic16&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+KR:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Pacifico&family=Barlow+Condensed:wght@600;700;800&family=Do+Hyeon&family=DotGothic16&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+KR:wght@400;600;700&display=swap">
 <style>
 /* Layout: 드래그로 둘러보는 3D 동전빨래방(CSS 3D 큐브 방) + 사물 클릭 → 전체화면 패널 */
 :root{
@@ -216,14 +216,14 @@ button{font:inherit;color:inherit;cursor:inherit}
 #panel[data-sec="dial"]{--pbg:#2a0004;--pfg:var(--paper);padding:0;overflow:hidden}
 #dl{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3vh;touch-action:none}
 #dl .back{position:absolute;left:max(16px,env(safe-area-inset-left,0px));top:calc(14px + env(safe-area-inset-top,0px));background:#efe3bf;color:#2a0004}
-#dnum{font-family:"Cinzel","Times New Roman",serif;font-weight:700;font-size:clamp(26px,7vmin,56px);letter-spacing:.32em;margin-right:-.32em;color:#efe3bf;min-height:1.2em;transition:opacity .4s}
+#dnum{font-size:clamp(26px,7vmin,56px);letter-spacing:.32em;margin-right:-.32em;color:#efe3bf;min-height:1.2em;transition:opacity .4s}
 #dnum.calling{animation:dblink .9s steps(2,jump-none) infinite}
 @keyframes dblink{50%{opacity:.35}}
 #dsvg{width:min(88vw,60vh);height:auto;touch-action:none;transition:transform .8s cubic-bezier(.65,0,.2,1);user-select:none;-webkit-user-select:none}
 #dl.on #dsvg{transform:translateY(-9vh) scale(.62)}
 #dinfo{position:absolute;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);width:min(92vw,520px);max-height:34vh;overflow:auto;background:#efe3bf;color:#2a0004;border-radius:16px;padding:14px 16px;box-shadow:0 10px 40px rgba(0,0,0,.45)}
 #dinfo[hidden]{display:none}
-#dinfo h3{margin:6px 0 4px;font-family:"Cinzel","Times New Roman",serif;font-size:16px;letter-spacing:.12em}
+#dinfo h3{margin:6px 0 4px;font-size:16px;letter-spacing:.12em}
 #dinfo .crow{border-bottom:1px solid rgba(42,0,4,.25);padding:5px 0}
 #dinfo .crow .k{width:96px}
 #dinfo .hang{display:block;margin:12px auto 2px;background:#2a0004;color:#efe3bf;border:0;border-radius:999px;padding:8px 22px;font-family:var(--f-display);font-size:15px}
@@ -331,24 +331,38 @@ button{font:inherit;color:inherit;cursor:inherit}
    색: 방 그림에서 가져옴 / 글씨: 간판 손글씨(Pacifico) · 라벨 좁은 대문자(Barlow Condensed) · 세탁기 숫자판 도트(DotGothic16) */
 :root{--lc-pink:#f08bb6;--lc-hot:#e5508b;--lc-teal:#36b6c8;--lc-cream:#fbf3e2;--lc-chrome:#a9b1b6;--lc-led:#9dffb0;
   --f-sign:"Pacifico","Brush Script MT",cursive;--f-label:"Barlow Condensed","Arial Narrow",sans-serif;--f-dot:"DotGothic16","Courier New",monospace}
-/* 로딩: 작은 세탁기 문 안에서 빨래가 돌고 물이 찰랑, 아래 숫자판에 진행률 */
-#gal .gload{position:absolute;inset:0;z-index:3;display:grid;place-content:center;justify-items:center;gap:20px;background:#000;transition:opacity .6s;pointer-events:none}
+/* 로딩: 아주 작게 — 도는 얇은 원 + 진행률 숫자만 */
+#gal .gload{position:absolute;inset:0;z-index:3;display:grid;place-content:center;justify-items:center;gap:10px;background:#000;transition:opacity .5s;pointer-events:none;color:var(--lc-cream)}
 #gal .gload.done{opacity:0}
-#gal .gl-door{width:148px;height:148px;border-radius:50%;padding:15px;background:radial-gradient(circle at 34% 28%,#fff,var(--lc-cream) 45%,#d8ccb2);box-shadow:0 0 0 5px var(--lc-pink),0 0 0 9px #000,0 0 0 11px var(--lc-chrome),0 10px 30px rgba(240,139,182,.25)}
-#gal .gl-glass{position:relative;width:100%;height:100%;border-radius:50%;overflow:hidden;background:radial-gradient(circle at 50% 38%,#2f7b92,#0c2a36 72%);box-shadow:inset 0 0 0 5px var(--lc-chrome),inset 0 8px 16px rgba(0,0,0,.65)}
-#gal .gl-drum{position:absolute;inset:14%;animation:glSpin 1.5s linear infinite}
-#gal .gl-drum i{position:absolute;width:30%;height:30%}
-#gal .gl-drum .t{left:6%;top:30%;background:var(--lc-pink);clip-path:polygon(30% 0,70% 0,100% 22%,86% 44%,76% 36%,76% 100%,24% 100%,24% 36%,14% 44%,0 22%)}
-#gal .gl-drum .k{right:4%;top:18%;width:22%;height:34%;background:var(--lc-teal);clip-path:polygon(20% 0,72% 0,72% 62%,100% 74%,100% 100%,20% 100%);transform:rotate(25deg)}
-#gal .gl-drum .p{left:38%;bottom:2%;width:26%;height:32%;background:var(--lc-cream);clip-path:polygon(0 0,100% 0,100% 100%,62% 100%,50% 38%,38% 100%,0 100%)}
-#gal .gl-water{position:absolute;left:-55%;width:210%;aspect-ratio:1;top:56%;border-radius:42%;background:rgba(127,211,230,.55);animation:glSpin 5s linear infinite}
-#gal .gl-water.b{top:60%;border-radius:45%;background:rgba(190,236,245,.4);animation-duration:7s;animation-direction:reverse}
-#gal .gl-glass::after{content:"";position:absolute;inset:8%;border-radius:50%;background:radial-gradient(circle at 30% 24%,rgba(255,255,255,.55),rgba(255,255,255,0) 32%)}
+.gl-ring{width:22px;height:22px;border-radius:50%;border:2px solid currentColor;border-right-color:transparent;opacity:.75;animation:glSpin .9s linear infinite}
+.gl-txt{font-family:var(--f-label);font-weight:700;font-size:11px;letter-spacing:.2em;opacity:.6}
 @keyframes glSpin{to{transform:rotate(360deg)}}
-#gal .gl-led{min-width:150px;padding:6px 14px;border-radius:6px;background:#0b1a12;box-shadow:inset 0 0 0 2px #1d3a29;color:var(--lc-led);font-family:var(--f-dot);font-size:17px;letter-spacing:.12em;text-align:center;text-shadow:0 0 6px rgba(157,255,176,.7)}
-#gal .gl-led b{font-weight:400;animation:glBlink 1s steps(2,jump-none) infinite}
-@keyframes glBlink{50%{opacity:.25}}
-@media (prefers-reduced-motion:reduce){#gal .gl-drum,#gal .gl-water{animation-duration:12s}}
+@media (prefers-reduced-motion:reduce){.gl-ring{animation-duration:3s}}
+/* ===== 사이트 전체에 같은 디자인 시스템 적용 ===== */
+:focus-visible{outline-color:var(--lc-hot)}
+#loader{gap:10px;color:var(--ink)}   /* 첫 로딩도 작은 원 + 숫자만 */
+/* 물건 위 이름표·알림·BACK 버튼 */
+#hotlabel{background:var(--lc-hot);color:var(--lc-cream)}
+#toast{color:var(--lc-cream)}
+#panel .back{background:var(--lc-cream);color:var(--ink);border:2px solid var(--ink);box-shadow:0 3px 0 var(--lc-hot)}
+#board .x{background:var(--lc-cream);border:2px solid var(--ink);box-shadow:0 3px 0 var(--lc-hot)}
+/* 쇼핑카트·미니게임·결제창 */
+#panel[data-sec="cart"]{--pbg:var(--lc-pink)}
+#ct{background:radial-gradient(var(--lc-cream) 23%,transparent 24.5%) 0 0/56px 56px,radial-gradient(var(--lc-cream) 23%,transparent 24.5%) 28px 28px/56px 56px,var(--lc-pink)}
+@media (max-width:760px),(max-aspect-ratio:1/1){#ct{background-size:40px 40px;background-position:0 0,20px 20px,0 0}}
+#ct .ct-n,#ct .g-hud .g-score{background:var(--lc-hot)}
+#ct .ct-co{box-shadow:0 4px 0 var(--lc-hot)}
+#ct .ct-buy,#ct .g-start{background:var(--lc-hot)}
+#ct .ct-drawer h3,#ct .g-over h3{font-family:var(--f-sign);font-weight:400;letter-spacing:0;color:var(--lc-hot);text-transform:none}
+#ct .ct-list .pr,#ct .g-hud .g-time{font-family:var(--f-dot)}
+#ct .ct-sum span:last-child{font-family:var(--f-dot);font-size:22px}
+/* 전화 다이얼: 진한 풀색 바탕 + 숫자판 도트 글씨 + 간판 손글씨 */
+#panel[data-sec="dial"]{--pbg:#0f3a43}
+#dnum{font-family:var(--f-dot);font-weight:400;color:var(--lc-led);text-shadow:0 0 8px rgba(157,255,176,.6);letter-spacing:.24em;margin-right:-.24em}
+#dinfo{background:var(--lc-cream);color:var(--ink)}
+#dinfo h3{font-family:var(--f-sign);font-weight:400;font-size:24px;letter-spacing:0;color:var(--lc-hot)}
+#dinfo .crow{border-bottom-color:rgba(29,26,23,.2)}
+#dinfo .hang{background:var(--lc-hot);color:var(--lc-cream)}
 </style>
 
 <div id="view" aria-label="빨래방 3D 공간. 드래그해서 둘러보세요"><canvas id="gl"></canvas></div>
@@ -362,7 +376,7 @@ button{font:inherit;color:inherit;cursor:inherit}
 <div id="toast" role="status"></div>
 <div id="board" aria-hidden="true"><img src="img/board.webp" alt="게시판" draggable="false"><button class="x" aria-label="닫기">×</button></div>
 
-<div id="loader" aria-label="불러오는 중"></div>
+<div id="loader" aria-label="불러오는 중"><div class="gl-ring"></div><div class="gl-txt"><span>0</span>%</div></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
@@ -628,7 +642,7 @@ addEventListener('resize',resize);
 let loadDone=0;
 async function buildRoom(){
   if(!window.THREE){showHint('3D 도구를 불러오지 못했어요. 새로고침해 주세요.');return}
-  const n=PANO.hot.length+1,track=p=>p.then(v=>{loadDone++;return v});
+  const n=PANO.hot.length+1,track=p=>p.then(v=>{loadDone++;const e=$('#loader .gl-txt span');if(e)e.textContent=Math.round(loadDone/n*100);return v});   // 첫 로딩 숫자판
   let room,imgs;
   try{[room,...imgs]=await Promise.all([track(loadImg(PANO.room)),...PANO.hot.map(h=>track(loadImg(h.src)))])}
   catch(e){showHint('그림을 불러오지 못했어요: '+e.message);return}
@@ -907,8 +921,8 @@ function stopGallery(){
 async function renderGallery(){
   stopGallery();
   panel.innerHTML='<div id="gal"><canvas id="galc"></canvas><img class="gdoor" src="img/washer_front.webp" alt=""><button class="back" data-back>← BACK</button><div id="gzoom" hidden></div>'+
-    '<div class="gload" role="status" aria-label="불러오는 중"><div class="gl-door"><div class="gl-glass"><div class="gl-water"></div><div class="gl-water b"></div><div class="gl-drum"><i class="t"></i><i class="k"></i><i class="p"></i></div></div></div><div class="gl-led">WASHING <span>0</span>%<b>_</b></div></div></div>';
-  let gDone=0;const gTot=GALLERY_PHOTOS.length+Object.keys(CLOTH3D).length+1,gStep=()=>{gDone++;const e=$('#gal .gl-led span');if(e)e.textContent=Math.min(99,Math.round(gDone/gTot*100))};   // 숫자판 진행률
+    '<div class="gload" role="status" aria-label="불러오는 중"><div class="gl-ring"></div><div class="gl-txt"><span>0</span>%</div></div></div>';
+  let gDone=0;const gTot=GALLERY_PHOTOS.length+Object.keys(CLOTH3D).length+1,gStep=()=>{gDone++;const e=$('#gal .gl-txt span');if(e)e.textContent=Math.min(99,Math.round(gDone/gTot*100))};   // 숫자판 진행률
   placeDoor();
   if(!window.THREE) return;
   const NC=Math.max(15,GALLERY_PHOTOS.length), arts=[]; // 사진 수만큼 카드
@@ -1106,7 +1120,7 @@ async function renderGallery(){
     renderer.setRenderTarget(rt);renderer.render(scene,cam);renderer.setRenderTarget(null);renderer.render(post,pcam); gal.raf=requestAnimationFrame(tick);
   };
   gal.raf=requestAnimationFrame(tick);
-  {const l=$('#gal .gload');if(l){const e=l.querySelector('.gl-led span');if(e)e.textContent='100';requestAnimationFrame(()=>requestAnimationFrame(()=>{l.classList.add('done');setTimeout(()=>l.remove(),700)}))}}   // 첫 장면이 그려지면 로딩 걷힘
+  {const l=$('#gal .gload');if(l){const e=l.querySelector('.gl-txt span');if(e)e.textContent='100';requestAnimationFrame(()=>requestAnimationFrame(()=>{l.classList.add('done');setTimeout(()=>l.remove(),700)}))}}   // 첫 장면이 그려지면 로딩 걷힘
 }
 
 /* ===== 영수증: Change 기계에서 영수증이 찍혀 나오고, 하나씩 뜯어 가는 페이지 ===== */
@@ -1243,7 +1257,7 @@ function dialSVG(){
    '<circle r="492" fill="#1b0f0a"/>'+back+
    '<g id="wheel"><g mask="url(#hm)"><circle r="488" fill="url(#brass)"/><circle r="488" fill="none" stroke="#efe0a6" stroke-width="6"/><circle r="300" fill="none" stroke="#fff" stroke-opacity=".07" stroke-width="3"/><g stroke="#fff" stroke-opacity=".09" stroke-width="2">'+scr+'</g></g>'+rings+'</g>'+
    '<circle r="276" fill="#241a0e"/><circle r="262" fill="url(#brassD)"/><circle r="240" fill="#1a1409"/><circle r="231" fill="#eadfba"/>'+
-   '<g font-family="Cinzel,Trajan Pro,Georgia,serif" font-weight="700" font-size="60" text-anchor="middle" fill="#17120d"><text id="dt1" y="-48">IT’S TIME</text><text id="dt2" y="16">TO TELL</text><text id="dt3" y="82">YOUR STORY</text></g>'+
+   '<g font-family="Barlow Condensed,Arial Narrow,sans-serif" font-weight="800" font-size="70" text-anchor="middle" fill="#17120d"><text id="dt1" y="-48">IT’S TIME</text><text id="dt2" y="16">TO TELL</text><text id="dt3" y="82">YOUR STORY</text></g>'+
    '<path d="M112 300 Q116 286 140 288 Q162 290 177 318 L256 416 Q264 428 250 430 L152 442 Q132 443 128 422 Z" fill="url(#brassD)" stroke="#2b2110" stroke-width="5"/></svg>';
 }
 function renderDial(){
