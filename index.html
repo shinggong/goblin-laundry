@@ -377,10 +377,10 @@ const TOUR=[
  ['2026.11.28','TOKYO, JP','Shimokita Sentaku',''],['2026.12.05','TAIPEI, TW','Night Market Stage','few'],['2026.12.12','BANGKOK, TH','Soi Suds',''],
  ['2027.01.16','LONDON, UK','Launderette Ballroom',''],['2027.01.21','BERLIN, DE','Waschhaus Kreuzberg','sold'],['2027.02.06','LOS ANGELES, US','The Tumble Room',''],
 ];
-const CONTACT=[
- ['MANAGEMENT',[['GENERAL','hello@laundry-club.example'],['PRESS','press@laundry-club.example']]],
- ['BOOKING',[['KOREA','kr@laundry-club.example'],['ASIA','asia@laundry-club.example'],['UK / EUROPE','eu@laundry-club.example'],['NA / SA','americas@laundry-club.example']]],
- ['FOLLOW US',[['INSTAGRAM','@laundry.club'],['YOUTUBE','@laundryclubTV'],['SOUNDCLOUD','/laundry-club']]],
+const CONTACT=[   // 연락처 카드(전화 페이지 옆)
+ ['PHONE','02-0000-0000'],
+ ['EMAIL','hello@laundry-club.example'],
+ ['INSTAGRAM','@laundry.club'],
 ];
 const SVG={
  tee:'<path d="M30 30 L48 22 Q60 34 72 22 L90 30 L106 52 L88 60 L88 102 L32 102 L32 60 L14 52 Z" fill="#fbf7ec"/><circle cx="60" cy="66" r="14" fill="#ff5a36"/><path d="M54 52 L57 42 L62 52" fill="#fbf7ec"/><path d="M52 70 Q60 78 68 70" fill="none"/>',
@@ -803,8 +803,8 @@ function renderTour(){
     <div class="trow"><span class="dt">${d}</span><span class="city">${c}</span><span class="ven">${v}</span><span class="st ${s}">${s==='sold'?'SOLD OUT':s==='few'?'FEW LEFT':'TICKETS'}</span></div>`).join('')}</div></div>`;
 }
 function renderContact(){
-  panel.innerHTML=`<div class="p-wrap">${head('CONTACT','연락처')}<div class="cgrid">${CONTACT.map(([h,rows])=>`<div><h3>${h}</h3>${rows.map(([k,v])=>`
-    <div class="crow"><span class="k">${k}</span><span class="v">${esc(v)}</span><button class="copy" data-c="${esc(v)}">COPY</button></div>`).join('')}</div>`).join('')}</div></div>`;
+  panel.innerHTML=`<div class="p-wrap">${head('CONTACT','연락처')}<div class="cgrid"><div>${CONTACT.map(([k,v])=>`
+    <div class="crow"><span class="k">${k}</span><span class="v">${esc(v)}</span><button class="copy" data-c="${esc(v)}">COPY</button></div>`).join('')}</div></div></div>`;
   panel.querySelectorAll('.copy').forEach(b=>b.onclick=()=>{
     const done=()=>toast('복사했어요: '+b.dataset.c);
     navigator.clipboard?.writeText(b.dataset.c).then(done,()=>{const s=getSelection(),rg=document.createRange();rg.selectNodeContents(b.previousElementSibling);s.removeAllRanges();s.addRange(rg);toast('선택했어요. ⌘C로 복사하세요')})
@@ -927,13 +927,13 @@ async function renderGallery(){
   // 옷: 깊이 없이 평평한 스티커 그대로(드럼 뒤쪽은 shade로 어둡게)
   const clothMat=map=>new THREE.ShaderMaterial({transparent:true,side:THREE.DoubleSide,
     uniforms:{map:{value:map},time:{value:0},shade:{value:1}},
-    vertexShader:'varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
+    vertexShader:'uniform float time;varying vec2 vUv;void main(){vUv=uv;vec3 p=position;float k=.35+.65*(1.-uv.y);p.z+=(sin(time*1.5+p.y*1.1+p.x*.5)*.12+sin(time*2.3+p.x*1.7)*.04)*k;p.x+=sin(time*1.1+p.y*.8)*.04*k;gl_Position=projectionMatrix*modelViewMatrix*vec4(p,1.);}',   // 아래쪽일수록 조금 더 살랑
     fragmentShader:'uniform sampler2D map;uniform float shade;varying vec2 vUv;void main(){vec4 c=texture2D(map,vUv);if(c.a<.5)discard;vec3 col=c.rgb;if(!gl_FrontFacing)col*=.5;gl_FragColor=vec4(col*shade,1.);}'});
   for(let i=0;i<NC;i++){
     const k=i%arts.length, col=i%NCOL, row=Math.floor(i/NCOL), perCol=Math.ceil(NC/NCOL);
     const asp=arts[k].width/arts[k].height, h=CW/asp, ct=clothTex[k];
     const mat=ct?clothMat(ct[0]):new THREE.MeshBasicMaterial({map:tex[k],transparent:true,alphaTest:.5});
-    const mesh=ct?new THREE.Mesh(new THREE.PlaneGeometry(CW*1.25,CW*1.25),mat):new THREE.Mesh(new THREE.PlaneGeometry(CW,h),mat); if(ct)mesh.userData.cloth=1; scene.add(mesh);
+    const mesh=ct?new THREE.Mesh(new THREE.PlaneGeometry(CW*1.25,CW*1.25,24,24),mat):new THREE.Mesh(new THREE.PlaneGeometry(CW,h),mat); if(ct)mesh.userData.cloth=1; scene.add(mesh);
     cards.push({mesh,meshes:[mesh],mats:[mat],x:(col-(NCOL-1)/2)*SP,R:RAD[col%RAD.length],a0:row/perCol*Math.PI*2+col*.9,idx:k,cw:CW,ch:h});
   }
   // 비눗방울: 진짜 구(3D). 가장자리로 갈수록 밝아지는 투명한 막 + 주변 빛 반사 + 반짝이는 점. 떠오르다 위에서 스르르 사라짐
@@ -1017,7 +1017,7 @@ async function renderGallery(){
   function startZoom3D(cv,ct,w,h){
     const r=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:true});r.setPixelRatio(Math.min(devicePixelRatio,2));r.setSize(w,h,false);
     const sc=new THREE.Scene(),cm=new THREE.PerspectiveCamera(35,w/h,.1,100);cm.position.set(0,0,9.5);
-    const m=clothMat(ct[0]);const me=new THREE.Mesh(new THREE.PlaneGeometry(5,5),m);sc.add(me);
+    const m=clothMat(ct[0]);const me=new THREE.Mesh(new THREE.PlaneGeometry(5,5,32,32),m);sc.add(me);
     let ry=-.35,rv=0,rx=.08,dr=null;
     cv.addEventListener('pointerdown',e=>{dr={x:e.clientX,y:e.clientY};cv.style.cursor='grabbing';try{cv.setPointerCapture(e.pointerId)}catch(_){}});
     cv.addEventListener('pointermove',e=>{if(!dr)return;const dx=e.clientX-dr.x,dy=e.clientY-dr.y;ry+=dx*.009;rv=dx*.009;rx=Math.max(-.45,Math.min(.45,rx+dy*.005));dr={x:e.clientX,y:e.clientY}});
@@ -1206,8 +1206,8 @@ function dialSVG(){
 function renderDial(){
   stopDial();
   // 왼쪽 전화 다이얼 + 오른쪽 연락처 카드(늘 보임). 좁은 화면에선 다이얼 아래에 카드
-  const card='<aside class="dcard" aria-label="연락처"><h2>Contact</h2><div class="dsub">LAUNDRY CLUB · CALL US ANYTIME</div>'+
-    CONTACT.map(([h,rows])=>'<h3>'+h+'</h3>'+rows.map(([k,v])=>'<div class="crow"><span class="k">'+k+'</span><span class="v">'+esc(v)+'</span></div>').join('')).join('')+
+  const card='<aside class="dcard" aria-label="연락처"><h2>Contact</h2><div class="dsub">LAUNDRY CLUB</div>'+
+    CONTACT.map(([k,v])=>'<div class="crow"><span class="k">'+k+'</span><span class="v">'+esc(v)+'</span></div>').join('')+
     '<p class="dtip">다이얼을 돌려 아무 번호나 걸어 보세요</p></aside>';
   panel.innerHTML='<div id="dl"><button class="back" data-back>← BACK</button><div class="dl-main"><div id="dnum"></div>'+dialSVG()+'</div>'+card+
     '<div id="dinfo" hidden></div></div>';
