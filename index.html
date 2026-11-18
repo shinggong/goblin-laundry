@@ -934,16 +934,19 @@ async function renderGallery(){
   const BW=NCOL*SP/2+3, NB=reduce?10:(innerWidth<760?16:26);
   const bgeo=new THREE.SphereGeometry(1,40,24),bph=new Float32Array(NB),ba=new Float32Array(NB);
   bgeo.setAttribute('iPh',new THREE.InstancedBufferAttribute(bph,1));bgeo.setAttribute('iA',new THREE.InstancedBufferAttribute(ba,1));
-  // 방 파노라마를 방울 표면에 비춤: 앞면엔 바로, 안쪽 뒷면엔 위아래가 뒤집혀 한 번 더 비쳐서 진짜 구처럼 보임
-  const envTex=new THREE.TextureLoader().load(PANO.room);envTex.wrapS=THREE.RepeatWrapping;envTex.minFilter=THREE.LinearFilter;envTex.generateMipmaps=false;
-  const bmat=new THREE.ShaderMaterial({transparent:true,depthWrite:false,side:THREE.DoubleSide,blending:THREE.CustomBlending,blendSrc:THREE.OneFactor,blendDst:THREE.OneMinusSrcAlphaFactor,uniforms:{time:{value:0},env:{value:envTex}},   // 반사는 더하고, 뒤 배경은 테두리에서만 살짝 가림
+  // 방울 표면에 은은한 조명이 비침(특정 장소가 아닌 밝은 빛): 앞면엔 바로, 안쪽 뒷면엔 위아래가 뒤집혀 한 번 더 비쳐서 진짜 구처럼 보임
+  const bmat=new THREE.ShaderMaterial({transparent:true,depthWrite:false,side:THREE.DoubleSide,blending:THREE.CustomBlending,blendSrc:THREE.OneFactor,blendDst:THREE.OneMinusSrcAlphaFactor,uniforms:{time:{value:0}},   // 반사는 더하고, 뒤 배경은 테두리에서만 살짝 가림
     vertexShader:`attribute float iPh,iA;uniform float time;varying vec3 vN,vW;varying float vA;
       void main(){vA=iA;
         vec3 p=position*(1.+.025*sin(time*2.3+iPh+position.y*3.)+.015*sin(time*3.1+iPh*2.+position.x*4.));   // 살짝 출렁이는 막
         vec4 w=modelMatrix*instanceMatrix*vec4(p,1.);vW=w.xyz;vN=normalize(mat3(modelMatrix*instanceMatrix)*normal);
         gl_Position=projectionMatrix*viewMatrix*w;}`,
-    fragmentShader:`uniform sampler2D env;varying vec3 vN,vW;varying float vA;
-      vec3 envAt(vec3 d){d=normalize(d);return texture2D(env,vec2(atan(d.x,-d.z)/6.2832+.5,.5+asin(clamp(d.y,-1.,1.))/3.1416)).rgb;}
+    fragmentShader:`varying vec3 vN,vW;varying float vA;
+      vec3 envAt(vec3 d){d=normalize(d);
+        vec3 c=mix(vec3(.16,.17,.2),vec3(.92,.94,.98),smoothstep(-.35,.85,d.y));                       // 위는 밝고 아래는 어두운 빛
+        c+=vec3(1.)*smoothstep(.05,.0,abs(d.y-.62)-.16)*smoothstep(.08,.0,abs(d.x+.32)-.24)*.55;       // 왼쪽 위 부드러운 사각 조명
+        c+=vec3(1.,.93,.96)*exp(-pow(d.y*7.,2.))*.12;                                                  // 옅은 수평선
+        return c;}
       void main(){vec3 V=normalize(cameraPosition-vW),N=normalize(vN);bool fr=gl_FrontFacing;if(!fr)N=-N;
         float f=.16+.84*pow(1.-clamp(dot(N,V),0.,1.),2.4);                 // 비누막 반사율(가장자리일수록 강함)
         vec3 R=reflect(-V,N),col=pow(envAt(R),vec3(.8))*1.5;
