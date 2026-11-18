@@ -875,8 +875,8 @@ const CLOTHES=[
 // 모든 옷을 입체 천으로: 배경 뺀 옷 그림 + 깊이 지도(가운데일수록 볼록)
 // 세탁기 속에서 도는 옷(스티커 그림 + 깊이 지도). 번갈아 가며 채움. 크게 보기 정보(info)도 여기서
 const GAL_CLOTHES=[
-  {map:'img/cloth3d/s1.webp',dep:'img/cloth3d/s1_d.png',info:['Ruffle Cami Top','₩42,000','하트 넥라인에 프릴과 셔링이 들어간 캐미솔. 끈 길이 조절.','S / M']},
-  {map:'img/cloth3d/s2.webp',dep:'img/cloth3d/s2_d.png',info:['Polka Dot Mini Skirt','₩48,000','브라운 도트 A라인 미니스커트. 속바지 포함.','S / M / L']},
+  {map:'img/cloth3d/s1.webp',info:['Ruffle Cami Top','₩42,000','하트 넥라인에 프릴과 셔링이 들어간 캐미솔. 끈 길이 조절.','S / M']},
+  {map:'img/cloth3d/s2.webp',info:['Polka Dot Mini Skirt','₩48,000','브라운 도트 A라인 미니스커트. 속바지 포함.','S / M / L']},
 ];
 const CLOTH3D=Object.fromEntries(Array.from({length:20},(_,i)=>[i,GAL_CLOTHES[i%GAL_CLOTHES.length]]));
 const GALLERY_PHOTOS=['img/clothes2/01.webp','img/clothes2/02.webp','img/clothes2/03.webp','img/clothes2/04.webp','img/clothes2/05.webp','img/clothes2/06.webp','img/clothes2/07.webp','img/clothes2/08.webp','img/clothes2/09.webp','img/clothes2/10.webp','img/clothes2/11.webp','img/clothes2/12.webp','img/clothes2/13.webp','img/clothes2/14.webp','img/clothes2/15.webp','img/clothes2/16.webp','img/clothes2/17.webp','img/clothes2/18.webp','img/clothes2/19.webp','img/clothes2/20.webp']; // 굿즈 의류 이미지(img/clothes). 실제 상품 사진으로 바꾸려면 이 목록만 교체
@@ -951,27 +951,17 @@ async function renderGallery(){
   // 입체 천: 잘게 나눈 판을 깊이 지도만큼 앞으로 부풀리고, 그 모양으로 빛을 받게 하고, 바람에 살랑이게
   const tl=new THREE.TextureLoader(), clothTex={};
   const texCache={};   // 같은 옷 그림은 한 번만 받음
-  for(const [k,c] of Object.entries(CLOTH3D)){try{clothTex[k]=texCache[c.map]||(texCache[c.map]=await Promise.all([c.map,c.dep].map(u=>new Promise((ok,no)=>tl.load(u,ok,undefined,no)))))}catch(e){}gStep()}
-  const clothMat=(map,dep)=>new THREE.ShaderMaterial({transparent:true,side:THREE.DoubleSide,
-    uniforms:{map:{value:map},dep:{value:dep},time:{value:0},shade:{value:1},D:{value:1.1}},
-    vertexShader:`uniform sampler2D dep;uniform float time,D;varying vec2 vUv;varying vec3 vN;
-      float H(vec2 u){return texture2D(dep,u).r;}
-      void main(){vUv=uv;float h=H(uv),e=.006;
-        float hx=H(uv+vec2(e,0.))-H(uv-vec2(e,0.)),hy=H(uv+vec2(0.,e))-H(uv-vec2(0.,e));
-        vN=normalize(vec3(-hx*D*18.,-hy*D*18.,1.));
-        vec3 p=position;p.z+=h*D;   // 흔들림 없이 볼록한 모양만
-        gl_Position=projectionMatrix*modelViewMatrix*vec4(p,1.);}`,
-    fragmentShader:`uniform sampler2D map;uniform float shade;varying vec2 vUv;varying vec3 vN;
-      void main(){vec4 c=texture2D(map,vUv);if(c.a<.5)discard;
-        vec3 n=normalize(vN);float l=.5+.6*max(0.,dot(n,normalize(vec3(-.45,.55,.75))));
-        float sp=pow(max(0.,dot(n,normalize(vec3(-.2,.3,1.)))),24.)*.12;
-        vec3 col=c.rgb*l+sp;if(!gl_FrontFacing)col*=.5;
-        gl_FragColor=vec4(col*shade,1.);}`});
+  for(const [k,c] of Object.entries(CLOTH3D)){try{clothTex[k]=texCache[c.map]||(texCache[c.map]=[await new Promise((ok,no)=>tl.load(c.map,ok,undefined,no))])}catch(e){}gStep()}
+  // 옷: 깊이 없이 평평한 스티커 그대로(드럼 뒤쪽은 shade로 어둡게)
+  const clothMat=map=>new THREE.ShaderMaterial({transparent:true,side:THREE.DoubleSide,
+    uniforms:{map:{value:map},time:{value:0},shade:{value:1}},
+    vertexShader:'varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
+    fragmentShader:'uniform sampler2D map;uniform float shade;varying vec2 vUv;void main(){vec4 c=texture2D(map,vUv);if(c.a<.5)discard;vec3 col=c.rgb;if(!gl_FrontFacing)col*=.5;gl_FragColor=vec4(col*shade,1.);}'});
   for(let i=0;i<NC;i++){
     const k=i%arts.length, col=i%NCOL, row=Math.floor(i/NCOL), perCol=Math.ceil(NC/NCOL);
     const asp=arts[k].width/arts[k].height, h=CW/asp, ct=clothTex[k];
-    const mat=ct?clothMat(ct[0],ct[1]):new THREE.MeshBasicMaterial({map:tex[k],transparent:true,alphaTest:.5});
-    const mesh=ct?new THREE.Mesh(new THREE.PlaneGeometry(CW*1.25,CW*1.25,110,110),mat):new THREE.Mesh(new THREE.PlaneGeometry(CW,h),mat); if(ct)mesh.userData.cloth=1; scene.add(mesh);
+    const mat=ct?clothMat(ct[0]):new THREE.MeshBasicMaterial({map:tex[k],transparent:true,alphaTest:.5});
+    const mesh=ct?new THREE.Mesh(new THREE.PlaneGeometry(CW*1.25,CW*1.25),mat):new THREE.Mesh(new THREE.PlaneGeometry(CW,h),mat); if(ct)mesh.userData.cloth=1; scene.add(mesh);
     cards.push({mesh,meshes:[mesh],mats:[mat],x:(col-(NCOL-1)/2)*SP,R:RAD[col%RAD.length],a0:row/perCol*Math.PI*2+col*.9,idx:k,cw:CW,ch:h});
   }
   // 비눗방울: 진짜 구(3D). 가장자리로 갈수록 밝아지는 투명한 막 + 주변 빛 반사 + 반짝이는 점. 떠오르다 위에서 스르르 사라짐
@@ -1055,7 +1045,7 @@ async function renderGallery(){
   function startZoom3D(cv,ct,w,h){
     const r=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:true});r.setPixelRatio(Math.min(devicePixelRatio,2));r.setSize(w,h,false);
     const sc=new THREE.Scene(),cm=new THREE.PerspectiveCamera(35,w/h,.1,100);cm.position.set(0,0,9.5);
-    const m=clothMat(ct[0],ct[1]);m.uniforms.D.value=1.4;const me=new THREE.Mesh(new THREE.PlaneGeometry(5,5,160,160),m);sc.add(me);
+    const m=clothMat(ct[0]);const me=new THREE.Mesh(new THREE.PlaneGeometry(5,5),m);sc.add(me);
     let ry=-.35,rv=0,rx=.08,dr=null;
     cv.addEventListener('pointerdown',e=>{dr={x:e.clientX,y:e.clientY};cv.style.cursor='grabbing';try{cv.setPointerCapture(e.pointerId)}catch(_){}});
     cv.addEventListener('pointermove',e=>{if(!dr)return;const dx=e.clientX-dr.x,dy=e.clientY-dr.y;ry+=dx*.009;rv=dx*.009;rx=Math.max(-.45,Math.min(.45,rx+dy*.005));dr={x:e.clientX,y:e.clientY}});
