@@ -916,7 +916,7 @@ function placeDoor(){
 addEventListener('resize',placeDoor);
 function stopGallery(){
   if(!gal) return; gal.stopZoom3D&&gal.stopZoom3D(); cancelAnimationFrame(gal.raf); removeEventListener('resize',gal.onResize);
-  gal.cards.forEach(c=>c.mats.forEach(m=>m.dispose())); gal.tex.forEach(t=>t.dispose()); gal.rt&&gal.rt.dispose(); gal.fitTitle&&removeEventListener('resize',gal.fitTitle); gal.renderer.dispose(); gal=null;
+  gal.cards.forEach(c=>c.mats.forEach(m=>m.dispose())); gal.tex.forEach(t=>t.dispose()); gal.rt&&gal.rt.dispose(); gal.renderer.dispose(); gal=null;
 }
 async function renderGallery(){
   stopGallery();
@@ -1002,31 +1002,7 @@ async function renderGallery(){
       bo.position.set(b.x+Math.sin(ts*.8+b.ph)*.6,b.y,b.z+Math.cos(ts*.6+b.ph)*.5);bo.scale.setScalar(b.r);bo.updateMatrix();bubbles.setMatrixAt(i,bo.matrix);bph[i]=b.ph;ba[i]=Math.max(0,b.a)});
     bubbles.instanceMatrix.needsUpdate=true;bgeo.attributes.iA.needsUpdate=true;bgeo.attributes.iPh.needsUpdate=true};
   // 가운데 글씨: 드럼 한가운데(z=0)에 놓인 판. 앞으로 오는 사진이 가리고, 뒤로 간 사진은 글씨 뒤에 있음
-  // 가운데 간판: 위 작은 라벨 + 큰 손글씨(크림 글씨에 분홍 입체 그림자) + 아래 라벨. 켜질 때 네온처럼 깜빡
-  try{await Promise.race([Promise.all([document.fonts.load('400 200px "Pacifico"'),document.fonts.load('700 40px "Barlow Condensed"')]),new Promise(r=>setTimeout(r,1800))])}catch(e){}
-  gStep();
-  const tgrp=new THREE.Group(); scene.add(tgrp);
-  const mkPlane=(draw,w,h)=>{const c=document.createElement('canvas');c.width=w;c.height=h;draw(c.getContext('2d'),w,h);
-    const t=new THREE.CanvasTexture(c),m=new THREE.MeshBasicMaterial({map:t,transparent:true,depthWrite:false,opacity:0});return{mesh:new THREE.Mesh(new THREE.PlaneGeometry(w,h),m),w,h,t,m}};
-  const SIGN='Fresh Spin', SF='400 230px "Pacifico","Brush Script MT",cursive';
-  const sw=(()=>{const g=document.createElement('canvas').getContext('2d');g.font=SF;return Math.ceil(g.measureText(SIGN).width)+80})();
-  const sign=mkPlane((g,w,h)=>{g.font=SF;g.textAlign='center';g.textBaseline='middle';const x=w/2,y=h/2+10;
-    g.fillStyle='#e5508b';for(let d=14;d>0;d-=1)g.fillText(SIGN,x+d*.7,y+d);                       // 분홍 입체 그림자
-    g.shadowColor='rgba(251,243,226,.55)';g.shadowBlur=22;g.fillStyle='#fbf3e2';g.fillText(SIGN,x,y);  // 크림 글씨 + 은은한 빛
-    g.shadowBlur=0;g.globalCompositeOperation='source-atop';const hl=g.createLinearGradient(0,y-90,0,y+20);hl.addColorStop(0,'rgba(255,255,255,.7)');hl.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=hl;g.fillRect(0,0,w,h)},sw,360);
-  tgrp.add(sign.mesh);
-  const label=(txt,col,size,ls)=>{const g0=document.createElement('canvas').getContext('2d'),F='700 '+size+'px "Barlow Condensed","Arial Narrow",sans-serif';g0.font=F;if(g0.letterSpacing!==undefined)g0.letterSpacing=ls+'px';
-    const w=Math.ceil(g0.measureText(txt).width+ls*2)+20;return mkPlane((g,w,h)=>{g.font=F;if(g.letterSpacing!==undefined)g.letterSpacing=ls+'px';g.textBaseline='middle';g.fillStyle=col;g.fillText(txt,10+ls/2,h/2+3)},w,size*1.5)};
-  const top=label('★  LAUNDRY CLUB  ★','#f08bb6',40,16); top.mesh.position.y=175; tgrp.add(top.mesh);
-  const sub=label('NEW ARRIVALS  ·  TUMBLED DAILY','#7fd3e6',40,12); sub.mesh.position.y=-185; tgrp.add(sub.mesh);
-  const titleW=sw, tStart=performance.now();
-  const fitTitle=()=>{const vh=2*25*Math.tan(22.5*Math.PI/180),vw=vh*innerWidth/innerHeight,w=Math.min(vw*.72,vh*1.15)*(1-FISH);tgrp.scale.setScalar(w/titleW)}; // 피시아이가 가운데를 키우는 만큼 미리 줄임
-  const animTitle=now=>{ // 간판이 살짝 커지며 켜지고(네온처럼 두어 번 깜빡), 그다음 위아래 라벨이 나타남
-    const t=(now-tStart)/1000, ob=x=>{const c=1.7;x=x-1;return 1+(c+1)*x*x*x+c*x*x};
-    const p=Math.max(0,Math.min(1,(t-.2)/.7)),fl=(t>.35&&t<.42)||(t>.55&&t<.6)?.25:1;
-    sign.m.opacity=Math.min(1,p*1.4)*fl;sign.mesh.scale.setScalar(.82+.18*ob(p));
-    const q=Math.max(0,Math.min(1,(t-.9)/.6));top.m.opacity=sub.m.opacity=q;top.mesh.position.y=175+12*(1-q);sub.mesh.position.y=-185-12*(1-q);
-  };
+  gStep();   // 가운데 글씨 없음: 옷과 비눗방울만
   const YAW_RANGE=18*Math.PI/180, CAM_YAW=32*Math.PI/180, CAM_TILT=10*Math.PI/180; // 옆으로 32°, 위에서 10° 내려다봄
   const mot=reduce?.25:1, DIST=25; let pan=0,panT=0,yawO=0,yawT=0,spin=0,spinV=.6*mot,dist=DIST,distT=DIST,drag=null,last=performance.now();
   // 살짝 피시아이: 유리 가운데는 크게, 가장자리는 그대로 (FISH가 클수록 많이 휨)
@@ -1038,9 +1014,8 @@ async function renderGallery(){
   const unfish=(x,y)=>{const R=gal&&gal.glassR||300,dx=(x-innerWidth/2)/R,dy=(y-innerHeight/2)/R,f=1-FISH+FISH*Math.min(dx*dx+dy*dy,1);return{clientX:innerWidth/2+dx*f*R,clientY:innerHeight/2+dy*f*R}};
   const onResize=()=>{renderer.setSize(innerWidth,innerHeight,false);cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();
     const pr=renderer.getPixelRatio();rt.setSize(innerWidth*pr,innerHeight*pr);pmat.uniforms.res.value.set(innerWidth,innerHeight);pmat.uniforms.rad.value=gal&&gal.glassR||Math.min(innerWidth,innerHeight)*.3};
-  addEventListener('resize',fitTitle);fitTitle();
   addEventListener('resize',onResize);onResize();
-  gal={fitTitle,renderer,rt,cards,tex,onResize,raf:0,zoomed:null,zrect:null,glassR:Math.hypot(innerWidth,innerHeight)/2};onResize();
+  gal={renderer,rt,cards,tex,onResize,raf:0,zoomed:null,zrect:null,glassR:Math.hypot(innerWidth,innerHeight)/2};onResize();
   // 사진 클릭 → 그 자리에서 화면 가득 커지며 크게 보기 (다시 클릭하거나 Esc로 원래 자리로 돌아감)
   const EASE='cubic-bezier(.65,0,.2,1)';
   const ray=new THREE.Raycaster(), v2=new THREE.Vector2();
@@ -1109,14 +1084,14 @@ async function renderGallery(){
     if(!drag){spinV+=(.6*mot*Math.sign(spinV||1)-spinV)*(1-Math.exp(-dt*.7));if(!gal.zoomed)spin+=spinV*dt}
     dist+=(distT-dist)*.1; pan+=(panT-pan)*.18; yawO+=(yawT-yawO)*.12;
     // 카메라를 옆·위로 살짝 틀어 드럼의 옆면(앞뒤 깊이)이 보이게. 가운데 글씨는 늘 카메라를 정면으로 봄
-    const cy_=CAM_YAW+yawO; cam.position.set(dist*Math.sin(cy_)*Math.cos(CAM_TILT),dist*Math.sin(CAM_TILT),dist*Math.cos(cy_)*Math.cos(CAM_TILT)); cam.lookAt(0,0,0); tgrp.quaternion.copy(cam.quaternion);
+    const cy_=CAM_YAW+yawO; cam.position.set(dist*Math.sin(cy_)*Math.cos(CAM_TILT),dist*Math.sin(CAM_TILT),dist*Math.cos(cy_)*Math.cos(CAM_TILT)); cam.lookAt(0,0,0);
     cards.forEach(c=>{
       const a=c.a0+spin;
       c.mesh.position.set(c.x+pan,-c.R*Math.sin(a),c.R*Math.cos(a));   // X는 고정, Y-Z만 이동. 회전은 하지 않고 항상 정면
       const sh=.45+.55*(.5+.5*Math.cos(a));                         // 앞(카메라 쪽)은 밝게, 뒤는 어둡게
       const m=c.mats[0]; if(m.uniforms){m.uniforms.shade.value=sh;m.uniforms.time.value=now/1000}else m.color.setScalar(sh);
     });
-    animTitle(now);bubTick(now,dt);
+    bubTick(now,dt);
     renderer.setRenderTarget(rt);renderer.render(scene,cam);renderer.setRenderTarget(null);renderer.render(post,pcam); gal.raf=requestAnimationFrame(tick);
   };
   gal.raf=requestAnimationFrame(tick);
