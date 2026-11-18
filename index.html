@@ -3,7 +3,7 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Barlow+Condensed:wght@600;700;800&family=Do+Hyeon&family=Cinzel:wght@500;700&family=DotGothic16&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+KR:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Pacifico&family=Barlow+Condensed:wght@600;700;800&family=Do+Hyeon&family=Cinzel:wght@500;700&family=DotGothic16&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+KR:wght@400;600;700&display=swap">
 <style>
 /* Layout: 드래그로 둘러보는 3D 동전빨래방(CSS 3D 큐브 방) + 사물 클릭 → 전체화면 패널 */
 :root{
@@ -327,6 +327,28 @@ button{font:inherit;color:inherit;cursor:inherit}
   #ct .g-cart{width:min(46vw,240px)}
 }
 #ct .g-start{height:54px;padding:0 34px;border:0;border-radius:999px;background:var(--tomato);color:#fff;font-family:var(--f-display);font-size:22px;letter-spacing:.08em;box-shadow:0 4px 0 var(--ink);cursor:pointer}
+/* ===== 세탁기 페이지 디자인 시스템: 60년대 셀프 빨래방 =====
+   색: 방 그림에서 가져옴 / 글씨: 간판 손글씨(Pacifico) · 라벨 좁은 대문자(Barlow Condensed) · 세탁기 숫자판 도트(DotGothic16) */
+:root{--lc-pink:#f08bb6;--lc-hot:#e5508b;--lc-teal:#36b6c8;--lc-cream:#fbf3e2;--lc-chrome:#a9b1b6;--lc-led:#9dffb0;
+  --f-sign:"Pacifico","Brush Script MT",cursive;--f-label:"Barlow Condensed","Arial Narrow",sans-serif;--f-dot:"DotGothic16","Courier New",monospace}
+/* 로딩: 작은 세탁기 문 안에서 빨래가 돌고 물이 찰랑, 아래 숫자판에 진행률 */
+#gal .gload{position:absolute;inset:0;z-index:3;display:grid;place-content:center;justify-items:center;gap:20px;background:#000;transition:opacity .6s;pointer-events:none}
+#gal .gload.done{opacity:0}
+#gal .gl-door{width:148px;height:148px;border-radius:50%;padding:15px;background:radial-gradient(circle at 34% 28%,#fff,var(--lc-cream) 45%,#d8ccb2);box-shadow:0 0 0 5px var(--lc-pink),0 0 0 9px #000,0 0 0 11px var(--lc-chrome),0 10px 30px rgba(240,139,182,.25)}
+#gal .gl-glass{position:relative;width:100%;height:100%;border-radius:50%;overflow:hidden;background:radial-gradient(circle at 50% 38%,#2f7b92,#0c2a36 72%);box-shadow:inset 0 0 0 5px var(--lc-chrome),inset 0 8px 16px rgba(0,0,0,.65)}
+#gal .gl-drum{position:absolute;inset:14%;animation:glSpin 1.5s linear infinite}
+#gal .gl-drum i{position:absolute;width:30%;height:30%}
+#gal .gl-drum .t{left:6%;top:30%;background:var(--lc-pink);clip-path:polygon(30% 0,70% 0,100% 22%,86% 44%,76% 36%,76% 100%,24% 100%,24% 36%,14% 44%,0 22%)}
+#gal .gl-drum .k{right:4%;top:18%;width:22%;height:34%;background:var(--lc-teal);clip-path:polygon(20% 0,72% 0,72% 62%,100% 74%,100% 100%,20% 100%);transform:rotate(25deg)}
+#gal .gl-drum .p{left:38%;bottom:2%;width:26%;height:32%;background:var(--lc-cream);clip-path:polygon(0 0,100% 0,100% 100%,62% 100%,50% 38%,38% 100%,0 100%)}
+#gal .gl-water{position:absolute;left:-55%;width:210%;aspect-ratio:1;top:56%;border-radius:42%;background:rgba(127,211,230,.55);animation:glSpin 5s linear infinite}
+#gal .gl-water.b{top:60%;border-radius:45%;background:rgba(190,236,245,.4);animation-duration:7s;animation-direction:reverse}
+#gal .gl-glass::after{content:"";position:absolute;inset:8%;border-radius:50%;background:radial-gradient(circle at 30% 24%,rgba(255,255,255,.55),rgba(255,255,255,0) 32%)}
+@keyframes glSpin{to{transform:rotate(360deg)}}
+#gal .gl-led{min-width:150px;padding:6px 14px;border-radius:6px;background:#0b1a12;box-shadow:inset 0 0 0 2px #1d3a29;color:var(--lc-led);font-family:var(--f-dot);font-size:17px;letter-spacing:.12em;text-align:center;text-shadow:0 0 6px rgba(157,255,176,.7)}
+#gal .gl-led b{font-weight:400;animation:glBlink 1s steps(2,jump-none) infinite}
+@keyframes glBlink{50%{opacity:.25}}
+@media (prefers-reduced-motion:reduce){#gal .gl-drum,#gal .gl-water{animation-duration:12s}}
 </style>
 
 <div id="view" aria-label="빨래방 3D 공간. 드래그해서 둘러보세요"><canvas id="gl"></canvas></div>
@@ -884,12 +906,14 @@ function stopGallery(){
 }
 async function renderGallery(){
   stopGallery();
-  panel.innerHTML='<div id="gal"><canvas id="galc"></canvas><img class="gdoor" src="img/washer_front.webp" alt=""><button class="back" data-back>← BACK</button><div id="gzoom" hidden></div></div>';
+  panel.innerHTML='<div id="gal"><canvas id="galc"></canvas><img class="gdoor" src="img/washer_front.webp" alt=""><button class="back" data-back>← BACK</button><div id="gzoom" hidden></div>'+
+    '<div class="gload" role="status" aria-label="불러오는 중"><div class="gl-door"><div class="gl-glass"><div class="gl-water"></div><div class="gl-water b"></div><div class="gl-drum"><i class="t"></i><i class="k"></i><i class="p"></i></div></div></div><div class="gl-led">WASHING <span>0</span>%<b>_</b></div></div></div>';
+  let gDone=0;const gTot=GALLERY_PHOTOS.length+Object.keys(CLOTH3D).length+1,gStep=()=>{gDone++;const e=$('#gal .gl-led span');if(e)e.textContent=Math.min(99,Math.round(gDone/gTot*100))};   // 숫자판 진행률
   placeDoor();
   if(!window.THREE) return;
   const NC=Math.max(15,GALLERY_PHOTOS.length), arts=[]; // 사진 수만큼 카드
   if(GALLERY_PHOTOS.length){
-    const ims=await Promise.all(GALLERY_PHOTOS.map(s=>loadImg(s).catch(()=>null)));
+    const ims=await Promise.all(GALLERY_PHOTOS.map(s=>loadImg(s).catch(()=>null).then(v=>{gStep();return v})));
     ims.filter(Boolean).slice(0,NC).forEach((im,i)=>arts.push(photoArt(im,i)));
   }else{
     ALBUMS.forEach(a=>arts.push(cardArt(a)));
@@ -907,7 +931,7 @@ async function renderGallery(){
   const NCOL=innerWidth/innerHeight<1?3:5, SP=4.4, CW=3.4, RAD=[7.5,6.4,8.4,6.9,8], cards=[];
   // 입체 천: 잘게 나눈 판을 깊이 지도만큼 앞으로 부풀리고, 그 모양으로 빛을 받게 하고, 바람에 살랑이게
   const tl=new THREE.TextureLoader(), clothTex={};
-  for(const [k,c] of Object.entries(CLOTH3D)){try{clothTex[k]=await Promise.all([c.map,c.dep].map(u=>new Promise((ok,no)=>tl.load(u,ok,undefined,no))))}catch(e){}}
+  for(const [k,c] of Object.entries(CLOTH3D)){try{clothTex[k]=await Promise.all([c.map,c.dep].map(u=>new Promise((ok,no)=>tl.load(u,ok,undefined,no))))}catch(e){}gStep()}
   const clothMat=(map,dep)=>new THREE.ShaderMaterial({transparent:true,side:THREE.DoubleSide,
     uniforms:{map:{value:map},dep:{value:dep},time:{value:0},shade:{value:1},D:{value:1.1}},
     vertexShader:`uniform sampler2D dep;uniform float time,D;varying vec2 vUv;varying vec3 vN;
@@ -964,21 +988,30 @@ async function renderGallery(){
       bo.position.set(b.x+Math.sin(ts*.8+b.ph)*.6,b.y,b.z+Math.cos(ts*.6+b.ph)*.5);bo.scale.setScalar(b.r);bo.updateMatrix();bubbles.setMatrixAt(i,bo.matrix);bph[i]=b.ph;ba[i]=Math.max(0,b.a)});
     bubbles.instanceMatrix.needsUpdate=true;bgeo.attributes.iA.needsUpdate=true;bgeo.attributes.iPh.needsUpdate=true};
   // 가운데 글씨: 드럼 한가운데(z=0)에 놓인 판. 앞으로 오는 사진이 가리고, 뒤로 간 사진은 글씨 뒤에 있음
-  try{await Promise.race([document.fonts.load('800 200px "Barlow Condensed"'),new Promise(r=>setTimeout(r,1500))])}catch(e){}
-  const tgrp=new THREE.Group(); scene.add(tgrp); const letters=[], TFONT='800 200px "Barlow Condensed","Arial Narrow",sans-serif';
-  const mkPlane=(txt,font,h,ls)=>{const c=document.createElement('canvas'),g=c.getContext('2d');g.font=font;const w=Math.ceil(g.measureText(txt).width+ls*(txt.length))+8;
-    c.width=w;c.height=h;g.font=font;g.fillStyle='#fff';g.textBaseline='middle';g.shadowColor='rgba(0,0,0,.6)';g.shadowBlur=h*.06;if(g.letterSpacing!==undefined)g.letterSpacing=ls+'px';g.fillText(txt,4,h/2+4);
-    const t=new THREE.CanvasTexture(c),m=new THREE.MeshBasicMaterial({map:t,transparent:true,depthWrite:false,opacity:0});return{mesh:new THREE.Mesh(new THREE.PlaneGeometry(w,h),m),w,t,m}};
-  let tx=0; const TITLE='LAUNDRY CLUB';
-  for(const ch of TITLE){const pl=mkPlane(ch,TFONT,240,0);if(ch!==' '){pl.mesh.position.x=tx+pl.w/2;tgrp.add(pl.mesh);letters.push(pl)}tx+=ch===' '?60:pl.w-6}
-  letters.forEach(l=>l.mesh.position.x-=tx/2);
-  const sub=mkPlane('WASH · RINSE · SPIN · DRY','700 40px "Barlow Condensed","Arial Narrow",sans-serif',60,14); sub.mesh.position.y=-150; tgrp.add(sub.mesh);
-  const titleW=tx, tStart=performance.now();
-  const fitTitle=()=>{const vh=2*25*Math.tan(22.5*Math.PI/180),vw=vh*innerWidth/innerHeight,w=Math.min(vw*.8,vh*1.2)*(1-FISH);tgrp.scale.setScalar(w/titleW)}; // 피시아이가 가운데를 키우는 만큼 미리 줄임
-  const animTitle=now=>{ // 글자가 아래에서 하나씩 튀어 오르고, 그다음 작은 글씨가 퍼지며 나타남
+  // 가운데 간판: 위 작은 라벨 + 큰 손글씨(크림 글씨에 분홍 입체 그림자) + 아래 라벨. 켜질 때 네온처럼 깜빡
+  try{await Promise.race([Promise.all([document.fonts.load('400 200px "Pacifico"'),document.fonts.load('700 40px "Barlow Condensed"')]),new Promise(r=>setTimeout(r,1800))])}catch(e){}
+  gStep();
+  const tgrp=new THREE.Group(); scene.add(tgrp);
+  const mkPlane=(draw,w,h)=>{const c=document.createElement('canvas');c.width=w;c.height=h;draw(c.getContext('2d'),w,h);
+    const t=new THREE.CanvasTexture(c),m=new THREE.MeshBasicMaterial({map:t,transparent:true,depthWrite:false,opacity:0});return{mesh:new THREE.Mesh(new THREE.PlaneGeometry(w,h),m),w,h,t,m}};
+  const SIGN='Fresh Spin', SF='400 230px "Pacifico","Brush Script MT",cursive';
+  const sw=(()=>{const g=document.createElement('canvas').getContext('2d');g.font=SF;return Math.ceil(g.measureText(SIGN).width)+80})();
+  const sign=mkPlane((g,w,h)=>{g.font=SF;g.textAlign='center';g.textBaseline='middle';const x=w/2,y=h/2+10;
+    g.fillStyle='#e5508b';for(let d=14;d>0;d-=1)g.fillText(SIGN,x+d*.7,y+d);                       // 분홍 입체 그림자
+    g.shadowColor='rgba(251,243,226,.55)';g.shadowBlur=22;g.fillStyle='#fbf3e2';g.fillText(SIGN,x,y);  // 크림 글씨 + 은은한 빛
+    g.shadowBlur=0;g.globalCompositeOperation='source-atop';const hl=g.createLinearGradient(0,y-90,0,y+20);hl.addColorStop(0,'rgba(255,255,255,.7)');hl.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=hl;g.fillRect(0,0,w,h)},sw,360);
+  tgrp.add(sign.mesh);
+  const label=(txt,col,size,ls)=>{const g0=document.createElement('canvas').getContext('2d'),F='700 '+size+'px "Barlow Condensed","Arial Narrow",sans-serif';g0.font=F;if(g0.letterSpacing!==undefined)g0.letterSpacing=ls+'px';
+    const w=Math.ceil(g0.measureText(txt).width+ls*2)+20;return mkPlane((g,w,h)=>{g.font=F;if(g.letterSpacing!==undefined)g.letterSpacing=ls+'px';g.textBaseline='middle';g.fillStyle=col;g.fillText(txt,10+ls/2,h/2+3)},w,size*1.5)};
+  const top=label('★  LAUNDRY CLUB  ★','#f08bb6',40,16); top.mesh.position.y=175; tgrp.add(top.mesh);
+  const sub=label('NEW ARRIVALS  ·  TUMBLED DAILY','#7fd3e6',40,12); sub.mesh.position.y=-185; tgrp.add(sub.mesh);
+  const titleW=sw, tStart=performance.now();
+  const fitTitle=()=>{const vh=2*25*Math.tan(22.5*Math.PI/180),vw=vh*innerWidth/innerHeight,w=Math.min(vw*.72,vh*1.15)*(1-FISH);tgrp.scale.setScalar(w/titleW)}; // 피시아이가 가운데를 키우는 만큼 미리 줄임
+  const animTitle=now=>{ // 간판이 살짝 커지며 켜지고(네온처럼 두어 번 깜빡), 그다음 위아래 라벨이 나타남
     const t=(now-tStart)/1000, ob=x=>{const c=1.7;x=x-1;return 1+(c+1)*x*x*x+c*x*x};
-    letters.forEach((l,i)=>{const p=Math.max(0,Math.min(1,(t-.25-i*.05)/.6));l.m.opacity=Math.min(1,p*1.6);l.mesh.position.y=-140*(1-ob(p));l.mesh.rotation.z=(1-p)*.35*(i%2?1:-1);l.mesh.scale.setScalar(.6+.4*ob(p))});
-    const q=Math.max(0,Math.min(1,(t-1.1)/.7));sub.m.opacity=q;sub.mesh.scale.x=.7+.3*(1-Math.pow(1-q,3));
+    const p=Math.max(0,Math.min(1,(t-.2)/.7)),fl=(t>.35&&t<.42)||(t>.55&&t<.6)?.25:1;
+    sign.m.opacity=Math.min(1,p*1.4)*fl;sign.mesh.scale.setScalar(.82+.18*ob(p));
+    const q=Math.max(0,Math.min(1,(t-.9)/.6));top.m.opacity=sub.m.opacity=q;top.mesh.position.y=175+12*(1-q);sub.mesh.position.y=-185-12*(1-q);
   };
   const YAW_RANGE=18*Math.PI/180, CAM_YAW=32*Math.PI/180, CAM_TILT=10*Math.PI/180; // 옆으로 32°, 위에서 10° 내려다봄
   const mot=reduce?.25:1, DIST=25; let pan=0,panT=0,yawO=0,yawT=0,spin=0,spinV=.6*mot,dist=DIST,distT=DIST,drag=null,last=performance.now();
@@ -1073,6 +1106,7 @@ async function renderGallery(){
     renderer.setRenderTarget(rt);renderer.render(scene,cam);renderer.setRenderTarget(null);renderer.render(post,pcam); gal.raf=requestAnimationFrame(tick);
   };
   gal.raf=requestAnimationFrame(tick);
+  {const l=$('#gal .gload');if(l){const e=l.querySelector('.gl-led span');if(e)e.textContent='100';requestAnimationFrame(()=>requestAnimationFrame(()=>{l.classList.add('done');setTimeout(()=>l.remove(),700)}))}}   // 첫 장면이 그려지면 로딩 걷힘
 }
 
 /* ===== 영수증: Change 기계에서 영수증이 찍혀 나오고, 하나씩 뜯어 가는 페이지 ===== */
