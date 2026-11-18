@@ -932,7 +932,7 @@ async function renderGallery(){
     cards.push({mesh,meshes:[mesh],mats:[mat],x:(col-(NCOL-1)/2)*SP,R:RAD[col%RAD.length],a0:row/perCol*Math.PI*2+col*.9,idx:k,cw:CW,ch:h});
   }
   // 비눗방울: 진짜 구(3D). 가장자리로 갈수록 밝아지는 투명한 막 + 주변 빛 반사 + 반짝이는 점. 떠오르다 위에서 스르르 사라짐
-  const BW=NCOL*SP/2+3, NB=reduce?18:(innerWidth<760?34:56);
+  const BW=NCOL*SP/2+3, NB=reduce?10:(innerWidth<760?16:26);
   const bgeo=new THREE.SphereGeometry(1,40,24),bph=new Float32Array(NB),ba=new Float32Array(NB);
   bgeo.setAttribute('iPh',new THREE.InstancedBufferAttribute(bph,1));bgeo.setAttribute('iA',new THREE.InstancedBufferAttribute(ba,1));
   const bmat=new THREE.ShaderMaterial({transparent:true,depthWrite:false,side:THREE.DoubleSide,uniforms:{time:{value:0}},
@@ -951,8 +951,8 @@ async function renderGallery(){
         float k=gl_FrontFacing?1.:.45;                                                 // 뒤쪽 안면은 옅게 → 입체감
         float sp=(s1+s2+win*(gl_FrontFacing?1.:0.))*k;gl_FragColor=vec4(env*film*f*k*1.15+vec3(sp),(f*.9*k+.025+sp)*vA);}`});
   const bubbles=new THREE.InstancedMesh(bgeo,bmat,NB);bubbles.renderOrder=6;bubbles.frustumCulled=false;scene.add(bubbles);
-  const newBub=init=>{const big=Math.random()<.14;return{x:(Math.random()*2-1)*BW,y:init?-9+Math.random()*18:-10-Math.random()*2,z:(Math.random()*2-1)*8,
-    v:(big?.3:.4)+Math.random()*.45,ph:Math.random()*6.28,r:big?.55+Math.random()*.35:.12+Math.random()*.3,top:3+Math.random()*8,a:init?1:0,out:false}};
+  const newBub=init=>{const big=Math.random()<.5;return{x:(Math.random()*2-1)*BW,y:init?-9+Math.random()*18:-10-Math.random()*2,z:(Math.random()*2-1)*8,
+    v:(big?.3:.4)+Math.random()*.45,ph:Math.random()*6.28,r:big?.65+Math.random()*.55:.22+Math.random()*.25,top:3+Math.random()*8,a:init?1:0,out:false}};
   const bub=Array.from({length:NB},()=>newBub(true)),bo=new THREE.Object3D();
   const bubTick=(now,dt)=>{const ts=now/1000;bmat.uniforms.time.value=ts;
     bub.forEach((b,i)=>{b.y+=b.v*dt*mot;
