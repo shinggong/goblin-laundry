@@ -336,6 +336,8 @@ button{font:inherit;color:inherit;cursor:inherit}
   #dl .dcard .k{font-size:13px}
   #dinfo{position:fixed}
 }
+/* 커서는 어디서나 손가락 하나로 통일 */
+*,*::before,*::after{cursor:pointer!important}
 </style>
 
 <div id="view" aria-label="빨래방 3D 공간. 드래그해서 둘러보세요"><canvas id="gl"></canvas></div>
@@ -914,17 +916,11 @@ async function renderGallery(){
   stopGallery();
   panel.innerHTML='<div id="gal"><canvas id="galc"></canvas><img class="gdoor" src="img/washer_front.webp" alt=""><button class="back" data-back aria-label="뒤로"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button><div id="gzoom" hidden></div>'+
     '<div class="gload" role="status" aria-label="불러오는 중"><div class="gl-ring"></div><div class="gl-txt"><span>0</span>%</div></div></div>';
-  let gDone=0;const gTot=GALLERY_PHOTOS.length+Object.keys(CLOTH3D).length+1,gStep=()=>{gDone++;const e=$('#gal .gl-txt span');if(e)e.textContent=Math.min(99,Math.round(gDone/gTot*100))};   // 숫자판 진행률
+  const uniqMaps=[...new Set(Object.values(CLOTH3D).map(c=>c.map))];
+  let gDone=0;const gTot=uniqMaps.length+1,gStep=()=>{gDone++;const e=$('#gal .gl-txt span');if(e)e.textContent=Math.min(99,Math.round(gDone/gTot*100))};   // 숫자판 진행률
   placeDoor();
   if(!window.THREE) return;
-  const NC=17, arts=[]; // 사진 수만큼 카드
-  if(GALLERY_PHOTOS.length){
-    const ims=await Promise.all(GALLERY_PHOTOS.map(s=>loadImg(s).catch(()=>null).then(v=>{gStep();return v})));
-    ims.filter(Boolean).slice(0,NC).forEach((im,i)=>arts.push(photoArt(im,i)));
-  }else{
-    ALBUMS.forEach(a=>arts.push(cardArt(a)));
-    try{const room=await loadImg(PANO.room);for(let k=1;arts.length<NC;k++)arts.push(photoArt(room,k))}catch(e){}
-  }
+  const NC=17, arts=Array.from({length:NC},()=>{const c=document.createElement('canvas');c.width=c.height=8;return c});   // 카드 자리(옷 그림은 아래에서 받음)
   if(panel.hidden||current!=='gallery'||!arts.length) return;
   const cv=$('#galc'), box=$('#gzoom');
   const renderer=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:true});
@@ -938,7 +934,9 @@ async function renderGallery(){
   // 입체 천: 잘게 나눈 판을 깊이 지도만큼 앞으로 부풀리고, 그 모양으로 빛을 받게 하고, 바람에 살랑이게
   const tl=new THREE.TextureLoader(), clothTex={};
   const texCache={};   // 같은 옷 그림은 한 번만 받음
-  for(const [k,c] of Object.entries(CLOTH3D)){try{clothTex[k]=texCache[c.map]||(texCache[c.map]=[await new Promise((ok,no)=>tl.load(c.map,ok,undefined,no))])}catch(e){}gStep()}
+  const loaded=await Promise.all(uniqMaps.map(u=>new Promise(ok=>tl.load(u,t=>{gStep();ok(t)},undefined,()=>{gStep();ok(null)}))));   // 한꺼번에 받음
+  uniqMaps.forEach((u,i)=>{if(loaded[i])texCache[u]=[loaded[i]]});
+  for(const [k,c] of Object.entries(CLOTH3D))if(texCache[c.map])clothTex[k]=texCache[c.map];
   // 옷: 깊이 없이 평평한 스티커 그대로(드럼 뒤쪽은 shade로 어둡게)
   const clothMat=map=>new THREE.ShaderMaterial({transparent:true,side:THREE.DoubleSide,
     uniforms:{map:{value:map},time:{value:0},shade:{value:1}},
@@ -1385,6 +1383,7 @@ const playBlind=()=>blind.press();
 requestAnimationFrame(frame);
 const built=buildRoom().catch(e=>console.error(e));
 // 그림이 준비되면 분홍 화면이 사라지고 바로 방이 보임. 소리는 첫 터치/클릭 때 시작(브라우저 규칙)
+built.then(()=>{setTimeout(()=>ITEM_PICS.forEach(u=>{const i=new Image();i.src=u}),2500)});   // 세탁기·게임 옷 그림 미리 받기
 built.then(()=>Promise.race([Promise.all([blind.preset(),locker.preset()]),new Promise(r=>setTimeout(r,3000))])).then(()=>{yaw=startYaw();   // 기본: 창문 닫힘·캐비닛 열림이 준비된 뒤 입장
   pitch=-4;$('#loader').classList.add('gone');setTimeout(()=>$('#hint').classList.add('off'),9000)});
 addEventListener('pointerdown',()=>audioInit(),{once:true});
