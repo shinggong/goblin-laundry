@@ -298,8 +298,9 @@ button{font:inherit;color:inherit;cursor:inherit}
 /* 물건 위 이름표·알림·BACK 버튼 */
 #hotlabel{background:var(--lc-hot);color:var(--lc-cream)}
 #toast{color:var(--lc-cream)}
-#panel .back{background:var(--lc-cream);color:var(--ink);border:2px solid var(--ink);box-shadow:0 3px 0 var(--lc-hot)}
-#board .x{background:var(--lc-cream);border:2px solid var(--ink);box-shadow:0 3px 0 var(--lc-hot)}
+/* BACK·닫기 버튼: 반투명 검정 + 뒤 배경 흐림 */
+#panel .back,#board .x,#gzoom .zx{background:rgba(0,0,0,.42);color:#fff;border:0;box-shadow:none;-webkit-backdrop-filter:blur(10px) saturate(140%);backdrop-filter:blur(10px) saturate(140%)}
+#panel .back:hover,#board .x:hover,#gzoom .zx:hover{background:rgba(0,0,0,.58)}
 /* 쇼핑카트·미니게임·결제창 */
 #panel[data-sec="cart"]{--pbg:var(--lc-pink)}
 #ct{background:radial-gradient(var(--lc-cream) 23%,transparent 24.5%) 0 0/56px 56px,radial-gradient(var(--lc-cream) 23%,transparent 24.5%) 28px 28px/56px 56px,var(--lc-pink)}
