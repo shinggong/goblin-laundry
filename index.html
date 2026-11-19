@@ -299,6 +299,7 @@ button{font:inherit;color:inherit;cursor:inherit}
 #hotlabel{background:var(--lc-hot);color:var(--lc-cream)}
 #toast{color:var(--lc-cream)}
 /* BACK·닫기 버튼: 반투명 검정 + 뒤 배경 흐림 */
+#panel .back{width:42px;height:42px;padding:0;display:grid;place-items:center;border-radius:50%}   /* 뒤로: 글자 없이 ‹ 아이콘만 */
 #panel .back,#board .x,#gzoom .zx{background:rgba(0,0,0,.42);color:#fff;border:0;box-shadow:none;-webkit-backdrop-filter:blur(10px) saturate(140%);backdrop-filter:blur(10px) saturate(140%)}
 #panel .back:hover,#board .x:hover,#gzoom .zx:hover{background:rgba(0,0,0,.58)}
 /* 쇼핑카트·미니게임·결제창 */
@@ -714,7 +715,7 @@ addEventListener('keydown',e=>{
 
 /* ===== 패널 ===== */
 let current=null, rafId=0, bag=0;
-function head(title,kr,right=''){return `<div class="p-head"><button class="back" data-back>← BACK</button><h2>${title}</h2>${kr?`<span class="kr">${kr}</span>`:''}${right?`<span class="right">${right}</span>`:''}</div>`}
+function head(title,kr,right=''){return `<div class="p-head"><button class="back" data-back aria-label="뒤로"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button><h2>${title}</h2>${kr?`<span class="kr">${kr}</span>`:''}${right?`<span class="right">${right}</span>`:''}</div>`}
 function open(sec){
   current=sec; panel.dataset.sec=sec; panel.hidden=false; panel.scrollTop=0; $('#hint').classList.add('off');
   ({dial:renderDial,cart:renderCart,receipt:renderReceipt,gallery:renderGallery,music:renderMusic,video:renderVideo,tour:renderTour,contact:renderContact,shop:renderShop})[sec]();
@@ -899,7 +900,7 @@ function stopGallery(){
 }
 async function renderGallery(){
   stopGallery();
-  panel.innerHTML='<div id="gal"><canvas id="galc"></canvas><img class="gdoor" src="img/washer_front.webp" alt=""><button class="back" data-back>← BACK</button><div id="gzoom" hidden></div>'+
+  panel.innerHTML='<div id="gal"><canvas id="galc"></canvas><img class="gdoor" src="img/washer_front.webp" alt=""><button class="back" data-back aria-label="뒤로"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button><div id="gzoom" hidden></div>'+
     '<div class="gload" role="status" aria-label="불러오는 중"><div class="gl-ring"></div><div class="gl-txt"><span>0</span>%</div></div></div>';
   let gDone=0;const gTot=GALLERY_PHOTOS.length+Object.keys(CLOTH3D).length+1,gStep=()=>{gDone++;const e=$('#gal .gl-txt span');if(e)e.textContent=Math.min(99,Math.round(gDone/gTot*100))};   // 숫자판 진행률
   placeDoor();
@@ -1101,7 +1102,7 @@ function tearSfx(){if(!Au.ctx||Au.muted)return;const t=Au.ctx.currentTime;noiseH
 function stopReceipt(){if(!rc)return;rc.timers.forEach(clearTimeout);removeEventListener('keydown',rc.onKey);rc=null}
 function renderReceipt(){
   stopReceipt();
-  panel.innerHTML='<div id="rc"><img class="rcphoto" style="--op:'+OUTFITS[0].pos+'" src="'+OUTFITS[0].photo+'" alt="" draggable="false"><button class="back" data-back>← BACK</button><div class="slot"></div><div class="feedwin"><div class="stage"></div><div class="slotshade"></div></div></div>';
+  panel.innerHTML='<div id="rc"><img class="rcphoto" style="--op:'+OUTFITS[0].pos+'" src="'+OUTFITS[0].photo+'" alt="" draggable="false"><button class="back" data-back aria-label="뒤로"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button><div class="slot"></div><div class="feedwin"><div class="stage"></div><div class="slotshade"></div></div></div>';
   const st=$('#rc .stage');
   rc={i:0,busy:true,cur:null,timers:[],next:null};
   const later=(f,ms)=>rc.timers.push(setTimeout(f,ms));
@@ -1211,7 +1212,7 @@ function renderDial(){
   const card='<aside class="dcard" aria-label="연락처"><h2>Contact</h2><div class="dsub">LAUNDRY CLUB</div>'+
     CONTACT.map(([k,v])=>'<div class="crow"><span class="k">'+k+'</span><span class="v">'+esc(v)+'</span></div>').join('')+
     '<p class="dtip">다이얼을 돌려 아무 번호나 걸어 보세요</p></aside>';
-  panel.innerHTML='<div id="dl"><button class="back" data-back>← BACK</button><div class="dl-main"><div id="dnum"></div>'+dialSVG()+'</div>'+card+
+  panel.innerHTML='<div id="dl"><button class="back" data-back aria-label="뒤로"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button><div class="dl-main"><div id="dnum"></div>'+dialSVG()+'</div>'+card+
     '<div id="dinfo" hidden></div></div>';
   const box=$('#dl'), svg=$('#dsvg'), wheel=$('#wheel'), num=$('#dnum');
   dl={rot:0,n:null,busy:false,digits:'',raf:0,timers:[]};
@@ -1272,7 +1273,7 @@ function stopCart(){if(!ct)return;ct.g&&ct.g.stop();ct=null}
 function renderCart(){   // 쇼핑카트: 빨래 받기 미니게임만
   stopCart();
   const pic=i=>'img/cloth3d/'+String(i+1).padStart(2,'0')+'.webp';
-  panel.innerHTML='<div id="ct"><button class="back" data-back>← BACK</button>'+
+  panel.innerHTML='<div id="ct"><button class="back" data-back aria-label="뒤로"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>'+
     '<div class="ct-game"><div class="g-hud"><span class="g-score">0</span><span class="g-time">30s</span><span class="g-best">BEST 0</span></div><div class="g-field"></div>'+
     '<div class="g-cart"><div class="ct-pile"></div><img class="g-cimg" src="img/game_cart.webp" alt="" draggable="false"></div>'+
     '<div class="g-over"><h3>LAUNDRY CATCH</h3><p>건조기에서 날아오는 빨래를 카트로 받아요!<br>마우스·손가락으로 끌거나 ← → 키로 움직여요</p><button class="g-start">START</button></div></div></div>';
