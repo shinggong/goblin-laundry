@@ -174,13 +174,11 @@ button{font:inherit;color:inherit;cursor:inherit}
 /* 슬롯: 피그마 시안 그림(낡은 베이지 금속 틀). 종이는 검은 입구 윗변에서 나와 틀 아랫부분 앞에 걸쳐짐 */
 /* 좁은 화면에선 슬롯이 BACK 버튼과 겹치지 않게 아래로 */
 /* 2단 뷰: 왼쪽 모델 사진, 오른쪽 가운데에 슬롯+영수증. 좁은 세로 화면에선 사진이 위, 영수증이 아래 */
-#rc .rcphoto{position:absolute;z-index:1;left:0;top:0;width:100%;height:var(--top);background:#f3f3f2;object-fit:contain;object-position:var(--op,50% 18%);pointer-events:none;user-select:none}
+#rc .rcphoto{position:absolute;z-index:1;left:0;top:0;width:100%;height:var(--top);background:radial-gradient(#e9e2e2 2.6px,transparent 3.1px) 0 0/24px 24px,radial-gradient(#e9e2e2 2.6px,transparent 3.1px) 12px 12px/24px 24px,#f3f4f1;object-fit:contain;object-position:50% 50%;pointer-events:none;user-select:none}
 @media (min-width:760px) and (min-aspect-ratio:1/1){
   #rc{--top:0%;--cx:75%;--rw:min(36vw,580px,calc((100vh - 40px)/1.669))}
-  #rc .rcphoto{width:50%;height:100%;object-fit:cover;object-position:var(--op,50% 12%)}
+  #rc .rcphoto{width:50%;height:100%;padding:4vh 2vw;box-sizing:border-box}
 }
-/* PC에서 왼쪽 칸이 사진보다 세로로 길면(화면 비율 8:5 미만) 사진을 좌우 폭에 맞추고 위아래는 사진 바탕색으로 */
-@media (min-width:760px) and (min-aspect-ratio:1/1) and (max-aspect-ratio:8/5){#rc .rcphoto{object-fit:contain;object-position:50% 50%}}
 #rc .slot{position:absolute;z-index:4;left:var(--cx);top:var(--st);width:calc(var(--rw)*1204/981);height:calc(var(--rw)*300/981);transform:translateX(-50%);background:url(img/rc_slot.webp) 0 0/100% 100% no-repeat}
 #rc .stage{position:absolute;z-index:2;left:var(--cx);top:var(--peek);pointer-events:none;width:var(--rw);height:calc(var(--rw)*1266/820);transform:translateX(-50%)}
 .rcpt{position:absolute;inset:0;transform-origin:50% 0;pointer-events:auto;isolation:isolate;touch-action:none;cursor:grab}
@@ -1073,11 +1071,11 @@ async function renderGallery(){
 let rc=null, opening=false;
 // 왼쪽 아웃핏 사진과 그 영수증 내용. 사진을 더 넣으면 영수증을 뜯을 때마다 다음 아웃핏으로 넘어감
 const OUTFITS=[
-  {photo:'img/rc_look8.webp',pos:'50% 50%',style:'y2k street',items:[['Star Raglan Crop Tee','₩39,000'],['Camo Cargo Pants','₩68,000'],['Pink Studded Shoulder Bag','₩59,000'],['Star Ball Cap','₩32,000'],['Platform Derby Shoes','₩98,000']]},
-  {photo:'img/rc_look9.webp',pos:'50% 50%',style:'silver chrome',items:[['Olive Track Zip-up','₩79,000'],['Washed Cargo Jeans','₩72,000'],['Silver Star Hobo Bag','₩55,000'],['Chrome Oval Shades','₩29,000'],['Retro Sneakers','₩89,000']]},
-  {photo:'img/rc_look10.webp',pos:'50% 50%',style:'leopard rock',items:[['Leopard Faux Fur Coat','₩129,000'],['Buckle Mini Skirt','₩49,000'],['Red Fishnet Tights','₩15,000'],['Buckle Platform Boots','₩139,000'],['Silver Buckle Bag','₩62,000']]},
-  {photo:'img/rc_look11.webp',pos:'50% 50%',style:'pink star',items:[['Fuzzy Bucket Hat','₩35,000'],['Star Knit Sweater','₩69,000'],['Ruffle Tiered Skirt','₩45,000'],['Knit Leg Warmers','₩22,000'],['Pink Suede Sneakers','₩85,000']]},
-  {photo:'img/rc_look12.webp',pos:'50% 50%',style:'varsity sport',items:[['Maroon Track Jacket','₩82,000'],['Khaki Shorts','₩39,000'],['Canvas Duffle Bag','₩58,000'],['73 Ball Cap','₩32,000'],['Retro Runners','₩92,000']]},
+  {photo:'img/rc_cut1.webp',style:'y2k street',items:[['Star Raglan Crop Tee','₩39,000'],['Camo Cargo Pants','₩68,000'],['Pink Studded Shoulder Bag','₩59,000'],['Star Ball Cap','₩32,000'],['Platform Derby Shoes','₩98,000']]},
+  {photo:'img/rc_cut2.webp',style:'silver chrome',items:[['Olive Track Zip-up','₩79,000'],['Washed Cargo Jeans','₩72,000'],['Silver Star Hobo Bag','₩55,000'],['Chrome Oval Shades','₩29,000'],['Retro Sneakers','₩89,000']]},
+  {photo:'img/rc_cut3.webp',style:'leopard rock',items:[['Leopard Faux Fur Coat','₩129,000'],['Buckle Mini Skirt','₩49,000'],['Red Fishnet Tights','₩15,000'],['Buckle Platform Boots','₩139,000'],['Silver Buckle Bag','₩62,000']]},
+  {photo:'img/rc_cut4.webp',style:'pink star',items:[['Fuzzy Bucket Hat','₩35,000'],['Star Knit Sweater','₩69,000'],['Ruffle Tiered Skirt','₩45,000'],['Knit Leg Warmers','₩22,000'],['Pink Suede Sneakers','₩85,000']]},
+  {photo:'img/rc_cut5.webp',style:'varsity sport',items:[['Maroon Track Jacket','₩82,000'],['Khaki Shorts','₩39,000'],['Canvas Duffle Bag','₩58,000'],['73 Ball Cap','₩32,000'],['Retro Runners','₩92,000']]},
 ];
 function receiptHTML(i){   // 빈 종이 위에 아웃핏 영수증을 글자로 찍음
   const o=OUTFITS[i%OUTFITS.length],t=new Date(),z=v=>String(v).padStart(2,'0'),num=v=>+String(v).replace(/[^0-9]/g,''),won=v=>'₩'+v.toLocaleString('ko-KR');
@@ -1099,14 +1097,14 @@ function receiptHTML(i){   // 빈 종이 위에 아웃핏 영수증을 글자로
 }
 function setLook(k){   // 왼쪽 사진을 k번째 아웃핏으로 (겹쳐서 부드럽게 바뀜)
   const o=OUTFITS[k%OUTFITS.length],cur=$('#rc .rcphoto:last-of-type');if(!cur||cur.getAttribute('src')===o.photo)return;
-  const n=cur.cloneNode();n.src=o.photo;n.style.setProperty('--op',o.pos||'');n.style.opacity=0;cur.after(n);requestAnimationFrame(()=>requestAnimationFrame(()=>{n.style.opacity=1}));setTimeout(()=>cur.remove(),750);
+  const n=cur.cloneNode();n.src=o.photo;n.style.opacity=0;cur.after(n);requestAnimationFrame(()=>requestAnimationFrame(()=>{n.style.opacity=1}));setTimeout(()=>cur.remove(),750);
 }
 function printSfx(ms){if(!Au.ctx||Au.muted)return;const t=Au.ctx.currentTime;for(let k=0;k<ms/75;k++)noiseHit(t+k*.075,Au.master,.1,3000,.03,'bandpass')}
 function tearSfx(){if(!Au.ctx||Au.muted)return;const t=Au.ctx.currentTime;noiseHit(t,Au.master,.45,1800,.26,'highpass');noiseHit(t+.05,Au.master,.3,4200,.18,'highpass')}
 function stopReceipt(){if(!rc)return;rc.timers.forEach(clearTimeout);removeEventListener('keydown',rc.onKey);rc=null}
 function renderReceipt(){
   stopReceipt();
-  panel.innerHTML='<div id="rc"><img class="rcphoto" style="--op:'+OUTFITS[0].pos+'" src="'+OUTFITS[0].photo+'" alt="" draggable="false"><button class="back" data-back aria-label="뒤로"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button><div class="slot"></div><div class="feedwin"><div class="stage"></div><div class="slotshade"></div></div></div>';
+  panel.innerHTML='<div id="rc"><img class="rcphoto" src="'+OUTFITS[0].photo+'" alt="" draggable="false"><button class="back" data-back aria-label="뒤로"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button><div class="slot"></div><div class="feedwin"><div class="stage"></div><div class="slotshade"></div></div></div>';
   const st=$('#rc .stage');
   rc={i:0,busy:true,cur:null,timers:[],next:null};
   const later=(f,ms)=>rc.timers.push(setTimeout(f,ms));
