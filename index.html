@@ -268,9 +268,9 @@ button{font:inherit;color:inherit;cursor:inherit}
 #ct .g-pop{position:absolute;z-index:6;font-family:var(--f-display);font-size:22px;color:var(--ink);pointer-events:none;animation:gPop .6s ease-out forwards}
 #ct .g-pop.miss{color:#b0466f}
 @keyframes gPop{from{transform:translate(-50%,0);opacity:1}to{transform:translate(-50%,-46px);opacity:0}}
-#ct .g-cart{position:absolute;z-index:4;left:0;bottom:calc(5% + env(safe-area-inset-bottom,0px));width:min(26vw,300px);aspect-ratio:682/583;will-change:transform}
+#ct .g-cart{position:absolute;z-index:4;left:0;bottom:calc(5% + env(safe-area-inset-bottom,0px));width:min(26vw,300px);aspect-ratio:675/606;will-change:transform}
 #ct .g-cart .g-cimg{position:absolute;inset:0;width:100%;height:100%;z-index:2;pointer-events:none;user-select:none}
-#ct .g-cart .ct-pile{left:32%;right:3%;top:-26%;bottom:42%}   /* 새 카트 바구니 안 */
+#ct .g-cart .ct-pile{left:30%;right:2%;top:-26%;bottom:41%}   /* 새 카트 바구니 안 */
 #ct .g-cart .ct-pile img{width:36%}
 #ct .g-over{position:absolute;z-index:7;left:50%;top:52%;transform:translate(-50%,-50%);width:min(86vw,380px);background:#fbf3e2;border-radius:22px;box-shadow:0 6px 0 var(--ink);padding:26px 24px 22px;text-align:center;cursor:default}
 #ct .g-over h3{margin:0 0 8px;font-family:var(--f-display);font-size:34px;letter-spacing:.06em}
@@ -1275,7 +1275,7 @@ function renderCart(){   // 쇼핑카트: 빨래 받기 미니게임만
   const pic=i=>'img/cloth3d/'+String(i+1).padStart(2,'0')+'.webp';
   panel.innerHTML='<div id="ct"><button class="back" data-back aria-label="뒤로"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>'+
     '<div class="ct-game"><div class="g-hud"><span class="g-score">0</span><span class="g-time">30s</span><span class="g-best">BEST 0</span></div><div class="g-field"></div>'+
-    '<div class="g-cart"><div class="ct-pile"></div><img class="g-cimg" src="img/game_cart.webp" alt="" draggable="false"></div>'+
+    '<div class="g-cart"><div class="ct-pile"></div><img class="g-cimg" src="img/game_cart.webp?v=2" alt="" draggable="false"></div>'+
     '<div class="g-over"><h3>LAUNDRY CATCH</h3><p>건조기에서 날아오는 빨래를 카트로 받아요!<br>마우스·손가락으로 끌거나 ← → 키로 움직여요</p><button class="g-start">START</button></div></div></div>';
   ct={g:laundryGame($('#ct .ct-game'),pic)};
 }
@@ -1298,11 +1298,11 @@ function laundryGame(el,pic){
     left-=dt;tm.textContent=Math.max(0,Math.ceil(left))+'s';
     if(key)tx=Math.max(0,Math.min(1,tx+key*dt*1.1));x+=(tx-x)*Math.min(1,dt*14);place();
     if((next-=dt)<=0){spawn();next=Math.max(.38,1-(DUR-left)*.022)*(.7+Math.random()*.6)}
-    const w=W(),h=H(),c=cw(),cl=Math.max(0,Math.min(w-c,x*w-c/2)),rim=h-ch()-h*.05+ch()*.2;
+    const w=W(),h=H(),c=cw(),cl=Math.max(0,Math.min(w-c,x*w-c/2)),rim=h-ch()-h*.05+ch()*.18;
     for(const it of items){
       if(it.done)continue;const py=it.y;it.y+=it.v*dt;it.r+=it.w*dt;
       if(py+it.size*.6<rim&&it.y+it.size*.6>=rim){   // 카트 테두리를 지나는 순간 판정
-        if(it.x>cl+c*.3&&it.x<cl+c*.99){it.done=true;it.im.remove();score++;sc.textContent=score;pop(it.x,rim-30,'+1');
+        if(it.x>cl+c*.29&&it.x<cl+c*.99){it.done=true;it.im.remove();score++;sc.textContent=score;pop(it.x,rim-30,'+1');
           const p=document.createElement('img');p.src=it.im.src;p.alt='';const k=pile.children.length;p.style.left=(2+(k*23)%50)+'%';p.style.bottom=Math.min(40,6+Math.floor(k/3)*6)+'%';p.style.setProperty('--r',((k*53%31)-15)+'deg');pile.appendChild(p);
           if(pile.children.length>14)pile.firstElementChild.remove();continue}
       }
