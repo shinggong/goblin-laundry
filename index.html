@@ -412,6 +412,12 @@ html body.grabbing,html body.grabbing *{cursor:url(img/cur_hand.png?v=4) 17 17,g
 #ct .g-over.res .g-badge small{font-family:'IBM Plex Mono',monospace;font-weight:500;font-size:13px;letter-spacing:.14em;text-transform:lowercase;opacity:.8}
 #ct .g-over.res .g-rkick{text-shadow:none}
 #ct .g-over.res .g-start{background:#fbf3e2;color:#3a2a14;border:2px solid #3a2a14;box-shadow:0 3px 0 #3a2a14;font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:16px;letter-spacing:.12em;text-transform:lowercase;height:46px;padding:0 26px}
+/* 결과 카드: 반으로 접혀 있던 종이가 위로 펼쳐짐 */
+#ct .g-over.res{animation:rcClip .9s linear both}
+#ct .g-over.res::after{content:"";position:absolute;left:0;right:0;top:0;height:50%;z-index:3;pointer-events:none;background:url(img/result_card.webp) 50% 0/100% 200% no-repeat;transform-origin:50% 100%;animation:rcFlap .9s cubic-bezier(.35,.1,.25,1) both}
+@keyframes rcClip{0%,48%{clip-path:inset(50% 0 0 0)}52%,100%{clip-path:inset(-20% -20% -20% -20%)}}
+@keyframes rcFlap{0%{transform:perspective(900px) rotateX(-180deg);filter:brightness(.82)}50%{filter:brightness(.7)}75%{transform:perspective(900px) rotateX(0);filter:brightness(1);opacity:1}90%,100%{transform:perspective(900px) rotateX(0);opacity:0}}
+@media (prefers-reduced-motion:reduce){#ct .g-over.res,#ct .g-over.res::after{animation:none}#ct .g-over.res::after{display:none}}
 </style>
 
 <div id="view" aria-label="빨래방 3D 공간. 드래그해서 둘러보세요"><canvas id="gl"></canvas></div>
@@ -1411,7 +1417,7 @@ function laundryGame(el,pic){
   function start(){clear();pile.innerHTML='';score=0;left=DUR;next=.4;sc.textContent='0';tm.textContent=DUR+'s';over.hidden=true;over.classList.remove('res');el.classList.add('playing');run=true;last=performance.now();raf=requestAnimationFrame(frame)}
   function end(){run=false;el.classList.remove('playing');cancelAnimationFrame(raf);clear();
     const nb=score>best;if(nb){best=score;try{localStorage.setItem('gl_laundry_best',best)}catch(e){}}bs.textContent=best;
-    over.classList.add('res');over.innerHTML='<p class="g-rkick">'+(nb?'oh my, a brand new record':'the dryer has stopped')+'</p><h3 class="g-rtitle">'+(nb?'New Best!':'Time Up!')+'</h3><div class="g-badge"><b>'+score+'</b><small>pieces caught</small></div><p class="g-rsub'+(nb?' best':'')+'">'+(nb?'caught with joy ♡':'best score · '+best)+'</p><button class="g-start">play again ♡</button>';over.hidden=false;over.querySelector('.g-start').onclick=start}
+    over.classList.add('res');over.innerHTML='<p class="g-rkick">'+(nb?'oh my, a brand new record':'the dryer has stopped')+'</p><h3 class="g-rtitle">'+(nb?'New Best!':'Time Up!')+'</h3><div class="g-badge"><b>'+score+'</b><small>pieces caught</small></div><p class="g-rsub'+(nb?' best':'')+'">'+(nb?'caught with joy ♡':'best score · '+best)+'</p><button class="g-start">play again</button>';over.hidden=false;over.querySelector('.g-start').onclick=start}
   over.querySelector('.g-start').onclick=start;
   const mv=e=>{if(!run)return;const r=el.getBoundingClientRect();tx=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width))};
   el.addEventListener('pointermove',mv);el.addEventListener('pointerdown',mv);
