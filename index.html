@@ -343,7 +343,7 @@ button{font:inherit;color:inherit;cursor:inherit}
 #dl .dphone .dbody{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;user-select:none}
 #dl .dphone #dsvg{position:absolute;left:53.3%;top:24.6%;width:31%;height:auto;transform:translate(-50%,-50%)}
 #dl.on .dphone #dsvg{transform:translate(-50%,-50%)}
-#dl .dphone #dnum{position:absolute;left:54%;top:43.4%;transform:translate(-50%,-50%);width:22%;height:14cqh;margin:0;padding:0;display:flex;flex-direction:column;gap:2.4cqh;align-items:center;justify-content:center;background:none;box-shadow:none;border-radius:0;color:#3a2a14;text-shadow:none;font-family:'IBM Plex Sans KR',system-ui,sans-serif;text-align:center;letter-spacing:0;margin-right:0;min-height:0;animation:none}   /* 판 위에 바로 인쇄된 글씨 */
+#dl .dphone #dnum{position:absolute;left:54%;top:45%;transform:translate(-50%,-50%);width:22%;height:14cqh;margin:0;padding:0;display:flex;flex-direction:column;gap:2.4cqh;align-items:center;justify-content:center;background:none;box-shadow:none;border-radius:0;color:#3a2a14;text-shadow:none;font-family:'IBM Plex Sans KR',system-ui,sans-serif;text-align:center;letter-spacing:0;margin-right:0;min-height:0;animation:none}   /* 판 위에 바로 인쇄된 글씨 */
 @media (max-width:760px),(max-aspect-ratio:1/1){#dl .dphone{height:min(72vh,140vw)}}
 /* 전화기 오버레이 */
 #phone{position:fixed;inset:0;z-index:60;background:rgba(15,40,46,.55);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);opacity:0;pointer-events:none;transition:opacity .35s}
@@ -1227,7 +1227,7 @@ function dialSVG(){   // 공중전화 몸체 위에 얹는 다이얼: 숫자판 
   return '<svg id="dsvg" viewBox="-520 -520 1040 1040" aria-label="로터리 다이얼">'+
    '<circle r="500" fill="#f4ecd6" stroke="#1b140c" stroke-width="8"/>'+nums+
    '<g id="wheel"><image href="img/phone_ring.webp" x="'+(-265*SC).toFixed(1)+'" y="'+(-266*SC).toFixed(1)+'" width="'+(530*SC).toFixed(1)+'" height="'+(532*SC).toFixed(1)+'"/></g>'+
-   '<image href="img/phone_stop.webp" x="-96" y="-71" width="192" height="143" transform="translate('+sx+' '+sy+') rotate(75)"/></svg>';
+   '<image href="img/phone_stop.webp" x="-96" y="-71" width="192" height="143" transform="translate('+sx+' '+sy+') rotate(18)"/></svg>';
 }
 function renderDial(host){
   stopDial();
