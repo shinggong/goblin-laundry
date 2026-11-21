@@ -397,6 +397,21 @@ html body.grabbing,html body.grabbing *{cursor:url(img/cur_hand.png?v=4) 17 17,g
 #ct .g-rkick{margin:0;font-family:'IBM Plex Mono',monospace;font-weight:500;font-size:14px;letter-spacing:.12em;color:#3a2a14;text-transform:lowercase}
 #ct .g-over.res .g-rsub{font-family:'IBM Plex Mono',monospace;font-weight:500;font-size:13px;letter-spacing:.14em;text-transform:lowercase;color:#3a2a14;text-shadow:none}
 #ct .g-over.res .g-rsub.best{color:#3a2a14}
+/* 게임 상단 점수판: 결과 화면과 같은 톤 */
+#ct .g-hud{gap:8px;font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:600;letter-spacing:.06em}
+#ct .g-hud span{background:rgba(251,243,226,.92);color:#3a2a14;border:1.5px solid #3a2a14;box-shadow:none;padding:5px 14px 5px 12px;border-radius:999px}
+#ct .g-hud .g-score,#ct .g-hud .g-time{background:rgba(251,243,226,.92);color:#3a2a14;font-family:'IBM Plex Mono',monospace}
+#ct .g-hud span::before{font-weight:500;font-size:.78em;letter-spacing:.12em;opacity:.65;margin-right:7px}
+#ct .g-hud .g-score::before{content:'caught'}
+#ct .g-hud .g-time::before{content:'time'}
+#ct .g-hud .g-best::before{content:'best'}
+#ct .g-hud .g-score{color:var(--lc-hot)}
+/* 결과 화면 톤: 동그라미 틀 없이 손글씨 숫자, 버튼도 크림+갈색 */
+#ct .g-over.res .g-badge{width:auto;height:auto;margin:4px auto 0;background:none;box-shadow:none;border-radius:0;gap:0}
+#ct .g-over.res .g-badge b{font-family:'Princess Sofia',var(--f-sign);font-size:clamp(70px,11vw,104px);line-height:1.05;color:var(--lc-hot);-webkit-text-stroke:6px #3a2a14;paint-order:stroke fill}
+#ct .g-over.res .g-badge small{font-family:'IBM Plex Mono',monospace;font-weight:500;font-size:13px;letter-spacing:.14em;text-transform:lowercase;opacity:.8}
+#ct .g-over.res .g-rkick{text-shadow:none}
+#ct .g-over.res .g-start{background:#fbf3e2;color:#3a2a14;border:2px solid #3a2a14;box-shadow:0 3px 0 #3a2a14;font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:16px;letter-spacing:.12em;text-transform:lowercase;height:46px;padding:0 26px}
 </style>
 
 <div id="view" aria-label="빨래방 3D 공간. 드래그해서 둘러보세요"><canvas id="gl"></canvas></div>
@@ -1353,7 +1368,7 @@ function renderCart(){   // 쇼핑카트: 빨래 받기 미니게임만
   stopCart();
   const pic=i=>ITEM_PICS[i%ITEM_PICS.length];
   panel.innerHTML='<div id="ct"><button class="back" data-back aria-label="뒤로"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>'+
-    '<div class="ct-game"><div class="g-hud"><span class="g-score">0</span><span class="g-time">30s</span><span class="g-best">BEST 0</span></div><div class="g-field"></div>'+
+    '<div class="ct-game"><div class="g-hud"><span class="g-score">0</span><span class="g-time">30s</span><span class="g-best">0</span></div><div class="g-field"></div>'+
     '<div class="g-cart"><div class="ct-pile"></div><img class="g-cimg" src="img/game_cart.webp?v=3" alt="" draggable="false"></div>'+
     '<div class="g-over"><img class="g-sign" src="img/game_sign.webp?v=1" alt="Laundry Catch" draggable="false"><p>건조기에서 날아오는 빨래를 카트로 받아요!<br>마우스·손가락으로 끌거나 ← → 키로 움직여요</p><button class="g-start">START</button></div></div></div>';
   ct={g:laundryGame($('#ct .ct-game'),pic)};
@@ -1363,7 +1378,7 @@ function laundryGame(el,pic){
   const field=el.querySelector('.g-field'),cart=el.querySelector('.g-cart'),pile=cart.querySelector('.ct-pile'),over=el.querySelector('.g-over');
   const sc=el.querySelector('.g-score'),tm=el.querySelector('.g-time'),bs=el.querySelector('.g-best'),DUR=30;
   let best=+(localStorage.getItem('gl_laundry_best')||0),run=false,raf=0,items=[],x=.5,tx=.5,key=0,score=0,left=DUR,last=0,next=0,el0=0;
-  bs.textContent='BEST '+best;
+  bs.textContent=best;
   const W=()=>el.clientWidth,H=()=>el.clientHeight,cw=()=>cart.offsetWidth,ch=()=>cart.offsetHeight;
   const place=()=>{const w=W(),c=cw();cart.style.transform='translateX('+Math.max(0,Math.min(w-c,x*w-c/2))+'px)'};
   const pop=(px,py,t,miss)=>{const d=document.createElement('div');d.className='g-pop'+(miss?' miss':'');d.textContent=t;d.style.left=px+'px';d.style.top=py+'px';el.appendChild(d);setTimeout(()=>d.remove(),650)};
@@ -1382,7 +1397,7 @@ function laundryGame(el,pic){
       if(it.done)continue;const py=it.y;it.y+=it.v*dt;it.r+=it.w*dt;
       if(py+it.size*.6<rim&&it.y+it.size*.6>=rim){   // 카트 테두리를 지나는 순간 판정
         if(it.x>cl+c*.29&&it.x<cl+c*.99){it.done=true;it.im.remove();score++;sc.textContent=score;pop(it.x,rim-30,'+1');
-          const p=document.createElement('img');p.src=it.im.src;p.alt='';const k=pile.children.length;p.style.left=(k*23%54)+'%';p.style.bottom=Math.min(55,-4+Math.floor(k/3)*12)+'%';p.style.setProperty('--r',((k*53%31)-15)+'deg');pile.appendChild(p);
+          const p=document.createElement('img');p.src=it.im.src;p.alt='';const k=score-1,col=[2,28,52,15,40][k%5],row=Math.floor(k/5)%4;p.style.left=(col+(k*7%5))+'%';p.style.bottom=(-6+row*12)+'%';p.style.setProperty('--r',((k*53%31)-15)+'deg');pile.appendChild(p);
           if(pile.children.length>14)pile.firstElementChild.remove();continue}
       }
       if(it.y>h){it.done=true;it.im.remove();pop(it.x,h-40,'MISS',true);continue}
@@ -1395,8 +1410,8 @@ function laundryGame(el,pic){
   function clear(){items.forEach(i=>i.im.remove());items=[];field.innerHTML=''}
   function start(){clear();pile.innerHTML='';score=0;left=DUR;next=.4;sc.textContent='0';tm.textContent=DUR+'s';over.hidden=true;over.classList.remove('res');el.classList.add('playing');run=true;last=performance.now();raf=requestAnimationFrame(frame)}
   function end(){run=false;el.classList.remove('playing');cancelAnimationFrame(raf);clear();
-    const nb=score>best;if(nb){best=score;try{localStorage.setItem('gl_laundry_best',best)}catch(e){}}bs.textContent='BEST '+best;
-    over.classList.add('res');over.innerHTML='<p class="g-rkick">'+(nb?'oh my, a brand new record':'the dryer has stopped')+'</p><h3 class="g-rtitle">'+(nb?'New Best!':'Time Up!')+'</h3><div class="g-badge"><b>'+score+'</b><small>CAUGHT</small></div><p class="g-rsub'+(nb?' best':'')+'">'+(nb?'caught with joy ♡':'best score · '+best)+'</p><button class="g-start">AGAIN</button>';over.hidden=false;over.querySelector('.g-start').onclick=start}
+    const nb=score>best;if(nb){best=score;try{localStorage.setItem('gl_laundry_best',best)}catch(e){}}bs.textContent=best;
+    over.classList.add('res');over.innerHTML='<p class="g-rkick">'+(nb?'oh my, a brand new record':'the dryer has stopped')+'</p><h3 class="g-rtitle">'+(nb?'New Best!':'Time Up!')+'</h3><div class="g-badge"><b>'+score+'</b><small>pieces caught</small></div><p class="g-rsub'+(nb?' best':'')+'">'+(nb?'caught with joy ♡':'best score · '+best)+'</p><button class="g-start">play again ♡</button>';over.hidden=false;over.querySelector('.g-start').onclick=start}
   over.querySelector('.g-start').onclick=start;
   const mv=e=>{if(!run)return;const r=el.getBoundingClientRect();tx=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width))};
   el.addEventListener('pointermove',mv);el.addEventListener('pointerdown',mv);
