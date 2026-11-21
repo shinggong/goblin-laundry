@@ -389,7 +389,7 @@ html body.grabbing,html body.grabbing *{cursor:url(img/cur_hand.png?v=4) 17 17,g
 /* 게임 중엔 카트를 잡은 손 커서 */
 #ct .ct-game.playing,#ct .ct-game.playing *{cursor:url(img/cur_hand.png?v=4) 17 17,grabbing!important;cursor:-webkit-image-set(url(img/cur_hand.png?v=4) 1x,url(img/cur_hand@2x.png?v=4) 2x) 17 17,grabbing!important;cursor:image-set(url(img/cur_hand.png?v=4) 1x,url(img/cur_hand@2x.png?v=4) 2x) 17 17,grabbing!important}
 /* 결과 화면 배경: 별 뚫린 분홍 종이 */
-#ct .g-over.res{top:37%;width:min(90vw,480px);aspect-ratio:900/596;background:url(img/result_card.webp) center/100% 100% no-repeat;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:18px 0}
+#ct .g-over.res{top:37%;width:min(90vw,480px);height:calc(min(90vw,480px) * 596 / 900);box-sizing:border-box;background:url(img/result_card.webp) center/100% 100% no-repeat;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0}
 #ct .g-over.res .g-badge{margin:8px auto 6px}
 #ct .g-over.res .g-rsub{margin:6px 0 10px}
 /* 결과 제목: 동글동글 손글씨(크림 글자 + 갈색 외곽선) + 타자기 소문자 */
@@ -412,12 +412,19 @@ html body.grabbing,html body.grabbing *{cursor:url(img/cur_hand.png?v=4) 17 17,g
 #ct .g-over.res .g-badge small{font-family:'IBM Plex Mono',monospace;font-weight:500;font-size:13px;letter-spacing:.14em;text-transform:lowercase;opacity:.8}
 #ct .g-over.res .g-rkick{text-shadow:none}
 #ct .g-over.res .g-start{background:#fbf3e2;color:#3a2a14;border:2px solid #3a2a14;box-shadow:0 3px 0 #3a2a14;font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:16px;letter-spacing:.12em;text-transform:lowercase;height:46px;padding:0 26px}
-/* 결과 카드: 반으로 접혀 있던 종이가 위로 펼쳐짐 */
-#ct .g-over.res{animation:rcClip .9s linear both}
-#ct .g-over.res::after{content:"";position:absolute;left:0;right:0;top:0;height:50%;z-index:3;pointer-events:none;background:url(img/result_card.webp) 50% 0/100% 200% no-repeat;transform-origin:50% 100%;animation:rcFlap .9s cubic-bezier(.35,.1,.25,1) both}
-@keyframes rcClip{0%,48%{clip-path:inset(50% 0 0 0)}52%,100%{clip-path:inset(-20% -20% -20% -20%)}}
-@keyframes rcFlap{0%{transform:perspective(900px) rotateX(-180deg);filter:brightness(.82)}50%{filter:brightness(.7)}75%{transform:perspective(900px) rotateX(0);filter:brightness(1);opacity:1}90%,100%{transform:perspective(900px) rotateX(0);opacity:0}}
-@media (prefers-reduced-motion:reduce){#ct .g-over.res,#ct .g-over.res::after{animation:none}#ct .g-over.res::after{display:none}}
+/* 결과 카드: 반으로 접힌 종이가 위로 펼쳐짐 (JS로 위·아래 조각을 만들어 회전) */
+#ct .g-over.res.rc-anim{background:none;perspective:1100px}
+#ct .g-over.res.rc-anim>:not(.rc-f){visibility:hidden}
+#ct .rc-f{position:absolute;left:0;width:100%;height:50%;pointer-events:none}
+#ct .rc-bot{top:50%;overflow:hidden}
+#ct .rc-top{top:0;z-index:3;transform-origin:50% 100%;-webkit-transform-style:preserve-3d;transform-style:preserve-3d}
+#ct .rc-face{position:absolute;inset:0;overflow:hidden;-webkit-backface-visibility:hidden;backface-visibility:hidden}
+#ct .rc-back{transform:rotateX(180deg);background:url(img/result_card.webp) 50% 0/100% 200% no-repeat;filter:brightness(.86) saturate(.9)}
+#ct .rc-shade{position:absolute;inset:0;pointer-events:none}
+#ct .rc-top .rc-shade{background:linear-gradient(to top,rgba(58,42,20,.45),rgba(58,42,20,.1))}
+#ct .rc-bot .rc-shade{background:linear-gradient(to bottom,rgba(58,42,20,.35),transparent 70%)}
+#ct .g-over.res.rc-copy{position:absolute;left:0;top:0;width:100%;height:200%;transform:none;margin:0;animation:none;z-index:auto;visibility:visible}
+#ct .rc-bot .g-over.res.rc-copy{top:-100%}
 </style>
 
 <div id="view" aria-label="빨래방 3D 공간. 드래그해서 둘러보세요"><canvas id="gl"></canvas></div>
@@ -1417,7 +1424,24 @@ function laundryGame(el,pic){
   function start(){clear();pile.innerHTML='';score=0;left=DUR;next=.4;sc.textContent='0';tm.textContent=DUR+'s';over.hidden=true;over.classList.remove('res');el.classList.add('playing');run=true;last=performance.now();raf=requestAnimationFrame(frame)}
   function end(){run=false;el.classList.remove('playing');cancelAnimationFrame(raf);clear();
     const nb=score>best;if(nb){best=score;try{localStorage.setItem('gl_laundry_best',best)}catch(e){}}bs.textContent=best;
-    over.classList.add('res');over.innerHTML='<p class="g-rkick">'+(nb?'oh my, a brand new record':'the dryer has stopped')+'</p><h3 class="g-rtitle">'+(nb?'New Best!':'Time Up!')+'</h3><div class="g-badge"><b>'+score+'</b><small>pieces caught</small></div><p class="g-rsub'+(nb?' best':'')+'">'+(nb?'caught with joy ♡':'best score · '+best)+'</p><button class="g-start">play again</button>';over.hidden=false;over.querySelector('.g-start').onclick=start}
+    over.classList.add('res');over.innerHTML='<p class="g-rkick">'+(nb?'oh my, a brand new record':'the dryer has stopped')+'</p><h3 class="g-rtitle">'+(nb?'New Best!':'Time Up!')+'</h3><div class="g-badge"><b>'+score+'</b><small>pieces caught</small></div><p class="g-rsub'+(nb?' best':'')+'">'+(nb?'caught with joy ♡':'best score · '+best)+'</p><button class="g-start">play again</button>';over.hidden=false;over.querySelector('.g-start').onclick=start;unfold()}
+  let rcTok=0;
+  function unfold(){   // 결과 카드: 반으로 접힌 종이가 위로 펼쳐짐
+    over.classList.remove('rc-anim');
+    if(matchMedia('(prefers-reduced-motion: reduce)').matches||!over.animate)return;
+    const tok=++rcTok,copy=()=>{const c=over.cloneNode(true);c.className='g-over res rc-copy';c.removeAttribute('hidden');return c};
+    const mk=(cls,html)=>{const d=document.createElement('div');d.className=cls;if(html)d.innerHTML=html;return d};
+    const bot=mk('rc-f rc-bot'),top=mk('rc-f rc-top'),front=mk('rc-face'),back=mk('rc-face rc-back');
+    const bShade=mk('rc-shade'),fShade=mk('rc-shade');
+    bot.append(copy(),bShade);front.append(copy(),fShade);top.append(back,front);
+    over.classList.add('rc-anim');over.append(bot,top);
+    const D=900,E='cubic-bezier(.45,.05,.25,1)';
+    over.animate([{opacity:0,transform:'translate(-50%,-44%) scale(.94)'},{opacity:1,transform:'translate(-50%,-50%) scale(1)'}],{duration:260,easing:'cubic-bezier(.2,.8,.3,1)'});
+    top.animate([{transform:'rotateX(-180deg)'},{transform:'rotateX(-180deg)',offset:.22},{transform:'rotateX(6deg)',offset:.82},{transform:'rotateX(0deg)'}],{duration:D,easing:E,fill:'both'});
+    fShade.animate([{opacity:1},{opacity:1,offset:.45},{opacity:0,offset:.85},{opacity:0}],{duration:D,fill:'both'});
+    bShade.animate([{opacity:.6},{opacity:.9,offset:.5},{opacity:0,offset:.85},{opacity:0}],{duration:D,fill:'both'});
+    setTimeout(()=>{if(tok!==rcTok)return;bot.remove();top.remove();over.classList.remove('rc-anim')},D+30);
+  }
   over.querySelector('.g-start').onclick=start;
   const mv=e=>{if(!run)return;const r=el.getBoundingClientRect();tx=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width))};
   el.addEventListener('pointermove',mv);el.addEventListener('pointerdown',mv);
