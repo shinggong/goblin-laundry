@@ -442,9 +442,9 @@ html body.grabbing,html body.grabbing *{cursor:url(img/cur_hand.png?v=4) 17 17,g
 #ct .back{z-index:6}
 @media (max-width:600px){#ct .g-bn-title{font-size:8.2vw;padding-left:46px}}
 /* 상단 패턴: 줄무늬+레이스 이미지 */
-#ct .g-banner{height:calc(var(--bn) + 40px + env(safe-area-inset-top,0px));padding-bottom:40px;background:url(img/game_banner.webp?v=1) 50% 100%/auto 100% repeat-x}
-#ct .g-bn-lace{display:none}
-#ct .g-hud{top:calc(clamp(76px,11vh,108px) + 56px + env(safe-area-inset-top,0px))!important}
+#ct .g-banner{height:calc(var(--bn) + 34px + env(safe-area-inset-top,0px));padding-bottom:16px;background:url(img/game_stripe.webp?v=1) 50% 0/173px auto repeat}
+#ct .g-bn-lace{display:block;bottom:-8px;height:64px;z-index:-1;filter:none;background:url(img/game_banner.webp?v=1) 50% 100%/173px auto repeat-x}
+#ct .g-hud{top:calc(clamp(76px,11vh,108px) + 54px + env(safe-area-inset-top,0px))!important}
 /* 시작 화면: 간판 없이, START 버튼 외곽선 */
 #ct .g-over .g-sign{display:none}
 #ct .g-over:not(.res) .g-start{border:2.5px solid #3a2a14}
