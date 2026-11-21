@@ -298,7 +298,7 @@ button{font:inherit;color:inherit;cursor:inherit}
 #toast{color:var(--lc-cream)}
 /* BACK·닫기 버튼: 반투명 검정 + 뒤 배경 흐림 */
 #panel .back{width:42px;height:42px;padding:0;display:grid;place-items:center;border-radius:50%}   /* 뒤로: 글자 없이 ‹ 아이콘만 */
-#panel .back,#board .x,#gzoom .zx{background:rgba(0,0,0,.42);color:#fff;border:0;box-shadow:none;-webkit-backdrop-filter:blur(10px) saturate(140%);backdrop-filter:blur(10px) saturate(140%)}
+#panel .back,#phone .back,#board .x,#gzoom .zx{background:rgba(0,0,0,.42);color:#fff;border:0;box-shadow:none;-webkit-backdrop-filter:blur(10px) saturate(140%);backdrop-filter:blur(10px) saturate(140%)}
 #panel .back:hover,#board .x:hover,#gzoom .zx:hover{background:rgba(0,0,0,.58)}
 /* 쇼핑카트·미니게임·결제창 */
 #panel[data-sec="cart"]{--pbg:#fbe1ea}
@@ -345,6 +345,12 @@ button{font:inherit;color:inherit;cursor:inherit}
 #dl.on .dphone #dsvg{transform:translate(-50%,-50%)}
 #dl .dphone #dnum{position:absolute;left:54%;top:43.4%;transform:translate(-50%,-50%);width:21%;height:5.2cqh;margin:0;padding:0;display:flex;align-items:center;justify-content:center;border-radius:1cqw;background:#0b1a12;box-shadow:inset 0 0 0 .5cqw #1d3a29;font-size:2.7cqw;line-height:1;letter-spacing:.12em;white-space:nowrap;min-height:0;overflow:hidden}
 @media (max-width:760px),(max-aspect-ratio:1/1){#dl .dphone{height:min(72vh,140vw)}}
+/* 전화기 오버레이 */
+#phone{position:fixed;inset:0;z-index:60;background:rgba(15,40,46,.55);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);opacity:0;pointer-events:none;transition:opacity .35s}
+#phone.on{opacity:1;pointer-events:auto}
+#phone #dl{transform:translate(var(--fx,0),var(--fy,0)) scale(.2);transition:transform .55s cubic-bezier(.2,1.15,.3,1)}
+#phone.on #dl{transform:none}
+#phone #dl .back{left:auto;right:max(16px,env(safe-area-inset-right,0px));width:44px;height:44px;padding:0;border-radius:50%;display:grid;place-items:center;font-size:24px;line-height:1}
 </style>
 
 <div id="view" aria-label="빨래방 3D 공간. 드래그해서 둘러보세요"><canvas id="gl"></canvas></div>
@@ -356,6 +362,7 @@ button{font:inherit;color:inherit;cursor:inherit}
 <section id="panel" hidden></section>
 <div id="vthumb"></div>
 <div id="toast" role="status"></div>
+<div id="phone" aria-hidden="true"></div>
 <div id="board" aria-hidden="true"><img src="img/board.webp" alt="게시판" draggable="false"><button class="x" aria-label="닫기">×</button></div>
 
 <div id="loader" aria-label="불러오는 중"><div class="gl-ring"></div><div class="gl-txt"><span>0</span>%</div></div>
@@ -703,7 +710,7 @@ function endDrag(e){
   if(!pts.size)document.body.classList.remove('grabbing');
   if(!drag||e.pointerId!==drag.id) return;
   // 클릭 시 메뉴 이동은 잠시 꺼 둠: if(drag.moved<7&&drag.hot&&e.type==='pointerup'){vy=vp=0;setHover(null);open(drag.hot.sec)}
-  if(drag.moved<7&&drag.hot&&e.type==='pointerup'){if(drag.hot.sec==='window')playBlind();else if(drag.hot.sec==='locker')locker.press();else if(drag.hot.sec==='tour')showBoard(e.clientX,e.clientY);else if(drag.hot.sec==='music')enterPage('gallery','music');else if(/shop_vend/.test(drag.hot.src))enterPage('receipt','shop');else if(/shop_bag/.test(drag.hot.src))enterPage('cart','shop',drag.hot);else if(drag.hot.sec==='contact')enterPage('dial','contact')}
+  if(drag.moved<7&&drag.hot&&e.type==='pointerup'){if(drag.hot.sec==='window')playBlind();else if(drag.hot.sec==='locker')locker.press();else if(drag.hot.sec==='tour')showBoard(e.clientX,e.clientY);else if(drag.hot.sec==='music')enterPage('gallery','music');else if(/shop_vend/.test(drag.hot.src))enterPage('receipt','shop');else if(/shop_bag/.test(drag.hot.src))enterPage('cart','shop',drag.hot);else if(drag.hot.sec==='contact')showPhone(e.clientX,e.clientY)}
   drag=null;
 }
 view.addEventListener('pointerup',endDrag);view.addEventListener('pointercancel',endDrag);
@@ -1218,17 +1225,15 @@ function dialSVG(){   // 공중전화 몸체 위에 얹는 다이얼: 숫자판 
   return '<svg id="dsvg" viewBox="-520 -520 1040 1040" aria-label="로터리 다이얼">'+
    '<circle r="500" fill="#f4ecd6" stroke="#1b140c" stroke-width="8"/>'+nums+
    '<g id="wheel"><image href="img/phone_ring.webp" x="'+(-265*SC).toFixed(1)+'" y="'+(-266*SC).toFixed(1)+'" width="'+(530*SC).toFixed(1)+'" height="'+(532*SC).toFixed(1)+'"/></g>'+
-   '<circle r="236" fill="#f4ecd6" stroke="#1b140c" stroke-width="7"/>'+
-   '<g font-family="Barlow Condensed,Arial Narrow,sans-serif" font-weight="800" font-size="62" text-anchor="middle" fill="#2a2016"><text id="dt1" y="-44">IT’S TIME</text><text id="dt2" y="14">TO TELL</text><text id="dt3" y="72">YOUR STORY</text></g>'+
    '<image href="img/phone_stop.webp" x="-96" y="-71" width="192" height="143" transform="translate('+sx+' '+sy+') rotate(20)"/></svg>';
 }
-function renderDial(){
+function renderDial(host){
   stopDial();
   // 왼쪽 전화 다이얼 + 오른쪽 연락처 카드(늘 보임). 좁은 화면에선 다이얼 아래에 카드
   const card='<aside class="dcard" aria-label="연락처"><h2>Contact</h2><div class="dsub">LAUNDRY CLUB</div>'+
     CONTACT.map(([k,v])=>'<div class="crow"><span class="k">'+k+'</span><span class="v">'+esc(v)+'</span></div>').join('')+
     '<p class="dtip">다이얼을 돌려 아무 번호나 걸어 보세요</p></aside>';
-  panel.innerHTML='<div id="dl"><button class="back" data-back aria-label="뒤로"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button><div class="dl-main dphone"><img class="dbody" src="img/phone_body.webp" alt="" draggable="false"><div id="dnum"></div>'+dialSVG()+'</div>'+card+
+  (host||panel).innerHTML='<div id="dl"><button class="back" data-back aria-label="뒤로"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button><div class="dl-main dphone"><img class="dbody" src="img/phone_body.webp" alt="" draggable="false"><div id="dnum"></div>'+dialSVG()+'</div>'+card+
     '<div id="dinfo" hidden></div></div>';
   const box=$('#dl'), svg=$('#dsvg'), wheel=$('#wheel'), num=$('#dnum');
   dl={rot:0,n:null,busy:false,digits:'',raf:0,timers:[]};
@@ -1264,7 +1269,7 @@ function renderDial(){
     dl.raf=requestAnimationFrame(step);
   };
   svg.addEventListener('pointerup',release); svg.addEventListener('pointercancel',release);
-  function say(a,b,c){$('#dt1').textContent=a;$('#dt2').textContent=b;$('#dt3').textContent=c}
+  function say(){}   // 가운데 글씨 없음
   function call(){
     dl.busy=true; num.classList.add('calling'); dialRing();
     later(()=>{
@@ -1380,6 +1385,14 @@ function makeToggle(src,uni,seg1,seg2){
 const blind=makeToggle('pano/window_blind.mp4','vid',[0,.9],[.9,1.75]);
 const locker=makeToggle('pano/locker_door.mp4','vid2',[0,.7],[.7,1.38]);
 const playBlind=()=>blind.press();
+
+/* ===== 전화기 크게 보기: 페이지 이동 없이 방 위에 게시판처럼 튀어나옴. 바깥·×·Esc로 닫기 ===== */
+function showPhone(x,y){const o=$('#phone');if(o.classList.contains('on'))return;setHover(null);vy=vp=0;
+  renderDial(o);const b=o.querySelector('#dl .back');b.setAttribute('aria-label','닫기');b.removeAttribute('data-back');b.innerHTML='×';b.onclick=hidePhone;
+  o.querySelector('#dl').addEventListener('click',e=>{if(e.target.id==='dl')hidePhone()});
+  o.style.setProperty('--fx',(x-innerWidth/2)+'px');o.style.setProperty('--fy',(y-innerHeight/2)+'px');void o.offsetWidth;o.classList.add('on');o.setAttribute('aria-hidden','false')}
+function hidePhone(){const o=$('#phone');if(!o.classList.contains('on'))return;o.classList.remove('on');o.setAttribute('aria-hidden','true');setTimeout(()=>{if(!o.classList.contains('on')){stopDial();o.innerHTML=''}},400)}
+addEventListener('keydown',e=>{if(e.key==='Escape'&&$('#phone').classList.contains('on'))hidePhone()});
 
 /* ===== 로딩 → 입장 ===== */
 requestAnimationFrame(frame);
