@@ -338,7 +338,8 @@ button{font:inherit;color:inherit;cursor:inherit}
   #dinfo{position:fixed}
 }
 /* 커서는 어디서나 손가락 하나로 통일 */
-*,*::before,*::after{cursor:pointer!important}
+*,*::before,*::after{cursor:url(img/cur_point.png) 15 2,pointer!important}   /* 게임 포함 어디서나 손가락 그림 */
+html body.grabbing,html body.grabbing *{cursor:url(img/cur_hand.png) 20 20,grabbing!important}   /* 방을 끌어 돌리는 동안엔 편 손 */
 /* 노란 공중전화: 몸체 그림 위 동그란 자리에 다이얼, 네모 판에 번호 화면 */
 #dl .dphone{position:relative;display:block;height:min(84vh,138vw);aspect-ratio:2/3;flex:none;container-type:size}
 #dl .dphone .dbody{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;user-select:none}
