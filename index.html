@@ -348,7 +348,7 @@ button{font:inherit;color:inherit;cursor:inherit}
 #phone.on{opacity:1;pointer-events:auto}
 #phone #dl{transform:translate(var(--fx,0),var(--fy,0)) scale(.2);transition:transform .55s cubic-bezier(.2,1.15,.3,1)}
 #phone.on #dl{transform:none}
-#phone #dl .back{left:auto;right:max(16px,env(safe-area-inset-right,0px));width:44px;height:44px;padding:0;border-radius:50%;display:grid;place-items:center;font-size:24px;line-height:1}
+#phone #dl .back{left:auto;right:max(16px,env(safe-area-inset-right,0px));top:calc(16px + env(safe-area-inset-top,0px));margin:0;width:44px;height:44px;padding:0;border-radius:50%;display:grid;place-items:center;font:400 24px/1 'IBM Plex Sans KR',system-ui,sans-serif;letter-spacing:normal;text-transform:none}   /* 게시판 ×와 똑같이 */
 #dl .dphone #dnum b{font-weight:700;font-size:3.1cqw;line-height:1.15}
 #dl .dphone #dnum small{font-family:var(--f-label);font-weight:700;font-size:1.7cqw;letter-spacing:.14em;opacity:.8}
 /* 영수증·전화기를 끌 때 글씨가 선택되지 않게 */
@@ -357,18 +357,19 @@ button{font:inherit;color:inherit;cursor:inherit}
 #mute{display:none}
 #zoom{bottom:calc(16px + env(safe-area-inset-bottom,0px))}
 /* 연락처: 핑크 클립 메모지 그림 위에, 줄에 맞춰 글씨 */
-#dl .dcard{position:relative;width:min(540px,94vw);aspect-ratio:1000/668;max-height:none;overflow:visible;flex:none;container-type:inline-size;
+#dl .dcard{position:relative;width:min(470px,90vw);aspect-ratio:1.32;max-height:none;overflow:visible;flex:none;container-type:inline-size;
   background:url(img/contact_memo.webp) center/100% 100% no-repeat;border:0;border-radius:0;box-shadow:none;padding:0;box-sizing:border-box;color:#3a2a14}
-#dl .dcard h2{position:absolute;left:14cqw;top:13.6cqw;margin:0;font-size:7.4cqw;line-height:1}
-#dl .dcard .dsub,#dl .dcard .crow,#dl .dcard .dtip{height:4.45cqw;margin:0 11cqw 0 13.5cqw;padding:0 0 .55cqw;box-sizing:border-box;display:flex;align-items:flex-end;border:0}
-#dl .dcard .dsub{margin-top:23.4cqw;font-size:1.9cqw;letter-spacing:.2em;opacity:.6}
+#dl .dcard h2{margin:26.45cqw 11cqw 0 13.5cqw;height:4.95cqw;display:flex;align-items:flex-end;padding-bottom:.9cqw;transform:rotate(1.9deg);transform-origin:0 100%;box-sizing:border-box;font-size:5.4cqw;line-height:1;overflow:visible}
+#dl .dcard .dsub,#dl .dcard .crow,#dl .dcard .dtip{height:4.95cqw;margin:0 11cqw 0 13.5cqw;padding:0 0 1.2cqw;transform:rotate(1.9deg);transform-origin:0 100%;box-sizing:border-box;display:flex;align-items:flex-end;border:0}
+#dl .dcard .dsub{font-size:1.9cqw;letter-spacing:.2em;opacity:.6}
 #dl .dcard .crow{justify-content:space-between;gap:2cqw}
 #dl .dcard .k{font-size:2.4cqw;letter-spacing:.06em}
 #dl .dcard .v{font-size:2.3cqw;white-space:nowrap;word-break:normal}
-#dl .dcard .dtip{justify-content:center;font-size:2cqw;opacity:.6;margin-top:4.45cqw}
-#dl .dcard>*:first-child+*{margin-top:23.4cqw}
+#dl .dcard .dtip{justify-content:center;font-size:2cqw;opacity:.6;margin-top:4.95cqw}
 #dl .dcard.live{animation:dcPop .6s cubic-bezier(.3,1.6,.5,1)}
 @keyframes dcPop{40%{transform:scale(1.04) rotate(-1deg)}}
+/* 뒤로가기 위치: 세탁기 페이지와 같게(위 14px, 왼쪽 16px) */
+#rc .back,#ct .back{margin-top:0;top:calc(14px + env(safe-area-inset-top,0px));left:max(16px,env(safe-area-inset-left,0px))}
 </style>
 
 <div id="view" aria-label="빨래방 3D 공간. 드래그해서 둘러보세요"><canvas id="gl"></canvas></div>
@@ -952,7 +953,7 @@ async function renderGallery(){
   let gDone=0;const gTot=uniqMaps.length+1,gStep=()=>{gDone++;const e=$('#gal .gl-txt span');if(e)e.textContent=Math.min(99,Math.round(gDone/gTot*100))};   // 숫자판 진행률
   placeDoor();
   if(!window.THREE) return;
-  const NC=17, arts=Array.from({length:NC},()=>{const c=document.createElement('canvas');c.width=c.height=8;return c});   // 카드 자리(옷 그림은 아래에서 받음)
+  const NC=GAL_CLOTHES.length, arts=Array.from({length:NC},()=>{const c=document.createElement('canvas');c.width=c.height=8;return c});   // 카드 자리(옷 그림은 아래에서 받음)
   if(panel.hidden||current!=='gallery'||!arts.length) return;
   const cv=$('#galc'), box=$('#gzoom');
   const renderer=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:true});
@@ -962,7 +963,7 @@ async function renderGallery(){
   // 정면에서 본 드럼: 카메라는 정면. 사진은 3D 링처럼 기울지 않고 항상 정면을 본 채로,
   // 위치만 Y-Z 평면을 따라 위→앞→아래→뒤로 돈다. 가로축(X)은 열마다 따로 있고(여러 개) 절대 움직이지 않음.
   // 모든 사진이 같은 방향의 평행한 면이라 서로 통과하지 않고, 같은 열은 등간격 위상으로 어긋나게 배치.
-  const NCOL=innerWidth/innerHeight<1?3:5, SP=4.4, CW=4.1, RAD=[7.5,6.4,8.4,6.9,8], cards=[];
+  const NCOL=innerWidth/innerHeight<1?3:5, SP=4.4, CW=3.4, RAD=[7.5,6.4,8.4,6.9,8], cards=[], jr=rng('drum');   // jr: 자리를 살짝씩 흐트러뜨림
   // 입체 천: 잘게 나눈 판을 깊이 지도만큼 앞으로 부풀리고, 그 모양으로 빛을 받게 하고, 바람에 살랑이게
   const tl=new THREE.TextureLoader(), clothTex={};
   const texCache={};   // 같은 옷 그림은 한 번만 받음
@@ -979,7 +980,8 @@ async function renderGallery(){
     const asp=arts[k].width/arts[k].height, h=CW/asp, ct=clothTex[k];
     const mat=ct?clothMat(ct[0]):new THREE.MeshBasicMaterial({map:tex[k],transparent:true,alphaTest:.5});
     const mesh=ct?new THREE.Mesh(new THREE.PlaneGeometry(CW*1.25,CW*1.25,24,24),mat):new THREE.Mesh(new THREE.PlaneGeometry(CW,h),mat); if(ct)mesh.userData.cloth=1; scene.add(mesh);
-    cards.push({mesh,meshes:[mesh],mats:[mat],x:(col-(NCOL-1)/2)*SP,R:RAD[col%RAD.length],a0:row/perCol*Math.PI*2+col*.9,idx:k,cw:CW,ch:h});
+    const sc=.82+jr()*.36;mesh.scale.setScalar(sc);   // 크기 제각각
+    cards.push({mesh,meshes:[mesh],mats:[mat],x:(col-(NCOL-1)/2)*SP+(jr()-.5)*1.8,R:RAD[col%RAD.length]+(jr()-.5)*1.6,a0:row/perCol*Math.PI*2+col*.9+(jr()-.5)*.9,idx:k,cw:CW*sc,ch:h*sc});
   }
   // 비눗방울: 진짜 구(3D). 가장자리로 갈수록 밝아지는 투명한 막 + 주변 빛 반사 + 반짝이는 점. 떠오르다 위에서 스르르 사라짐
   const BW=NCOL*SP/2+3, NB=reduce?10:(innerWidth<760?16:26);
@@ -1000,7 +1002,7 @@ async function renderGallery(){
         return c;}
       void main(){vec3 V=normalize(cameraPosition-vW),N=normalize(vN);bool fr=gl_FrontFacing;if(!fr)N=-N;
         float f=.16+.84*pow(1.-clamp(dot(N,V),0.,1.),2.4);                 // 비누막 반사율(가장자리일수록 강함)
-        vec3 R=reflect(-V,N),col=pow(envAt(R),vec3(.8))*1.5;
+        vec3 R=reflect(-V,N),col=pow(envAt(R),vec3(.8))*1.15;
         float sp=pow(max(dot(R,normalize(vec3(-.4,.75,.5))),0.),260.)*1.4+pow(max(dot(R,normalize(vec3(.6,.3,.75))),0.),90.)*.35;   // 조명 반짝임
         float k=fr?1.:.55;                                                   // 안쪽 뒷면(뒤집힌 반사)은 옅게
         float a=clamp(f*.55*k,0.,1.)*vA;
