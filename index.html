@@ -3,7 +3,7 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Pacifico&family=Barlow+Condensed:wght@600;700;800&family=Do+Hyeon&family=DotGothic16&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+KR:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Pacifico&family=Princess+Sofia&family=Barlow+Condensed:wght@600;700;800&family=Do+Hyeon&family=DotGothic16&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+KR:wght@400;600;700&display=swap">
 <style>
 /* Layout: 드래그로 둘러보는 3D 동전빨래방(CSS 3D 큐브 방) + 사물 클릭 → 전체화면 패널 */
 :root{
@@ -392,6 +392,11 @@ html body.grabbing,html body.grabbing *{cursor:url(img/cur_hand.png?v=4) 17 17,g
 #ct .g-over.res{top:37%;width:min(90vw,480px);aspect-ratio:900/596;background:url(img/result_card.webp) center/100% 100% no-repeat;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:18px 0}
 #ct .g-over.res .g-badge{margin:8px auto 6px}
 #ct .g-over.res .g-rsub{margin:6px 0 10px}
+/* 결과 제목: 동글동글 손글씨(크림 글자 + 갈색 외곽선) + 타자기 소문자 */
+#ct .g-over.res .g-rtitle{font-family:'Princess Sofia',var(--f-sign);font-size:clamp(46px,7vw,66px);line-height:1;color:#fbf3e2;-webkit-text-stroke:5px #3a2a14;paint-order:stroke fill;filter:none;letter-spacing:.01em;margin:2px 0 0}
+#ct .g-rkick{margin:0;font-family:'IBM Plex Mono',monospace;font-weight:500;font-size:14px;letter-spacing:.12em;color:#3a2a14;text-transform:lowercase}
+#ct .g-over.res .g-rsub{font-family:'IBM Plex Mono',monospace;font-weight:500;font-size:13px;letter-spacing:.14em;text-transform:lowercase;color:#3a2a14;text-shadow:none}
+#ct .g-over.res .g-rsub.best{color:#3a2a14}
 </style>
 
 <div id="view" aria-label="빨래방 3D 공간. 드래그해서 둘러보세요"><canvas id="gl"></canvas></div>
@@ -1391,7 +1396,7 @@ function laundryGame(el,pic){
   function start(){clear();pile.innerHTML='';score=0;left=DUR;next=.4;sc.textContent='0';tm.textContent=DUR+'s';over.hidden=true;over.classList.remove('res');el.classList.add('playing');run=true;last=performance.now();raf=requestAnimationFrame(frame)}
   function end(){run=false;el.classList.remove('playing');cancelAnimationFrame(raf);clear();
     const nb=score>best;if(nb){best=score;try{localStorage.setItem('gl_laundry_best',best)}catch(e){}}bs.textContent='BEST '+best;
-    over.classList.add('res');over.innerHTML='<h3 class="g-rtitle">'+(nb?'New Best!':'Time Up!')+'</h3><div class="g-badge"><b>'+score+'</b><small>CAUGHT</small></div><p class="g-rsub'+(nb?' best':'')+'">'+(nb?'★ 최고 기록 갱신 ★':'BEST '+best)+'</p><button class="g-start">AGAIN</button>';over.hidden=false;over.querySelector('.g-start').onclick=start}
+    over.classList.add('res');over.innerHTML='<p class="g-rkick">'+(nb?'oh my, a brand new record':'the dryer has stopped')+'</p><h3 class="g-rtitle">'+(nb?'New Best!':'Time Up!')+'</h3><div class="g-badge"><b>'+score+'</b><small>CAUGHT</small></div><p class="g-rsub'+(nb?' best':'')+'">'+(nb?'caught with joy ♡':'best score · '+best)+'</p><button class="g-start">AGAIN</button>';over.hidden=false;over.querySelector('.g-start').onclick=start}
   over.querySelector('.g-start').onclick=start;
   const mv=e=>{if(!run)return;const r=el.getBoundingClientRect();tx=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width))};
   el.addEventListener('pointermove',mv);el.addEventListener('pointerdown',mv);
