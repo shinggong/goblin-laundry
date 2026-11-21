@@ -271,7 +271,7 @@ button{font:inherit;color:inherit;cursor:inherit}
 @keyframes gPop{from{transform:translate(-50%,0);opacity:1}to{transform:translate(-50%,-46px);opacity:0}}
 #ct .g-cart{position:absolute;z-index:4;left:0;bottom:calc(5% + env(safe-area-inset-bottom,0px));width:min(26vw,300px);aspect-ratio:696/616;will-change:transform}
 #ct .g-cart .g-cimg{position:absolute;inset:0;width:100%;height:100%;z-index:2;pointer-events:none;user-select:none}
-#ct .g-cart .ct-pile{left:30%;right:2%;top:-26%;bottom:41%}   /* 새 카트 바구니 안 */
+#ct .g-cart .ct-pile{left:31%;right:4%;top:8%;bottom:41.5%}   /* 바구니 바닥부터 쌓임 */   /* 새 카트 바구니 안 */
 #ct .g-cart .ct-pile img{width:36%}
 #ct .g-over{position:absolute;z-index:7;left:50%;top:52%;transform:translate(-50%,-50%);width:min(86vw,380px);background:#fbf3e2;border-radius:22px;box-shadow:0 6px 0 var(--ink);padding:26px 24px 22px;text-align:center;cursor:default}
 #ct .g-over h3{margin:0 0 8px;font-family:var(--f-display);font-size:34px;letter-spacing:.06em}
@@ -338,8 +338,8 @@ button{font:inherit;color:inherit;cursor:inherit}
   #dinfo{position:fixed}
 }
 /* 커서는 어디서나 손가락 하나로 통일 */
-*,*::before,*::after{cursor:url(img/cur_point.png?v=3) 10 1,pointer!important;cursor:-webkit-image-set(url(img/cur_point.png?v=3) 1x,url(img/cur_point@2x.png?v=3) 2x) 10 1,pointer!important;cursor:image-set(url(img/cur_point.png?v=3) 1x,url(img/cur_point@2x.png?v=3) 2x) 10 1,pointer!important}   /* 게임 포함 어디서나 손가락 그림 */
-html body.grabbing,html body.grabbing *{cursor:url(img/cur_hand.png?v=3) 14 14,grabbing!important;cursor:-webkit-image-set(url(img/cur_hand.png?v=3) 1x,url(img/cur_hand@2x.png?v=3) 2x) 14 14,grabbing!important;cursor:image-set(url(img/cur_hand.png?v=3) 1x,url(img/cur_hand@2x.png?v=3) 2x) 14 14,grabbing!important}   /* 방을 끌어 돌리는 동안엔 편 손 */
+*,*::before,*::after{cursor:url(img/cur_point.png?v=4) 12 1,pointer!important;cursor:-webkit-image-set(url(img/cur_point.png?v=4) 1x,url(img/cur_point@2x.png?v=4) 2x) 12 1,pointer!important;cursor:image-set(url(img/cur_point.png?v=4) 1x,url(img/cur_point@2x.png?v=4) 2x) 12 1,pointer!important}   /* 게임 포함 어디서나 손가락 그림 */
+html body.grabbing,html body.grabbing *{cursor:url(img/cur_hand.png?v=4) 17 17,grabbing!important;cursor:-webkit-image-set(url(img/cur_hand.png?v=4) 1x,url(img/cur_hand@2x.png?v=4) 2x) 17 17,grabbing!important;cursor:image-set(url(img/cur_hand.png?v=4) 1x,url(img/cur_hand@2x.png?v=4) 2x) 17 17,grabbing!important}   /* 방을 끌어 돌리는 동안엔 편 손 */
 /* 노란 공중전화: 몸체 그림 위 동그란 자리에 다이얼, 네모 판에 번호 화면 */
 #dl .dphone{position:relative;display:block;height:min(84vh,138vw);aspect-ratio:2/3;flex:none;container-type:size}
 #dl .dphone .dbody{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;user-select:none}
@@ -376,8 +376,18 @@ html body.grabbing,html body.grabbing *{cursor:url(img/cur_hand.png?v=3) 14 14,g
 #rc .back,#ct .back{margin-top:0;top:calc(14px + env(safe-area-inset-top,0px));left:max(16px,env(safe-area-inset-left,0px))}
 /* 연락처 메모지를 조금 위·왼쪽으로(넓은 화면) */
 @media (min-width:761px) and (min-aspect-ratio:1/1){#dl .dcard{margin:-3vh 0 0 -10vw}}
-#ct .g-sign{display:block;width:124%;max-width:none;margin:-34% -12% 2px;pointer-events:none;filter:drop-shadow(0 6px 10px rgba(29,26,23,.18))}   /* 게임 간판 */
-#ct .g-over{padding-top:8px}
+#ct .g-sign{display:block;width:124%;max-width:none;margin:-10% -12% 6px;pointer-events:none}   /* 게임 간판 */
+#ct .g-over{padding:0;background:none;box-shadow:none;border-radius:0;width:min(88vw,420px);top:41%}
+#ct .g-over p{color:var(--ink);opacity:.85;font-weight:600;text-shadow:0 0 6px #fff,0 0 2px #fff}
+/* 결과 화면: 네온 간판 느낌 제목 + 하늘색 테두리 동그라미 점수판 */
+#ct .g-rtitle{margin:0;font-family:var(--f-sign);font-size:clamp(44px,7vw,64px);line-height:1.1;color:var(--lc-hot);-webkit-text-stroke:7px #fff;paint-order:stroke fill;filter:drop-shadow(0 3px 0 rgba(58,42,20,.35))}
+#ct .g-badge{width:136px;height:136px;margin:14px auto 10px;border-radius:50%;background:#fbf3e2;box-shadow:0 0 0 7px #6fc9c6,0 0 0 10px #3a2a14,0 8px 0 10px rgba(58,42,20,.25);display:grid;place-content:center;gap:2px}
+#ct .g-badge b{font-family:var(--f-sign);font-weight:400;font-size:60px;line-height:1;color:var(--lc-hot)}
+#ct .g-badge small{font-family:var(--f-label);font-weight:700;font-size:12px;letter-spacing:.18em;color:#3a2a14;opacity:.7}
+#ct .g-rsub{margin:8px 0 16px;font-family:var(--f-label);font-weight:700;font-size:16px;letter-spacing:.12em;color:#3a2a14;text-shadow:0 0 6px #fff}
+#ct .g-rsub.best{color:var(--lc-hot)}
+/* 게임 중엔 카트를 잡은 손 커서 */
+#ct .ct-game.playing,#ct .ct-game.playing *{cursor:url(img/cur_hand.png?v=4) 17 17,grabbing!important;cursor:-webkit-image-set(url(img/cur_hand.png?v=4) 1x,url(img/cur_hand@2x.png?v=4) 2x) 17 17,grabbing!important;cursor:image-set(url(img/cur_hand.png?v=4) 1x,url(img/cur_hand@2x.png?v=4) 2x) 17 17,grabbing!important}
 </style>
 
 <div id="view" aria-label="빨래방 3D 공간. 드래그해서 둘러보세요"><canvas id="gl"></canvas></div>
@@ -1363,7 +1373,7 @@ function laundryGame(el,pic){
       if(it.done)continue;const py=it.y;it.y+=it.v*dt;it.r+=it.w*dt;
       if(py+it.size*.6<rim&&it.y+it.size*.6>=rim){   // 카트 테두리를 지나는 순간 판정
         if(it.x>cl+c*.29&&it.x<cl+c*.99){it.done=true;it.im.remove();score++;sc.textContent=score;pop(it.x,rim-30,'+1');
-          const p=document.createElement('img');p.src=it.im.src;p.alt='';const k=pile.children.length;p.style.left=(2+(k*23)%50)+'%';p.style.bottom=Math.min(40,6+Math.floor(k/3)*6)+'%';p.style.setProperty('--r',((k*53%31)-15)+'deg');pile.appendChild(p);
+          const p=document.createElement('img');p.src=it.im.src;p.alt='';const k=pile.children.length;p.style.left=(k*23%62)+'%';p.style.bottom=Math.min(55,-4+Math.floor(k/3)*12)+'%';p.style.setProperty('--r',((k*53%31)-15)+'deg');pile.appendChild(p);
           if(pile.children.length>14)pile.firstElementChild.remove();continue}
       }
       if(it.y>h){it.done=true;it.im.remove();pop(it.x,h-40,'MISS',true);continue}
@@ -1374,10 +1384,10 @@ function laundryGame(el,pic){
     raf=requestAnimationFrame(frame);
   }
   function clear(){items.forEach(i=>i.im.remove());items=[];field.innerHTML=''}
-  function start(){clear();pile.innerHTML='';score=0;left=DUR;next=.4;sc.textContent='0';tm.textContent=DUR+'s';over.hidden=true;run=true;last=performance.now();raf=requestAnimationFrame(frame)}
-  function end(){run=false;cancelAnimationFrame(raf);clear();
+  function start(){clear();pile.innerHTML='';score=0;left=DUR;next=.4;sc.textContent='0';tm.textContent=DUR+'s';over.hidden=true;el.classList.add('playing');run=true;last=performance.now();raf=requestAnimationFrame(frame)}
+  function end(){run=false;el.classList.remove('playing');cancelAnimationFrame(raf);clear();
     const nb=score>best;if(nb){best=score;try{localStorage.setItem('gl_laundry_best',best)}catch(e){}}bs.textContent='BEST '+best;
-    over.innerHTML='<h3>'+(nb?'NEW BEST!':'TIME UP!')+'</h3><p class="g-res">빨래 '+score+'벌 받았어요</p><button class="g-start">AGAIN</button>';over.hidden=false;over.querySelector('.g-start').onclick=start}
+    over.innerHTML='<h3 class="g-rtitle">'+(nb?'New Best!':'Time Up!')+'</h3><div class="g-badge"><b>'+score+'</b><small>CAUGHT</small></div><p class="g-rsub'+(nb?' best':'')+'">'+(nb?'★ 최고 기록 갱신 ★':'BEST '+best)+'</p><button class="g-start">AGAIN</button>';over.hidden=false;over.querySelector('.g-start').onclick=start}
   over.querySelector('.g-start').onclick=start;
   const mv=e=>{if(!run)return;const r=el.getBoundingClientRect();tx=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width))};
   el.addEventListener('pointermove',mv);el.addEventListener('pointerdown',mv);
@@ -1385,7 +1395,7 @@ function laundryGame(el,pic){
   const ku=e=>{if((e.key==='ArrowLeft'&&key<0)||(e.key==='ArrowRight'&&key>0))key=0};
   addEventListener('keydown',kd);addEventListener('keyup',ku);addEventListener('resize',place);   // 화면 크기가 바뀌어도 카트 위치 다시
   requestAnimationFrame(place);
-  return {stop(keep){if(run){run=false;cancelAnimationFrame(raf);clear();over.innerHTML='<img class="g-sign" src="img/game_sign.webp?v=1" alt="Laundry Catch" draggable="false"><p>건조기에서 날아오는 빨래를 카트로 받아요!<br>마우스·손가락으로 끌거나 ← → 키로 움직여요</p><button class="g-start">START</button>';over.hidden=false;over.querySelector('.g-start').onclick=start}
+  return {stop(keep){el.classList.remove('playing');if(run){run=false;cancelAnimationFrame(raf);clear();over.innerHTML='<img class="g-sign" src="img/game_sign.webp?v=1" alt="Laundry Catch" draggable="false"><p>건조기에서 날아오는 빨래를 카트로 받아요!<br>마우스·손가락으로 끌거나 ← → 키로 움직여요</p><button class="g-start">START</button>';over.hidden=false;over.querySelector('.g-start').onclick=start}
     if(!keep){removeEventListener('keydown',kd);removeEventListener('keyup',ku);removeEventListener('resize',place)}}};
 }
 
