@@ -888,21 +888,21 @@ const CLOTHES=[
 // 모든 옷을 입체 천으로: 배경 뺀 옷 그림 + 깊이 지도(가운데일수록 볼록)
 // 세탁기 속·빨래 게임에 나오는 옷과 소품(배경 없는 그림). 크게 보기 정보(info)도 여기서
 const GAL_CLOTHES=[
-  {map:'img/items/i01.webp',info:['Leopard Buckle Bag','₩89,000','핑크 가죽에 레오파드 패치, 버클·체인 장식 숄더백.','FREE']},
-  {map:'img/items/i02.webp',info:['Cable Knit Turtleneck','₩79,000','단추 달린 넓은 카라의 꽈배기 니트. 레이스 소매 레이어드.','FREE']},
-  {map:'img/items/i03.webp',info:['Layered V-neck Tee','₩45,000','브라운 이너가 보이는 핑크 브이넥 셔링 티.','S / M']},
-  {map:'img/items/i04.webp',info:['Polka Dot Mini Skirt','₩48,000','브라운 도트 A라인 미니스커트.','S / M / L']},
-  {map:'img/items/i05.webp',info:['Pink Ballet Flats','₩69,000','리본과 밴드가 달린 핑크 발레 플랫.','225–250']},
-  {map:'img/items/i06.webp',info:['Ribbon Square-neck Top','₩42,000','플라워 안감에 리본 끈 스퀘어넥 티.','S / M']},
-  {map:'img/items/i07.webp',info:['Floral Ribbon Mini Skirt','₩52,000','잔꽃무늬에 리본과 레이스 단이 달린 미니스커트.','S / M']},
-  {map:'img/items/i08.webp',info:['Dot Crew Socks','₩12,000','올리브 바탕 브라운 도트 크루 삭스.','FREE']},
-  {map:'img/items/i09.webp',info:['Brown Check Mini Skirt','₩55,000','브라운 체크 울 미니스커트.','S / M / L']},
-  {map:'img/items/i10.webp',info:['Suede Ballet Flats','₩79,000','브라운 파이핑 리본 장식 올리브 스웨이드 플랫.','225–250']},
-  {map:'img/items/i11.webp',info:['Burgundy Bowling Bag','₩98,000','버건디 가죽 보울링백. 매듭 태슬 장식.','FREE']},
-  {map:'img/items/i12.webp',info:['Dark Denim Jacket','₩119,000','진한 워싱의 크롭 데님 재킷.','S / M / L']},
-  {map:'img/items/i13.webp',info:['Belted Denim Skort','₩58,000','스터드 벨트가 달린 플리츠 데님 스코트.','S / M']},
-  {map:'img/items/i14.webp',info:['Corduroy Newsboy Cap','₩39,000','단추 장식 브라운 코듀로이 뉴스보이 캡.','FREE']},
-  {map:'img/items/i15.webp',info:['Brown Retro Sneakers','₩109,000','핑크 라인 브라운 스웨이드 레트로 스니커즈.','225–270']},
+  {map:'img/items/i01.webp',info:['Leopard Buckle Bag','₩89,000','Pink leather shoulder bag with leopard panels, buckles and chain details.','FREE']},
+  {map:'img/items/i02.webp',info:['Cable Knit Turtleneck','₩79,000','Cable knit with a wide buttoned collar, layered with lace cuffs.','FREE']},
+  {map:'img/items/i03.webp',info:['Layered V-neck Tee','₩45,000','Pink V-neck top with side ruching and a peek of brown layer.','S / M']},
+  {map:'img/items/i04.webp',info:['Polka Dot Mini Skirt','₩48,000','A-line mini skirt with brown polka dots.','S / M / L']},
+  {map:'img/items/i05.webp',info:['Pink Ballet Flats','₩69,000','Pink ballet flats with a bow and elastic strap.','225–250']},
+  {map:'img/items/i06.webp',info:['Ribbon Square-neck Top','₩42,000','Square-neck top with a ribbon tie and floral lining.','S / M']},
+  {map:'img/items/i07.webp',info:['Floral Ribbon Mini Skirt','₩52,000','Ditsy floral mini skirt with ribbon ties and a lace hem.','S / M']},
+  {map:'img/items/i08.webp',info:['Dot Crew Socks','₩12,000','Olive crew socks with brown dots.','FREE']},
+  {map:'img/items/i09.webp',info:['Brown Check Mini Skirt','₩55,000','Brown plaid wool mini skirt.','S / M / L']},
+  {map:'img/items/i10.webp',info:['Suede Ballet Flats','₩79,000','Olive suede flats with brown piping and a bow.','225–250']},
+  {map:'img/items/i11.webp',info:['Burgundy Bowling Bag','₩98,000','Burgundy leather bowling bag with a knotted tassel.','FREE']},
+  {map:'img/items/i12.webp',info:['Dark Denim Jacket','₩119,000','Cropped denim jacket in a dark wash.','S / M / L']},
+  {map:'img/items/i13.webp',info:['Belted Denim Skort','₩58,000','Pleated denim skort with a studded belt.','S / M']},
+  {map:'img/items/i14.webp',info:['Corduroy Newsboy Cap','₩39,000','Brown corduroy newsboy cap with button details.','FREE']},
+  {map:'img/items/i15.webp',info:['Brown Retro Sneakers','₩109,000','Brown suede retro sneakers with pink stripes.','225–270']},
 ];
 const ITEM_PICS=GAL_CLOTHES.map(c=>c.map);
 const CLOTH3D=Object.fromEntries(Array.from({length:20},(_,i)=>[i,GAL_CLOTHES[i%GAL_CLOTHES.length]]));
