@@ -338,8 +338,8 @@ button{font:inherit;color:inherit;cursor:inherit}
   #dinfo{position:fixed}
 }
 /* 커서는 어디서나 손가락 하나로 통일 */
-*,*::before,*::after{cursor:url(img/cur_point.png) 15 2,pointer!important}   /* 게임 포함 어디서나 손가락 그림 */
-html body.grabbing,html body.grabbing *{cursor:url(img/cur_hand.png) 20 20,grabbing!important}   /* 방을 끌어 돌리는 동안엔 편 손 */
+*,*::before,*::after{cursor:url(img/cur_point.png?v=3) 10 1,pointer!important;cursor:-webkit-image-set(url(img/cur_point.png?v=3) 1x,url(img/cur_point@2x.png?v=3) 2x) 10 1,pointer!important;cursor:image-set(url(img/cur_point.png?v=3) 1x,url(img/cur_point@2x.png?v=3) 2x) 10 1,pointer!important}   /* 게임 포함 어디서나 손가락 그림 */
+html body.grabbing,html body.grabbing *{cursor:url(img/cur_hand.png?v=3) 14 14,grabbing!important;cursor:-webkit-image-set(url(img/cur_hand.png?v=3) 1x,url(img/cur_hand@2x.png?v=3) 2x) 14 14,grabbing!important;cursor:image-set(url(img/cur_hand.png?v=3) 1x,url(img/cur_hand@2x.png?v=3) 2x) 14 14,grabbing!important}   /* 방을 끌어 돌리는 동안엔 편 손 */
 /* 노란 공중전화: 몸체 그림 위 동그란 자리에 다이얼, 네모 판에 번호 화면 */
 #dl .dphone{position:relative;display:block;height:min(84vh,138vw);aspect-ratio:2/3;flex:none;container-type:size}
 #dl .dphone .dbody{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;user-select:none}
@@ -376,6 +376,8 @@ html body.grabbing,html body.grabbing *{cursor:url(img/cur_hand.png) 20 20,grabb
 #rc .back,#ct .back{margin-top:0;top:calc(14px + env(safe-area-inset-top,0px));left:max(16px,env(safe-area-inset-left,0px))}
 /* 연락처 메모지를 조금 위·왼쪽으로(넓은 화면) */
 @media (min-width:761px) and (min-aspect-ratio:1/1){#dl .dcard{margin:-3vh 0 0 -10vw}}
+#ct .g-sign{display:block;width:124%;max-width:none;margin:-34% -12% 2px;pointer-events:none;filter:drop-shadow(0 6px 10px rgba(29,26,23,.18))}   /* 게임 간판 */
+#ct .g-over{padding-top:8px}
 </style>
 
 <div id="view" aria-label="빨래방 3D 공간. 드래그해서 둘러보세요"><canvas id="gl"></canvas></div>
@@ -1334,7 +1336,7 @@ function renderCart(){   // 쇼핑카트: 빨래 받기 미니게임만
   panel.innerHTML='<div id="ct"><button class="back" data-back aria-label="뒤로"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>'+
     '<div class="ct-game"><div class="g-hud"><span class="g-score">0</span><span class="g-time">30s</span><span class="g-best">BEST 0</span></div><div class="g-field"></div>'+
     '<div class="g-cart"><div class="ct-pile"></div><img class="g-cimg" src="img/game_cart.webp?v=3" alt="" draggable="false"></div>'+
-    '<div class="g-over"><h3>LAUNDRY CATCH</h3><p>건조기에서 날아오는 빨래를 카트로 받아요!<br>마우스·손가락으로 끌거나 ← → 키로 움직여요</p><button class="g-start">START</button></div></div></div>';
+    '<div class="g-over"><img class="g-sign" src="img/game_sign.webp?v=1" alt="Laundry Catch" draggable="false"><p>건조기에서 날아오는 빨래를 카트로 받아요!<br>마우스·손가락으로 끌거나 ← → 키로 움직여요</p><button class="g-start">START</button></div></div></div>';
   ct={g:laundryGame($('#ct .ct-game'),pic)};
 }
 /* 빨래 받기 미니게임: 30초 동안 위에서 떨어지는 옷을 카트로 받기. 점점 빨라짐. 최고 점수는 이 기기에 저장 */
@@ -1383,7 +1385,7 @@ function laundryGame(el,pic){
   const ku=e=>{if((e.key==='ArrowLeft'&&key<0)||(e.key==='ArrowRight'&&key>0))key=0};
   addEventListener('keydown',kd);addEventListener('keyup',ku);addEventListener('resize',place);   // 화면 크기가 바뀌어도 카트 위치 다시
   requestAnimationFrame(place);
-  return {stop(keep){if(run){run=false;cancelAnimationFrame(raf);clear();over.innerHTML='<h3>LAUNDRY CATCH</h3><p>건조기에서 날아오는 빨래를 카트로 받아요!<br>마우스·손가락으로 끌거나 ← → 키로 움직여요</p><button class="g-start">START</button>';over.hidden=false;over.querySelector('.g-start').onclick=start}
+  return {stop(keep){if(run){run=false;cancelAnimationFrame(raf);clear();over.innerHTML='<img class="g-sign" src="img/game_sign.webp?v=1" alt="Laundry Catch" draggable="false"><p>건조기에서 날아오는 빨래를 카트로 받아요!<br>마우스·손가락으로 끌거나 ← → 키로 움직여요</p><button class="g-start">START</button>';over.hidden=false;over.querySelector('.g-start').onclick=start}
     if(!keep){removeEventListener('keydown',kd);removeEventListener('keyup',ku);removeEventListener('resize',place)}}};
 }
 
