@@ -170,7 +170,10 @@ button{font:inherit;color:inherit;cursor:inherit}
 #rc .slotshade{position:absolute;z-index:3;left:var(--cx);top:0;width:var(--rw);height:calc(var(--peek) + var(--rw)*.09);transform:translateX(-50%);pointer-events:none;opacity:0;transition:opacity .3s;
   background:linear-gradient(rgba(20,14,9,.86),rgba(20,14,9,.62) calc(var(--peek)*.5),rgba(20,14,9,.36) var(--peek),rgba(20,14,9,.18) calc(var(--peek) + var(--rw)*.03),rgba(20,14,9,.07) calc(var(--peek) + var(--rw)*.06),rgba(20,14,9,0))}
 #rc.has .slotshade{opacity:1}
-#rc .rcphoto:not(.rcbg){background:none;transform-origin:50% 60%}   /* 도트 바탕은 뒤에 고정, 사진만 움직임 */
+#rc .rcphoto:not(.rcbg){background:none}
+#rc .rcclip{position:absolute;z-index:1;left:0;top:0;width:100%;height:var(--top);overflow:hidden;pointer-events:none}   /* 밀려 나가는 사진이 사진 칸 밖으로 안 보이게 */
+@media (min-width:760px) and (min-aspect-ratio:1/1){#rc .rcclip{width:50%;height:100%}}
+#rc .rcclip .rcphoto{width:100%;height:100%}   /* 도트 바탕은 뒤에 고정, 사진만 움직임 */
 /* 슬롯: 피그마 시안 그림(낡은 베이지 금속 틀). 종이는 검은 입구 윗변에서 나와 틀 아랫부분 앞에 걸쳐짐 */
 /* 좁은 화면에선 슬롯이 BACK 버튼과 겹치지 않게 아래로 */
 /* 2단 뷰: 왼쪽 모델 사진, 오른쪽 가운데에 슬롯+영수증. 좁은 세로 화면에선 사진이 위, 영수증이 아래 */
@@ -1151,18 +1154,19 @@ function receiptHTML(i){   // 빈 종이 위에 아웃핏 영수증을 글자로
 }
 function setLook(k){   // 왼쪽 사진을 k번째 아웃핏으로
   const o=OUTFITS[k%OUTFITS.length],cur=$('#rc .rcphoto:last-of-type');if(!cur||cur.getAttribute('src')===o.photo)return;
-  // 스티커 붙이기: 이전 사진은 비스듬히 떨어져 나가고, 새 사진은 살짝 커졌다가 톡 붙음
+  // 옆으로 밀기: 새 사진이 오른쪽(영수증 쪽)에서 밀고 들어오고, 이전 사진은 왼쪽으로 밀려 나감
   const n=cur.cloneNode();n.src=o.photo;cur.after(n);
   if(reduce){cur.remove();return}
-  cur.animate([{transform:'none',opacity:1},{transform:'translate(-6%,9%) rotate(-10deg) scale(.9)',opacity:0}],{duration:420,easing:'cubic-bezier(.5,0,.8,.4)',fill:'forwards'}).onfinish=()=>cur.remove();
-  n.animate([{transform:'scale(1.2) rotate(-6deg)',opacity:0},{transform:'scale(.95) rotate(1.5deg)',opacity:1,offset:.6},{transform:'none',opacity:1}],{duration:560,delay:120,easing:'cubic-bezier(.2,.9,.3,1)',fill:'backwards'});
+  const E={duration:620,easing:'cubic-bezier(.65,0,.25,1)'};
+  cur.animate([{transform:'none'},{transform:'translateX(-100%)'}],{...E,fill:'forwards'}).onfinish=()=>cur.remove();
+  n.animate([{transform:'translateX(100%)'},{transform:'none'}],E);
 }
 function printSfx(ms){if(!Au.ctx||Au.muted)return;const t=Au.ctx.currentTime;for(let k=0;k<ms/75;k++)noiseHit(t+k*.075,Au.master,.1,3000,.03,'bandpass')}
 function tearSfx(){if(!Au.ctx||Au.muted)return;const t=Au.ctx.currentTime;noiseHit(t,Au.master,.45,1800,.26,'highpass');noiseHit(t+.05,Au.master,.3,4200,.18,'highpass')}
 function stopReceipt(){if(!rc)return;rc.timers.forEach(clearTimeout);removeEventListener('keydown',rc.onKey);rc=null}
 function renderReceipt(){
   stopReceipt();
-  panel.innerHTML='<div id="rc"><div class="rcphoto rcbg"></div><img class="rcphoto" src="'+OUTFITS[0].photo+'" alt="" draggable="false"><button class="back" data-back aria-label="뒤로"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button><div class="slot"></div><div class="feedwin"><div class="stage"></div><div class="slotshade"></div></div></div>';
+  panel.innerHTML='<div id="rc"><div class="rcphoto rcbg"></div><div class="rcclip"><img class="rcphoto" src="'+OUTFITS[0].photo+'" alt="" draggable="false"></div><button class="back" data-back aria-label="뒤로"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button><div class="slot"></div><div class="feedwin"><div class="stage"></div><div class="slotshade"></div></div></div>';
   const st=$('#rc .stage');
   rc={i:0,busy:true,cur:null,timers:[],next:null};
   const later=(f,ms)=>rc.timers.push(setTimeout(f,ms));
