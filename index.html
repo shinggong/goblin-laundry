@@ -388,6 +388,10 @@ html body.grabbing,html body.grabbing *{cursor:url(img/cur_hand.png?v=4) 17 17,g
 #ct .g-rsub.best{color:var(--lc-hot)}
 /* 게임 중엔 카트를 잡은 손 커서 */
 #ct .ct-game.playing,#ct .ct-game.playing *{cursor:url(img/cur_hand.png?v=4) 17 17,grabbing!important;cursor:-webkit-image-set(url(img/cur_hand.png?v=4) 1x,url(img/cur_hand@2x.png?v=4) 2x) 17 17,grabbing!important;cursor:image-set(url(img/cur_hand.png?v=4) 1x,url(img/cur_hand@2x.png?v=4) 2x) 17 17,grabbing!important}
+/* 결과 화면 배경: 별 뚫린 분홍 종이 */
+#ct .g-over.res{top:37%;width:min(90vw,480px);aspect-ratio:900/596;background:url(img/result_card.webp) center/100% 100% no-repeat;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:18px 0}
+#ct .g-over.res .g-badge{margin:8px auto 6px}
+#ct .g-over.res .g-rsub{margin:6px 0 10px}
 </style>
 
 <div id="view" aria-label="빨래방 3D 공간. 드래그해서 둘러보세요"><canvas id="gl"></canvas></div>
@@ -1384,10 +1388,10 @@ function laundryGame(el,pic){
     raf=requestAnimationFrame(frame);
   }
   function clear(){items.forEach(i=>i.im.remove());items=[];field.innerHTML=''}
-  function start(){clear();pile.innerHTML='';score=0;left=DUR;next=.4;sc.textContent='0';tm.textContent=DUR+'s';over.hidden=true;el.classList.add('playing');run=true;last=performance.now();raf=requestAnimationFrame(frame)}
+  function start(){clear();pile.innerHTML='';score=0;left=DUR;next=.4;sc.textContent='0';tm.textContent=DUR+'s';over.hidden=true;over.classList.remove('res');el.classList.add('playing');run=true;last=performance.now();raf=requestAnimationFrame(frame)}
   function end(){run=false;el.classList.remove('playing');cancelAnimationFrame(raf);clear();
     const nb=score>best;if(nb){best=score;try{localStorage.setItem('gl_laundry_best',best)}catch(e){}}bs.textContent='BEST '+best;
-    over.innerHTML='<h3 class="g-rtitle">'+(nb?'New Best!':'Time Up!')+'</h3><div class="g-badge"><b>'+score+'</b><small>CAUGHT</small></div><p class="g-rsub'+(nb?' best':'')+'">'+(nb?'★ 최고 기록 갱신 ★':'BEST '+best)+'</p><button class="g-start">AGAIN</button>';over.hidden=false;over.querySelector('.g-start').onclick=start}
+    over.classList.add('res');over.innerHTML='<h3 class="g-rtitle">'+(nb?'New Best!':'Time Up!')+'</h3><div class="g-badge"><b>'+score+'</b><small>CAUGHT</small></div><p class="g-rsub'+(nb?' best':'')+'">'+(nb?'★ 최고 기록 갱신 ★':'BEST '+best)+'</p><button class="g-start">AGAIN</button>';over.hidden=false;over.querySelector('.g-start').onclick=start}
   over.querySelector('.g-start').onclick=start;
   const mv=e=>{if(!run)return;const r=el.getBoundingClientRect();tx=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width))};
   el.addEventListener('pointermove',mv);el.addEventListener('pointerdown',mv);
@@ -1395,7 +1399,7 @@ function laundryGame(el,pic){
   const ku=e=>{if((e.key==='ArrowLeft'&&key<0)||(e.key==='ArrowRight'&&key>0))key=0};
   addEventListener('keydown',kd);addEventListener('keyup',ku);addEventListener('resize',place);   // 화면 크기가 바뀌어도 카트 위치 다시
   requestAnimationFrame(place);
-  return {stop(keep){el.classList.remove('playing');if(run){run=false;cancelAnimationFrame(raf);clear();over.innerHTML='<img class="g-sign" src="img/game_sign.webp?v=1" alt="Laundry Catch" draggable="false"><p>건조기에서 날아오는 빨래를 카트로 받아요!<br>마우스·손가락으로 끌거나 ← → 키로 움직여요</p><button class="g-start">START</button>';over.hidden=false;over.querySelector('.g-start').onclick=start}
+  return {stop(keep){el.classList.remove('playing');over.classList.remove('res');if(run){run=false;cancelAnimationFrame(raf);clear();over.innerHTML='<img class="g-sign" src="img/game_sign.webp?v=1" alt="Laundry Catch" draggable="false"><p>건조기에서 날아오는 빨래를 카트로 받아요!<br>마우스·손가락으로 끌거나 ← → 키로 움직여요</p><button class="g-start">START</button>';over.hidden=false;over.querySelector('.g-start').onclick=start}
     if(!keep){removeEventListener('keydown',kd);removeEventListener('keyup',ku);removeEventListener('resize',place)}}};
 }
 
