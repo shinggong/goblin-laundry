@@ -343,7 +343,7 @@ button{font:inherit;color:inherit;cursor:inherit}
 #dl .dphone .dbody{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;user-select:none}
 #dl .dphone #dsvg{position:absolute;left:53.3%;top:24.6%;width:31%;height:auto;transform:translate(-50%,-50%)}
 #dl.on .dphone #dsvg{transform:translate(-50%,-50%)}
-#dl .dphone #dnum{position:absolute;left:54%;top:43.4%;transform:translate(-50%,-50%);width:22%;height:6.4cqh;margin:0;padding:0;display:flex;flex-direction:column;gap:.5cqh;align-items:center;justify-content:center;border-radius:1cqw;background:#0b1a12;box-shadow:inset 0 0 0 .5cqw #1d3a29;font-size:1.75cqw;line-height:1;letter-spacing:.06em;white-space:nowrap;min-height:0;overflow:hidden}
+#dl .dphone #dnum{position:absolute;left:54%;top:43.4%;transform:translate(-50%,-50%);width:22%;height:14cqh;margin:0;padding:0;display:flex;flex-direction:column;gap:2.4cqh;align-items:center;justify-content:center;background:none;box-shadow:none;border-radius:0;color:#3a2a14;text-shadow:none;font-family:'IBM Plex Sans KR',system-ui,sans-serif;text-align:center;letter-spacing:0;margin-right:0;min-height:0;animation:none}   /* 판 위에 바로 인쇄된 글씨 */
 @media (max-width:760px),(max-aspect-ratio:1/1){#dl .dphone{height:min(72vh,140vw)}}
 /* 전화기 오버레이 */
 #phone{position:fixed;inset:0;z-index:60;background:rgba(15,40,46,.55);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);opacity:0;pointer-events:none;transition:opacity .35s}
@@ -351,8 +351,8 @@ button{font:inherit;color:inherit;cursor:inherit}
 #phone #dl{transform:translate(var(--fx,0),var(--fy,0)) scale(.2);transition:transform .55s cubic-bezier(.2,1.15,.3,1)}
 #phone.on #dl{transform:none}
 #phone #dl .back{left:auto;right:max(16px,env(safe-area-inset-right,0px));width:44px;height:44px;padding:0;border-radius:50%;display:grid;place-items:center;font-size:24px;line-height:1}
-#dl .dphone #dnum b{font-weight:400}
-#dl .dphone #dnum small{font-size:.8em;opacity:.75;letter-spacing:.12em}
+#dl .dphone #dnum b{font-weight:700;font-size:3.1cqw;line-height:1.15}
+#dl .dphone #dnum small{font-family:var(--f-label);font-weight:700;font-size:1.7cqw;letter-spacing:.14em;opacity:.8}
 </style>
 
 <div id="view" aria-label="빨래방 3D 공간. 드래그해서 둘러보세요"><canvas id="gl"></canvas></div>
@@ -1240,7 +1240,7 @@ function renderDial(host){
   const box=$('#dl'), svg=$('#dsvg'), wheel=$('#wheel'), num=$('#dnum');
   dl={rot:0,n:null,busy:false,digits:'',raf:0,timers:[]};
   const later=(f,ms)=>dl.timers.push(setTimeout(f,ms));
-  const showNum=()=>{num.innerHTML='<b>GOOD VIBE CALLING</b><small>laundry club</small>'};   // 번호 대신 고정 문구
+  const showNum=()=>{num.innerHTML='<b>Good Vibes<br>Calling</b><small>LAUNDRY CLUB</small>'};   // 번호 대신 고정 문구
   const setRot=v=>{dl.rot=v;wheel.setAttribute('transform','rotate('+v.toFixed(2)+')')};
   const pt=e=>{const r=svg.getBoundingClientRect(),k=1040/r.width;return[(e.clientX-r.left-r.width/2)*k,(e.clientY-r.top-r.height/2)*k]};
   const ang=p=>Math.atan2(-p[1],p[0])/DEG;
