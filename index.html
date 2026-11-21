@@ -359,8 +359,8 @@ button{font:inherit;color:inherit;cursor:inherit}
 /* 연락처: 핑크 클립 메모지 그림 위에, 줄에 맞춰 글씨 */
 #dl .dcard{position:relative;width:min(470px,90vw);aspect-ratio:1.32;max-height:none;overflow:visible;flex:none;container-type:inline-size;
   background:url(img/contact_memo.webp) center/100% 100% no-repeat;border:0;border-radius:0;box-shadow:none;padding:0;box-sizing:border-box;color:#3a2a14}
-#dl .dcard h2{margin:26.45cqw 11cqw 0 13.5cqw;height:4.95cqw;display:flex;align-items:flex-end;padding-bottom:.9cqw;transform:rotate(1.9deg);transform-origin:0 100%;box-sizing:border-box;font-size:5.4cqw;line-height:1;overflow:visible}
-#dl .dcard .dsub,#dl .dcard .crow,#dl .dcard .dtip{height:4.95cqw;margin:0 11cqw 0 13.5cqw;padding:0 0 1.2cqw;transform:rotate(1.9deg);transform-origin:0 100%;box-sizing:border-box;display:flex;align-items:flex-end;border:0}
+#dl .dcard h2{margin:26.45cqw 18cqw 0 20cqw;height:4.95cqw;display:flex;align-items:flex-end;padding-bottom:.9cqw;transform:rotate(1.9deg);transform-origin:0 100%;box-sizing:border-box;font-size:5.4cqw;line-height:1;overflow:visible}
+#dl .dcard .dsub,#dl .dcard .crow,#dl .dcard .dtip{height:4.95cqw;margin:0 18cqw 0 20cqw;padding:0 0 1.2cqw;transform:rotate(1.9deg);transform-origin:0 100%;box-sizing:border-box;display:flex;align-items:flex-end;border:0}
 #dl .dcard .dsub{font-size:1.9cqw;letter-spacing:.2em;opacity:.6}
 #dl .dcard .crow{justify-content:space-between;gap:2cqw}
 #dl .dcard .k{font-size:2.4cqw;letter-spacing:.06em}
@@ -370,6 +370,8 @@ button{font:inherit;color:inherit;cursor:inherit}
 @keyframes dcPop{40%{transform:scale(1.04) rotate(-1deg)}}
 /* 뒤로가기 위치: 세탁기 페이지와 같게(위 14px, 왼쪽 16px) */
 #rc .back,#ct .back{margin-top:0;top:calc(14px + env(safe-area-inset-top,0px));left:max(16px,env(safe-area-inset-left,0px))}
+/* 연락처 메모지를 조금 위·왼쪽으로(넓은 화면) */
+@media (min-width:761px) and (min-aspect-ratio:1/1){#dl .dcard{margin:-9vh 0 0 -3vw}}
 </style>
 
 <div id="view" aria-label="빨래방 3D 공간. 드래그해서 둘러보세요"><canvas id="gl"></canvas></div>
@@ -1067,7 +1069,7 @@ async function renderGallery(){
     const r=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:true});r.setPixelRatio(Math.min(devicePixelRatio,2));r.setSize(w,h,false);
     const sc=new THREE.Scene(),cm=new THREE.PerspectiveCamera(35,w/h,.1,100);cm.position.set(0,0,9.5);
     const m=clothMat(ct[0]);const me=new THREE.Mesh(new THREE.PlaneGeometry(5,5,32,32),m);sc.add(me);
-    let ry=-.35,rv=0,rx=.08,dr=null;
+    let ry=0,rv=0,rx=0,dr=null;
     cv.addEventListener('pointerdown',e=>{dr={x:e.clientX,y:e.clientY};cv.style.cursor='grabbing';try{cv.setPointerCapture(e.pointerId)}catch(_){}});
     cv.addEventListener('pointermove',e=>{if(!dr)return;const dx=e.clientX-dr.x,dy=e.clientY-dr.y;ry+=dx*.009;rv=dx*.009;rx=Math.max(-.45,Math.min(.45,rx+dy*.005));dr={x:e.clientX,y:e.clientY}});
     const up=()=>{dr=null;cv.style.cursor='grab'};cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',up);
