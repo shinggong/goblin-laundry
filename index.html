@@ -338,6 +338,13 @@ button{font:inherit;color:inherit;cursor:inherit}
 }
 /* 커서는 어디서나 손가락 하나로 통일 */
 *,*::before,*::after{cursor:pointer!important}
+/* 노란 공중전화: 몸체 그림 위 동그란 자리에 다이얼, 네모 판에 번호 화면 */
+#dl .dphone{position:relative;display:block;height:min(84vh,138vw);aspect-ratio:2/3;flex:none;container-type:size}
+#dl .dphone .dbody{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;user-select:none}
+#dl .dphone #dsvg{position:absolute;left:53.3%;top:24.6%;width:31%;height:auto;transform:translate(-50%,-50%)}
+#dl.on .dphone #dsvg{transform:translate(-50%,-50%)}
+#dl .dphone #dnum{position:absolute;left:54%;top:43.4%;transform:translate(-50%,-50%);width:21%;height:5.2cqh;margin:0;padding:0;display:flex;align-items:center;justify-content:center;border-radius:1cqw;background:#0b1a12;box-shadow:inset 0 0 0 .5cqw #1d3a29;font-size:2.7cqw;line-height:1;letter-spacing:.12em;white-space:nowrap;min-height:0;overflow:hidden}
+@media (max-width:760px),(max-aspect-ratio:1/1){#dl .dphone{height:min(72vh,140vw)}}
 </style>
 
 <div id="view" aria-label="빨래방 3D 공간. 드래그해서 둘러보세요"><canvas id="gl"></canvas></div>
@@ -1196,29 +1203,24 @@ function renderReceipt(){
 
 /* ===== 전화기: 로터리 다이얼을 손가락 멈춤쇠까지 돌렸다 놓으면 되감기며 숫자가 눌림 ===== */
 let dl=null;
-const DIAL_HA={1:29.4,2:57.2,3:86,4:115,5:144.6,6:171,7:197.6,8:222.3,9:246,0:270}, DIAL_STOP=-66, DIAL_RH=376, DIAL_LEN=7;
+// 다이얼 링 그림(구멍 9개)의 구멍 각도·반지름에 맞춤
+const DIAL_HA={1:31.2,2:66.4,3:100.4,4:132.5,5:164.3,6:196.2,7:230.3,8:265.9,9:302.2}, DIAL_KEYS=[1,2,3,4,5,6,7,8,9], DIAL_STOP=-18, DIAL_RH=376, DIAL_LEN=7;
 const dialMax=n=>(DIAL_HA[n]-DIAL_STOP+360)%360;
 function dialTick(v){if(!Au.ctx||!Au.master||Au.muted)return;noiseHit(Au.ctx.currentTime,Au.master,v,2600,.015,'highpass')}
 function dialRing(){if(!Au.ctx||!Au.master||Au.muted)return;const t=Au.ctx.currentTime;[0,1.5].forEach(o=>[440,480].forEach(f=>tone(t+o,Au.master,f,.9,.06,'sine',2500)))}
 function stopDial(){if(!dl)return;cancelAnimationFrame(dl.raf);dl.timers.forEach(clearTimeout);dl=null}
-function dialSVG(){
-  const ns=[1,2,3,4,5,6,7,8,9,0], pos=n=>[DIAL_RH*Math.cos(DIAL_HA[n]*DEG),-DIAL_RH*Math.sin(DIAL_HA[n]*DEG)];
-  let back='',rings='',holes='',scr='';
-  ns.forEach(n=>{const [x,y]=pos(n).map(v=>+v.toFixed(1));
-    back+='<circle cx="'+x+'" cy="'+y+'" r="82" fill="#efe3bf"/><circle cx="'+x+'" cy="'+y+'" r="70" fill="none" stroke="#cdbb8a" stroke-width="2"/><text x="'+x+'" y="'+(y+38)+'" text-anchor="middle" font-size="112" font-family="Helvetica Neue,Arial,sans-serif" font-weight="600" fill="#17120d">'+n+'</text>';
-    holes+='<circle cx="'+x+'" cy="'+y+'" r="80" fill="#000"/>';
-    rings+='<circle cx="'+x+'" cy="'+y+'" r="84" fill="none" stroke="#17100a" stroke-width="7"/><circle cx="'+x+'" cy="'+y+'" r="91" fill="none" stroke="#f1e4ae" stroke-width="3" opacity=".8"/>';
-  });
-  const r=rng('brass');for(let i=0;i<46;i++){const a=r()*Math.PI*2,r1=290+r()*60,r2=r1+60+r()*120;scr+='<line x1="'+(r1*Math.cos(a)).toFixed(1)+'" y1="'+(r1*Math.sin(a)).toFixed(1)+'" x2="'+(r2*Math.cos(a)).toFixed(1)+'" y2="'+(r2*Math.sin(a)).toFixed(1)+'"/>'}
+function dialSVG(){   // 공중전화 몸체 위에 얹는 다이얼: 숫자판 + 도는 링 그림 + 가운데 라벨 + 손가락 멈춤쇠 그림
+  const SC=1.918;   // 링 그림(530px) → 다이얼 좌표
+  let nums='';
+  DIAL_KEYS.forEach(n=>{const x=(DIAL_RH*Math.cos(DIAL_HA[n]*DEG)).toFixed(1),y=(-DIAL_RH*Math.sin(DIAL_HA[n]*DEG)).toFixed(1);
+    nums+='<text x="'+x+'" y="'+(+y+34)+'" text-anchor="middle" font-size="96" font-weight="800" font-family="Barlow Condensed,Arial Narrow,sans-serif" fill="#2a2016">'+n+'</text>'});
+  const sa=DIAL_STOP+4, sx=(430*Math.cos(sa*DEG)).toFixed(1), sy=(-430*Math.sin(sa*DEG)).toFixed(1);
   return '<svg id="dsvg" viewBox="-520 -520 1040 1040" aria-label="로터리 다이얼">'+
-   '<defs><radialGradient id="brass" cx=".38" cy=".3" r=".9"><stop offset="0" stop-color="#e3d29c"/><stop offset=".5" stop-color="#b79f60"/><stop offset=".85" stop-color="#8d7a45"/><stop offset="1" stop-color="#cbb77a"/></radialGradient>'+
-   '<linearGradient id="brassD" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#d8c68b"/><stop offset=".5" stop-color="#8a7640"/><stop offset="1" stop-color="#c3ae6f"/></linearGradient>'+
-   '<mask id="hm" maskUnits="userSpaceOnUse" x="-520" y="-520" width="1040" height="1040"><rect x="-520" y="-520" width="1040" height="1040" fill="#fff"/><circle r="272" fill="#000"/>'+holes+'</mask></defs>'+
-   '<circle r="492" fill="#1b0f0a"/>'+back+
-   '<g id="wheel"><g mask="url(#hm)"><circle r="488" fill="url(#brass)"/><circle r="488" fill="none" stroke="#efe0a6" stroke-width="6"/><circle r="300" fill="none" stroke="#fff" stroke-opacity=".07" stroke-width="3"/><g stroke="#fff" stroke-opacity=".09" stroke-width="2">'+scr+'</g></g>'+rings+'</g>'+
-   '<circle r="276" fill="#241a0e"/><circle r="262" fill="url(#brassD)"/><circle r="240" fill="#1a1409"/><circle r="231" fill="#eadfba"/>'+
-   '<g font-family="Barlow Condensed,Arial Narrow,sans-serif" font-weight="800" font-size="70" text-anchor="middle" fill="#17120d"><text id="dt1" y="-48">IT’S TIME</text><text id="dt2" y="16">TO TELL</text><text id="dt3" y="82">YOUR STORY</text></g>'+
-   '<path d="M112 300 Q116 286 140 288 Q162 290 177 318 L256 416 Q264 428 250 430 L152 442 Q132 443 128 422 Z" fill="url(#brassD)" stroke="#2b2110" stroke-width="5"/></svg>';
+   '<circle r="500" fill="#f4ecd6" stroke="#1b140c" stroke-width="8"/>'+nums+
+   '<g id="wheel"><image href="img/phone_ring.webp" x="'+(-265*SC).toFixed(1)+'" y="'+(-266*SC).toFixed(1)+'" width="'+(530*SC).toFixed(1)+'" height="'+(532*SC).toFixed(1)+'"/></g>'+
+   '<circle r="236" fill="#f4ecd6" stroke="#1b140c" stroke-width="7"/>'+
+   '<g font-family="Barlow Condensed,Arial Narrow,sans-serif" font-weight="800" font-size="62" text-anchor="middle" fill="#2a2016"><text id="dt1" y="-44">IT’S TIME</text><text id="dt2" y="14">TO TELL</text><text id="dt3" y="72">YOUR STORY</text></g>'+
+   '<image href="img/phone_stop.webp" x="-96" y="-71" width="192" height="143" transform="translate('+sx+' '+sy+') rotate(20)"/></svg>';
 }
 function renderDial(){
   stopDial();
@@ -1226,17 +1228,17 @@ function renderDial(){
   const card='<aside class="dcard" aria-label="연락처"><h2>Contact</h2><div class="dsub">LAUNDRY CLUB</div>'+
     CONTACT.map(([k,v])=>'<div class="crow"><span class="k">'+k+'</span><span class="v">'+esc(v)+'</span></div>').join('')+
     '<p class="dtip">다이얼을 돌려 아무 번호나 걸어 보세요</p></aside>';
-  panel.innerHTML='<div id="dl"><button class="back" data-back aria-label="뒤로"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button><div class="dl-main"><div id="dnum"></div>'+dialSVG()+'</div>'+card+
+  panel.innerHTML='<div id="dl"><button class="back" data-back aria-label="뒤로"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button><div class="dl-main dphone"><img class="dbody" src="img/phone_body.webp" alt="" draggable="false"><div id="dnum"></div>'+dialSVG()+'</div>'+card+
     '<div id="dinfo" hidden></div></div>';
   const box=$('#dl'), svg=$('#dsvg'), wheel=$('#wheel'), num=$('#dnum');
   dl={rot:0,n:null,busy:false,digits:'',raf:0,timers:[]};
   const later=(f,ms)=>dl.timers.push(setTimeout(f,ms));
-  const showNum=()=>{const d=dl.digits.split('');while(d.length<DIAL_LEN)d.push('_');num.textContent=d.join(' ')};
+  const showNum=()=>{const d=dl.digits.split('');while(d.length<DIAL_LEN)d.push('_');num.textContent=d.join('')};
   const setRot=v=>{dl.rot=v;wheel.setAttribute('transform','rotate('+v.toFixed(2)+')')};
   const pt=e=>{const r=svg.getBoundingClientRect(),k=1040/r.width;return[(e.clientX-r.left-r.width/2)*k,(e.clientY-r.top-r.height/2)*k]};
   const ang=p=>Math.atan2(-p[1],p[0])/DEG;
   const norm=a=>{while(a>180)a-=360;while(a<-180)a+=360;return a};
-  const holeAt=p=>{for(const n of [1,2,3,4,5,6,7,8,9,0]){const a=(DIAL_HA[n]-dl.rot)*DEG,x=DIAL_RH*Math.cos(a),y=-DIAL_RH*Math.sin(a);if(Math.hypot(p[0]-x,p[1]-y)<=95)return n}return null};
+  const holeAt=p=>{for(const n of DIAL_KEYS){const a=(DIAL_HA[n]-dl.rot)*DEG,x=DIAL_RH*Math.cos(a),y=-DIAL_RH*Math.sin(a);if(Math.hypot(p[0]-x,p[1]-y)<=95)return n}return null};
   showNum();
   let g=null;
   svg.addEventListener('pointerdown',e=>{
