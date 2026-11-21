@@ -1013,8 +1013,10 @@ async function renderGallery(){
   const bub=Array.from({length:NB},()=>newBub(true)),bo=new THREE.Object3D();
   const bubTick=(now,dt)=>{const ts=now/1000;bmat.uniforms.time.value=ts;
     bub.forEach((b,i)=>{b.y+=b.v*dt*mot;
-      if(b.out){b.a-=dt*.9;if(b.a<=0)Object.assign(b,newBub(false))}else{b.a=Math.min(1,b.a+dt*.8);if(b.y>b.top)b.out=true}   // 나타날 땐 스르르, 사라질 때도 스르르
-      bo.position.set(b.x+Math.sin(ts*.8+b.ph)*.6,b.y,b.z+Math.cos(ts*.6+b.ph)*.5);bo.scale.setScalar(b.r);bo.updateMatrix();bubbles.setMatrixAt(i,bo.matrix);bph[i]=b.ph;ba[i]=Math.max(0,b.a)});
+      let sc=b.r;
+      if(b.pop!=null){b.pop+=dt*7;sc=b.r*(1+b.pop*.7);b.a=1-b.pop;if(b.pop>=1)Object.assign(b,newBub(false),{pop:null})}   // 눌러서 터짐: 순간 부풀며 사라짐
+      else if(b.out){b.a-=dt*.9;if(b.a<=0)Object.assign(b,newBub(false))}else{b.a=Math.min(1,b.a+dt*.8);if(b.y>b.top)b.out=true}   // 나타날 땐 스르르, 사라질 때도 스르르
+      bo.position.set(b.x+Math.sin(ts*.8+b.ph)*.6,b.y,b.z+Math.cos(ts*.6+b.ph)*.5);b.p=bo.position.clone();bo.scale.setScalar(sc);bo.updateMatrix();bubbles.setMatrixAt(i,bo.matrix);bph[i]=b.ph;ba[i]=Math.max(0,b.a)});
     bubbles.instanceMatrix.needsUpdate=true;bgeo.attributes.iA.needsUpdate=true;bgeo.attributes.iPh.needsUpdate=true};
   // 가운데 글씨: 드럼 한가운데(z=0)에 놓인 판. 앞으로 오는 사진이 가리고, 뒤로 간 사진은 글씨 뒤에 있음
   gStep();   // 가운데 글씨 없음: 옷과 비눗방울만
@@ -1091,7 +1093,11 @@ async function renderGallery(){
     const dt=Math.max(.008,(now-drag.t)/1000);spinV=spinV*.6+(da/dt)*.4;
     drag.x=e.clientX;drag.y=e.clientY;drag.t=now;drag.moved=Math.max(drag.moved,Math.hypot(e.clientX-drag.sx,e.clientY-drag.sy));
   });
-  cv.addEventListener('pointerup',e=>{const d=drag;drag=null;if(d&&d.moved<6&&!gal.zoomed){const c=pick(e);if(c)openZoom(c)}});
+  // 비눗방울 누르면 톡 터짐(옷보다 먼저 확인)
+  const popAt=e=>{e=unfish(e.clientX,e.clientY);v2.set(e.clientX/innerWidth*2-1,-(e.clientY/innerHeight)*2+1);ray.setFromCamera(v2,cam);
+    let best=null,bd=1e9;bub.forEach(b=>{if(!b.p||b.pop!=null||b.a<.3)return;const r=b.r*1.15;if(ray.ray.distanceSqToPoint(b.p)<r*r){const d=b.p.distanceTo(cam.position);if(d<bd){bd=d;best=b}}});
+    if(!best)return false;best.pop=0;if(Au.ctx&&Au.master&&!Au.muted)noiseHit(Au.ctx.currentTime,Au.master,.35,5200,.05,'highpass');return true};
+  cv.addEventListener('pointerup',e=>{const d=drag;drag=null;if(d&&d.moved<6&&!gal.zoomed){if(popAt(e))return;const c=pick(e);if(c)openZoom(c)}});
   cv.addEventListener('pointercancel',()=>{drag=null});
   cv.addEventListener('wheel',e=>{e.preventDefault();distT=Math.max(DIST*.6,Math.min(DIST*1.5,distT+e.deltaY*.03))},{passive:false});
   const tick=now=>{
