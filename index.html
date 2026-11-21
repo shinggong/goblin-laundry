@@ -331,9 +331,7 @@ button{font:inherit;color:inherit;cursor:inherit}
 #dinfo h3{text-align:center}
 @media (max-width:760px),(max-aspect-ratio:1/1){
   #dl{flex-direction:column;justify-content:flex-start;overflow-y:auto;padding:calc(76px + env(safe-area-inset-top,0px)) 0 calc(30px + env(safe-area-inset-bottom,0px));gap:22px}
-  #dl .dcard{max-height:none;flex:none;width:92vw;padding:16px 16px 12px}
-  #dl .dcard .v{font-size:11.5px;word-break:normal;white-space:nowrap}
-  #dl .dcard .k{font-size:13px}
+  #dl .dcard{flex:none}
   #dinfo{position:fixed}
 }
 /* 커서는 어디서나 손가락 하나로 통일 */
@@ -358,6 +356,19 @@ button{font:inherit;color:inherit;cursor:inherit}
 /* 음량 아이콘 숨김(소리 기능은 그대로, M키로 끄고 켜기) + 확대 버튼을 그 자리로 */
 #mute{display:none}
 #zoom{bottom:calc(16px + env(safe-area-inset-bottom,0px))}
+/* 연락처: 핑크 클립 메모지 그림 위에, 줄에 맞춰 글씨 */
+#dl .dcard{position:relative;width:min(540px,94vw);aspect-ratio:1000/668;max-height:none;overflow:visible;flex:none;container-type:inline-size;
+  background:url(img/contact_memo.webp) center/100% 100% no-repeat;border:0;border-radius:0;box-shadow:none;padding:0;box-sizing:border-box;color:#3a2a14}
+#dl .dcard h2{position:absolute;left:14cqw;top:13.6cqw;margin:0;font-size:7.4cqw;line-height:1}
+#dl .dcard .dsub,#dl .dcard .crow,#dl .dcard .dtip{height:4.45cqw;margin:0 11cqw 0 13.5cqw;padding:0 0 .55cqw;box-sizing:border-box;display:flex;align-items:flex-end;border:0}
+#dl .dcard .dsub{margin-top:23.4cqw;font-size:1.9cqw;letter-spacing:.2em;opacity:.6}
+#dl .dcard .crow{justify-content:space-between;gap:2cqw}
+#dl .dcard .k{font-size:2.4cqw;letter-spacing:.06em}
+#dl .dcard .v{font-size:2.3cqw;white-space:nowrap;word-break:normal}
+#dl .dcard .dtip{justify-content:center;font-size:2cqw;opacity:.6;margin-top:4.45cqw}
+#dl .dcard>*:first-child+*{margin-top:23.4cqw}
+#dl .dcard.live{animation:dcPop .6s cubic-bezier(.3,1.6,.5,1)}
+@keyframes dcPop{40%{transform:scale(1.04) rotate(-1deg)}}
 </style>
 
 <div id="view" aria-label="빨래방 3D 공간. 드래그해서 둘러보세요"><canvas id="gl"></canvas></div>
