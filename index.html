@@ -355,6 +355,9 @@ button{font:inherit;color:inherit;cursor:inherit}
 #dl .dphone #dnum small{font-family:var(--f-label);font-weight:700;font-size:1.7cqw;letter-spacing:.14em;opacity:.8}
 /* 영수증·전화기를 끌 때 글씨가 선택되지 않게 */
 #rc,#rc *,#dl,#dl *,#ct,#ct *{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+/* 음량 아이콘 숨김(소리 기능은 그대로, M키로 끄고 켜기) + 확대 버튼을 그 자리로 */
+#mute{display:none}
+#zoom{bottom:calc(16px + env(safe-area-inset-bottom,0px))}
 </style>
 
 <div id="view" aria-label="빨래방 3D 공간. 드래그해서 둘러보세요"><canvas id="gl"></canvas></div>
@@ -1229,7 +1232,7 @@ function dialSVG(){   // 공중전화 몸체 위에 얹는 다이얼: 숫자판 
   return '<svg id="dsvg" viewBox="-520 -520 1040 1040" aria-label="로터리 다이얼">'+
    '<circle r="500" fill="#f4ecd6" stroke="#1b140c" stroke-width="8"/>'+nums+
    '<g id="wheel"><image href="img/phone_ring.webp" x="'+(-265*SC).toFixed(1)+'" y="'+(-266*SC).toFixed(1)+'" width="'+(530*SC).toFixed(1)+'" height="'+(532*SC).toFixed(1)+'"/></g>'+
-   '<image href="img/phone_stop.webp" x="-96" y="-71" width="192" height="143" transform="translate('+sx+' '+sy+') rotate(20)"/></svg>';
+   '<image href="img/phone_stop.webp" x="-96" y="-71" width="192" height="143" transform="translate('+sx+' '+sy+') rotate(10)"/></svg>';
 }
 function renderDial(host){
   stopDial();
