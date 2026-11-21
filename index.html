@@ -450,6 +450,10 @@ html body.grabbing,html body.grabbing *{cursor:url(img/cur_hand.png?v=4) 17 17,g
 #ct .g-over:not(.res) .g-start{border:2.5px solid #3a2a14}
 /* 점수판: 외곽선 없이 흰 배경 */
 #ct .g-hud span,#ct .g-hud .g-score,#ct .g-hud .g-time{background:#fff;border:0}
+/* 결과 손글씨: 겹친 획에서 외곽선이 깨지지 않게 text-stroke 대신 그림자로 외곽선 */
+#ct .g-over.res .g-rtitle{-webkit-text-stroke:0;text-shadow:4.0px 0.0px 0 #3a2a14,3.9px 1.0px 0 #3a2a14,3.5px 2.0px 0 #3a2a14,2.8px 2.8px 0 #3a2a14,2.0px 3.5px 0 #3a2a14,1.0px 3.9px 0 #3a2a14,0.0px 4.0px 0 #3a2a14,-1.0px 3.9px 0 #3a2a14,-2.0px 3.5px 0 #3a2a14,-2.8px 2.8px 0 #3a2a14,-3.5px 2.0px 0 #3a2a14,-3.9px 1.0px 0 #3a2a14,-4.0px 0.0px 0 #3a2a14,-3.9px -1.0px 0 #3a2a14,-3.5px -2.0px 0 #3a2a14,-2.8px -2.8px 0 #3a2a14,-2.0px -3.5px 0 #3a2a14,-1.0px -3.9px 0 #3a2a14,-0.0px -4.0px 0 #3a2a14,1.0px -3.9px 0 #3a2a14,2.0px -3.5px 0 #3a2a14,2.8px -2.8px 0 #3a2a14,3.5px -2.0px 0 #3a2a14,3.9px -1.0px 0 #3a2a14,2.0px 0.0px 0 #3a2a14,1.7px 1.0px 0 #3a2a14,1.0px 1.7px 0 #3a2a14,0.0px 2.0px 0 #3a2a14,-1.0px 1.7px 0 #3a2a14,-1.7px 1.0px 0 #3a2a14,-2.0px 0.0px 0 #3a2a14,-1.7px -1.0px 0 #3a2a14,-1.0px -1.7px 0 #3a2a14,-0.0px -2.0px 0 #3a2a14,1.0px -1.7px 0 #3a2a14,1.7px -1.0px 0 #3a2a14}
+#ct .g-over.res .g-badge b{-webkit-text-stroke:0;text-shadow:5.0px 0.0px 0 #3a2a14,4.8px 1.3px 0 #3a2a14,4.3px 2.5px 0 #3a2a14,3.5px 3.5px 0 #3a2a14,2.5px 4.3px 0 #3a2a14,1.3px 4.8px 0 #3a2a14,0.0px 5.0px 0 #3a2a14,-1.3px 4.8px 0 #3a2a14,-2.5px 4.3px 0 #3a2a14,-3.5px 3.5px 0 #3a2a14,-4.3px 2.5px 0 #3a2a14,-4.8px 1.3px 0 #3a2a14,-5.0px 0.0px 0 #3a2a14,-4.8px -1.3px 0 #3a2a14,-4.3px -2.5px 0 #3a2a14,-3.5px -3.5px 0 #3a2a14,-2.5px -4.3px 0 #3a2a14,-1.3px -4.8px 0 #3a2a14,-0.0px -5.0px 0 #3a2a14,1.3px -4.8px 0 #3a2a14,2.5px -4.3px 0 #3a2a14,3.5px -3.5px 0 #3a2a14,4.3px -2.5px 0 #3a2a14,4.8px -1.3px 0 #3a2a14,2.5px 0.0px 0 #3a2a14,2.2px 1.2px 0 #3a2a14,1.3px 2.2px 0 #3a2a14,0.0px 2.5px 0 #3a2a14,-1.2px 2.2px 0 #3a2a14,-2.2px 1.2px 0 #3a2a14,-2.5px 0.0px 0 #3a2a14,-2.2px -1.2px 0 #3a2a14,-1.3px -2.2px 0 #3a2a14,-0.0px -2.5px 0 #3a2a14,1.3px -2.2px 0 #3a2a14,2.2px -1.3px 0 #3a2a14}
+#ct .g-over.res .g-start{margin-top:26px}
 </style>
 
 <div id="view" aria-label="빨래방 3D 공간. 드래그해서 둘러보세요"><canvas id="gl"></canvas></div>
@@ -1449,7 +1453,7 @@ function laundryGame(el,pic){
   function start(){clear();pile.innerHTML='';score=0;left=DUR;next=.4;sc.textContent='0';tm.textContent=DUR+'s';over.hidden=true;over.classList.remove('res');el.classList.add('playing');run=true;last=performance.now();raf=requestAnimationFrame(frame)}
   function end(){run=false;el.classList.remove('playing');cancelAnimationFrame(raf);clear();
     const nb=score>best;if(nb){best=score;try{localStorage.setItem('gl_laundry_best',best)}catch(e){}}bs.textContent=best;
-    over.classList.add('res');over.innerHTML='<p class="g-rkick">'+(nb?'oh my, a brand new record':'the dryer has stopped')+'</p><h3 class="g-rtitle">'+(nb?'New Best!':'Time Up!')+'</h3><div class="g-badge"><b>'+score+'</b><small>pieces caught</small></div><p class="g-rsub'+(nb?' best':'')+'">'+(nb?'caught with joy ♡':'best score · '+best)+'</p><button class="g-start">play again</button>';over.hidden=false;over.querySelector('.g-start').onclick=start;unfold()}
+    over.classList.add('res');over.innerHTML='<p class="g-rkick">'+(nb?'oh my, a brand new record':'the dryer has stopped')+'</p><h3 class="g-rtitle">'+(nb?'New Best!':'Time Up!')+'</h3><div class="g-badge"><b>'+score+'</b><small>pieces caught</small></div><button class="g-start">play again</button>';over.hidden=false;over.querySelector('.g-start').onclick=start;unfold()}
   let rcTok=0;
   function unfold(){   // 결과 카드: 반으로 접힌 종이가 위로 펼쳐짐
     over.classList.remove('rc-anim');
